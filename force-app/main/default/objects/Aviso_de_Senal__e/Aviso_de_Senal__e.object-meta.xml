@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <deploymentStatus>Deployed</deploymentStatus>
+    <description>El aviso que publica la ingesta y recoge el procesamiento. No admite campos unicos ni relaciones: por eso lleva los codigos externos en texto.</description>
+    <eventType>HighVolume</eventType>
+    <label>Aviso de señal</label>
+    <pluralLabel>Avisos de señal</pluralLabel>
+    <publishBehavior>PublishImmediately</publishBehavior>
+</CustomObject>

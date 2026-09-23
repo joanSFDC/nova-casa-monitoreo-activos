@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Unidad__c</fullName>
+    <inlineHelpText>La unidad en la que se expresan los valores. Una lectura en otra unidad se rechaza, no se convierte.</inlineHelpText>
+    <label>Unidad</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetName>Unidad</valueSetName>
+    </valueSet>
+</CustomField>
