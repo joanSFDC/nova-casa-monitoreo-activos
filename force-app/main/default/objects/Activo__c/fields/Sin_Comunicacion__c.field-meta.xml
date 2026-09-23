@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Sin_Comunicacion__c</fullName>
+    <inlineHelpText>Vale 1 si alguna de sus mediciones está muda.</inlineHelpText>
+    <label>Sin comunicación</label>
+    <summarizedField>Estado_Actual__c.Sin_Comunicacion_Num__c</summarizedField>
+    <summaryForeignKey>Estado_Actual__c.Activo__c</summaryForeignKey>
+    <summaryOperation>max</summaryOperation>
+    <trackTrending>false</trackTrending>
+    <type>Summary</type>
+</CustomField>

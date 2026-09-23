@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GlobalValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customValue>
+        <fullName>CELSIUS</fullName>
+        <default>false</default>
+        <label>Grados Celsius</label>
+    </customValue>
+    <customValue>
+        <fullName>FAHRENHEIT</fullName>
+        <default>false</default>
+        <label>Grados Fahrenheit</label>
+    </customValue>
+    <customValue>
+        <fullName>BAR</fullName>
+        <default>false</default>
+        <label>Bar</label>
+    </customValue>
+    <customValue>
+        <fullName>PSI</fullName>
+        <default>false</default>
+        <label>PSI</label>
+    </customValue>
+    <customValue>
+        <fullName>LITER_PER_15_MIN</fullName>
+        <default>false</default>
+        <label>Litros por 15 minutos</label>
+    </customValue>
+    <customValue>
+        <fullName>GALLON_PER_15_MIN</fullName>
+        <default>false</default>
+        <label>Galones por 15 minutos</label>
+    </customValue>
+    <customValue>
+        <fullName>KWH_PER_15_MIN</fullName>
+        <default>false</default>
+        <label>kWh por 15 minutos</label>
+    </customValue>
+    <customValue>
+        <fullName>WATT</fullName>
+        <default>false</default>
+        <label>Vatios</label>
+    </customValue>
+    <masterLabel>Unidad</masterLabel>
+    <sorted>false</sorted>
+</GlobalValueSet>

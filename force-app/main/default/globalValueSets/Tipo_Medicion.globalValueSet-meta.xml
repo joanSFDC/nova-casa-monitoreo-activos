@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GlobalValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customValue>
+        <fullName>TEMPERATURE</fullName>
+        <default>false</default>
+        <label>Temperatura</label>
+    </customValue>
+    <customValue>
+        <fullName>WATER_PRESSURE</fullName>
+        <default>false</default>
+        <label>Presión de agua</label>
+    </customValue>
+    <customValue>
+        <fullName>WATER_CONSUMPTION</fullName>
+        <default>false</default>
+        <label>Consumo de agua</label>
+    </customValue>
+    <customValue>
+        <fullName>ENERGY_CONSUMPTION</fullName>
+        <default>false</default>
+        <label>Consumo de energía</label>
+    </customValue>
+    <customValue>
+        <fullName>CAMERA_CONNECTIVITY</fullName>
+        <default>false</default>
+        <label>Conectividad de cámara</label>
+    </customValue>
+    <masterLabel>Tipo de medición</masterLabel>
+    <sorted>false</sorted>
+</GlobalValueSet>

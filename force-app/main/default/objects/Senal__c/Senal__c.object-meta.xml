@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <deploymentStatus>Deployed</deploymentStatus>
+    <description>Cada mensaje recibido queda aqui con su resultado. Es la unica tabla que crece sin techo y por eso la pantalla del operador nunca la consulta.</description>
+    <enableActivities>false</enableActivities>
+    <enableBulkApi>true</enableBulkApi>
+    <enableFeeds>false</enableFeeds>
+    <enableHistory>true</enableHistory>
+    <enableReports>true</enableReports>
+    <enableSearch>true</enableSearch>
+    <enableSharing>true</enableSharing>
+    <enableStreamingApi>true</enableStreamingApi>
+    <label>Señal</label>
+    <nameField>
+        <displayFormat>SEN-{000000}</displayFormat>
+        <label>Número de señal</label>
+        <type>AutoNumber</type>
+    </nameField>
+    <pluralLabel>Señales</pluralLabel>
+    <sharingModel>Private</sharingModel>
+    <visibility>Public</visibility>
+</CustomObject>

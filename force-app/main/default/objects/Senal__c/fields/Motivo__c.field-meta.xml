@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Motivo__c</fullName>
+    <inlineHelpText>Es lista y no texto libre porque los motivos hay que poder filtrarlos y contarlos. El texto libre va en Detalle.</inlineHelpText>
+    <label>Motivo</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Version no soportada</fullName>
+                <default>false</default>
+                <label>Versión no soportada</label>
+            </value>
+            <value>
+                <fullName>Tipo de mensaje desconocido</fullName>
+                <default>false</default>
+                <label>Tipo de mensaje desconocido</label>
+            </value>
+            <value>
+                <fullName>Edificio no encontrado</fullName>
+                <default>false</default>
+                <label>Edificio no encontrado</label>
+            </value>
+            <value>
+                <fullName>Activo no encontrado</fullName>
+                <default>false</default>
+                <label>Activo no encontrado</label>
+            </value>
+            <value>
+                <fullName>Tipo de medicion desconocido</fullName>
+                <default>false</default>
+                <label>Tipo de medición desconocido</label>
+            </value>
+            <value>
+                <fullName>Sin limite configurado</fullName>
+                <default>false</default>
+                <label>Sin límite configurado</label>
+            </value>
+            <value>
+                <fullName>Sin minutos configurados</fullName>
+                <default>false</default>
+                <label>Sin minutos configurados</label>
+            </value>
+            <value>
+                <fullName>Error del sistema</fullName>
+                <default>false</default>
+                <label>Error del sistema</label>
+            </value>
+            <value>
+                <fullName>Campo faltante</fullName>
+                <default>false</default>
+                <label>Campo faltante</label>
+            </value>
+            <value>
+                <fullName>Valor invalido</fullName>
+                <default>false</default>
+                <label>Valor inválido</label>
+            </value>
+            <value>
+                <fullName>Fecha invalida</fullName>
+                <default>false</default>
+                <label>Fecha inválida</label>
+            </value>
+            <value>
+                <fullName>Fecha futura</fullName>
+                <default>false</default>
+                <label>Fecha futura</label>
+            </value>
+            <value>
+                <fullName>Activo no coincide con el edificio</fullName>
+                <default>false</default>
+                <label>Activo no coincide con el edificio</label>
+            </value>
+            <value>
+                <fullName>Estado de comunicacion invalido</fullName>
+                <default>false</default>
+                <label>Estado de comunicación inválido</label>
+            </value>
+            <value>
+                <fullName>Unidad no compatible</fullName>
+                <default>false</default>
+                <label>Unidad no compatible</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

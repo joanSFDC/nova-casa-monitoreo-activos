@@ -1,0 +1,36 @@
+# Cache de Salesforce
+.sf/
+.sfdx/
+.localdevserver/
+deploy-options.json
+
+# Autocompletado de LWC
+**/lwc/jsconfig.json
+
+# Cobertura de Jest
+coverage/
+
+# Registros
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Dependencias
+node_modules/
+
+# Caches de herramientas
+.pmdCache
+.eslintcache
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+ehthumbs.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+
+# Variables de entorno locales. Aqui es donde vive el token del simulador
+# si alguna vez lo necesitas en local: nunca en un archivo versionado.
+.env

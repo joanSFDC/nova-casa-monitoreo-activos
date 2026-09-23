@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Estado_Comunicacion__c</fullName>
+    <label>Estado de comunicación</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>HEALTHY</fullName>
+                <default>false</default>
+                <label>Con comunicación</label>
+            </value>
+            <value>
+                <fullName>LOST</fullName>
+                <default>false</default>
+                <label>Sin comunicación</label>
+            </value>
+            <value>
+                <fullName>RESTORED</fullName>
+                <default>false</default>
+                <label>Comunicación restablecida</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

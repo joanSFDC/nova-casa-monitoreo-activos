@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Edificio__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <inlineHelpText>Vacío si el edificio no se resolvió. Es búsqueda y no principal-detalle para poder registrar el rechazo.</inlineHelpText>
+    <label>Edificio</label>
+    <referenceTo>Edificio__c</referenceTo>
+    <relationshipLabel>Señales</relationshipLabel>
+    <relationshipName>Senales</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

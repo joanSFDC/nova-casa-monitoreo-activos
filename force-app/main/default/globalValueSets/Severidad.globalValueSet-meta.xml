@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GlobalValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customValue>
+        <fullName>Normal</fullName>
+        <default>false</default>
+        <label>Normal</label>
+    </customValue>
+    <customValue>
+        <fullName>Advertencia</fullName>
+        <default>false</default>
+        <label>Advertencia</label>
+    </customValue>
+    <customValue>
+        <fullName>Critico</fullName>
+        <default>false</default>
+        <label>Crítico</label>
+    </customValue>
+    <customValue>
+        <fullName>Sin datos</fullName>
+        <default>false</default>
+        <label>Sin datos</label>
+    </customValue>
+    <masterLabel>Severidad</masterLabel>
+    <sorted>false</sorted>
+</GlobalValueSet>
