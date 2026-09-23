@@ -1,0 +1,18 @@
+# Archivos y carpetas que no viajan entre el proyecto y la organizacion.
+# https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_exclude_source.htm
+
+package.xml
+
+# Configuracion local de LWC
+**/jsconfig.json
+**/.eslintrc.json
+
+# Pruebas de Jest: viven en el repositorio, no en la organizacion
+**/__tests__/**
+
+node_modules/
+
+# Perfiles: los permisos se conceden por conjunto de permisos, nunca por perfil.
+# Esta decision esta en docs/10-seguridad-y-accesos.md. Ignorarlos evita que una
+# recuperacion de metadatos los arrastre y pise la configuracion de la organizacion.
+**/profiles/**
