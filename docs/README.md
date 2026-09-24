@@ -3,6 +3,11 @@
 Esta carpeta es la especificación de implementación de la fase Development del Sprint 2.
 No es un resumen del discovery: es el documento contra el que se escribe el código.
 
+El tablero de qué ya está construido, qué se está haciendo y cómo reconstruir
+la org está en [`estado.md`](estado.md). Se actualiza en cada Pull Request.
+No sustituye a los módulos: registra lo implementado contra ellos.
+
+
 Cada módulo sigue la misma estructura. Primero explica el concepto técnico de base,
 porque una decisión solo se puede discutir si se entiende el mecanismo sobre el que se
 apoya. Después presenta las alternativas que se consideraron. Y termina con la decisión
@@ -12,6 +17,7 @@ final y cómo funciona exactamente, al nivel de campo y de método.
 
 | Módulo | De qué trata | Historias que cubre |
 | --- | --- | --- |
+| [Estado de la implementación](estado.md) | Qué ya existe, qué se está haciendo, cómo reconstruir la org | — |
 | [01 · Contrato del mensaje](01-contrato-del-mensaje.md) | Qué manda el simulador, campo por campo, verificado contra la API real | US-201 |
 | [02 · Ingesta](02-ingesta.md) | Sesión, cursor, paginación, cadencia, errores y reintentos | US-201 |
 | [03 · Modelo de datos](03-modelo-de-datos.md) | Objetos, campos, claves y relaciones | US-201, US-203, US-209 |

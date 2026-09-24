@@ -40,8 +40,10 @@ US-210.
 | Ruta | Qué es |
 | --- | --- |
 | `docs/` | **La especificación.** Trece documentos. Es la fuente de verdad del diseño |
+| `docs/estado.md` | **Qué ya existe y qué se está haciendo.** Se actualiza en cada PR |
 | `docs/data-model/` | El diagrama del modelo de datos |
 | `force-app/main/default/` | El código y los metadatos de Salesforce |
+| `scripts/` | Siembra y reconstrucción de la org. No es metadato |
 | `CONTRIBUTING.md` | El manual de git y del flujo de equipo |
 | `AGENTS.md` | Este archivo |
 
@@ -107,6 +109,17 @@ Comprobar que responde:
 ```bash
 sf org display -o novacasa2
 ```
+
+Desplegar el metadato, asignar el permission set de administración y sembrar
+el catálogo:
+
+```bash
+sf project deploy start --source-dir force-app
+sf org assign permset -n Nova_Casa_Administracion
+./scripts/sembrar-catalogo.sh
+```
+
+El detalle de qué queda sembrado está en [`docs/estado.md`](docs/estado.md).
 
 ---
 
@@ -290,16 +303,52 @@ bloqueado. Antes de empezar algo, mira en el issue si sus bloqueantes ya están 
 
 ---
 
-## 10. Si eres un agente de IA
+## 10. Pull Requests e issues, siempre
+
+Antes de escribir código y otra vez antes de abrir o actualizar un Pull Request:
+
+**Revisa todos los Pull Requests, incluidos los fusionados y los cerrados.** Las
+decisiones, los comentarios y las trampas ya descubiertas viven ahí. El #16, por
+ejemplo, dejó sentado que un despliegue no concede seguridad a nivel de campo: no
+hace falta volver a tropezar con eso. `gh pr list --state all` es el comando.
+
+**Comenta en los issues a los que el cambio afecta**, no solo en el que cierras.
+Un cambio de datos, de clave o de permiso suele desbloquear o condicionar el
+trabajo de otra persona. El comentario dice qué cambió, qué tiene que usar a
+partir de ahora y el número del PR. No se comenta un issue solo porque comparte
+módulo: se comenta si quien lo implemente necesita saber algo nuevo.
+
+Criterio para decidir si toca comentar:
+
+| Sí, comenta | No hace falta |
+| --- | --- |
+| Aparece un código, un registro o un permiso que esa historia va a usar | El issue solo comparte carpeta o etiqueta |
+| Una decisión de implementación cambia lo que esa historia daba por hecho | El efecto es transitivo y ya está en un bloqueante comentado |
+| Desbloqueas trabajo que alguien más tiene asignado | El issue está cerrado y el dato no le aporta nada a nadie |
+
+**Actualiza [`docs/estado.md`](docs/estado.md)** en el mismo Pull Request. Qué
+entró, qué se está haciendo, cómo se reconstruye. Si no lo actualizas, el
+siguiente va a sembrar a mano o a preguntar si el modelo ya existe.
+
+Al terminar, abre el Pull Request. No se deja una rama subida esperando a que
+alguien se acuerde.
+
+## 11. Si eres un agente de IA
 
 Además de todo lo anterior:
 
 - **Lee el documento del módulo antes de escribir una línea.** Si el código y el documento
   no coinciden, el documento manda, salvo que expliques por qué en el Pull Request.
+- **Lee `docs/estado.md` y los Pull Requests, también los cerrados**, antes de
+  proponer un camino. Lo que ya se decidió no se vuelve a decidir.
 - **No inventes campos ni objetos.** Todo lo que existe está en `docs/03-modelo-de-datos.md`.
   Si crees que falta algo, dilo antes de crearlo.
 - **No despliegues a la organización sin avisar.** Es compartida y es la de la demostración.
 - **Un issue, una rama, un Pull Request.** No mezcles módulos en un commit: si tocaste dos,
-  probablemente sean dos commits.
+  probablemente sean dos commits. La documentación de estado y los comentarios a
+  issues relacionados sí van en el mismo PR: no son otro módulo, son el rastro
+  del cambio.
+- **Comenta los issues afectados** según la sección 10, en el mismo turno en que
+  subes el PR. No lo dejes para después.
 - **Verifica, no supongas.** "Desplegó sin error" no es lo mismo que "funciona": la
   seguridad a nivel de campo es la prueba de que esas dos cosas son distintas.

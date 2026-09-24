@@ -338,4 +338,6 @@ problema visible y recuperable. El escenario `INVALID_DATA` incluye un
 `AST-UNKNOWN-0001` justamente para ejercitar este camino.
 
 La siembra se materializa como un script de datos en el repositorio, no como una carga
-manual, para que cualquiera pueda reconstruir el entorno desde cero.
+manual, para que cualquiera pueda reconstruir el entorno desde cero. El comando es
+`./scripts/sembrar-catalogo.sh`. Qué queda sembrado y con qué códigos está en
+[`estado.md`](estado.md).
