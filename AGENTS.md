@@ -110,13 +110,14 @@ Comprobar que responde:
 sf org display -o novacasa2
 ```
 
-Desplegar el metadato, asignar el permission set de administración y sembrar
-el catálogo:
+Desplegar el metadato, asignar el permission set de administración, sembrar
+el catálogo y crear los usuarios de la demo:
 
 ```bash
 sf project deploy start --source-dir force-app
 sf org assign permset -n Nova_Casa_Administracion
 ./scripts/sembrar-catalogo.sh
+./scripts/crear-usuarios-demo.sh
 ```
 
 El detalle de qué queda sembrado está en [`docs/estado.md`](docs/estado.md).

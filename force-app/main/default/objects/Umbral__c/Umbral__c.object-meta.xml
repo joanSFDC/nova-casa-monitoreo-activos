@@ -1,7 +1,8 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
     <deploymentStatus>Deployed</deploymentStatus>
-    <description>Los valores que separan lo normal de la advertencia y de lo critico. Es un objeto y no un tipo de metadato personalizado porque el coordinador debe poder editarlo sin entrar a la configuracion del sistema.</description>
+    <description
+  >Los valores que separan lo normal de la advertencia y de lo critico. Es un objeto y no un tipo de metadato personalizado porque el coordinador debe poder editarlo sin entrar a la configuracion del sistema. Comparticion ReadWrite: el coordinador edita umbrales que no le pertenecen; el operador no edita porque su conjunto no se lo concede.</description>
     <enableActivities>false</enableActivities>
     <enableBulkApi>true</enableBulkApi>
     <enableFeeds>false</enableFeeds>
@@ -17,6 +18,6 @@
         <type>AutoNumber</type>
     </nameField>
     <pluralLabel>Umbrales</pluralLabel>
-    <sharingModel>Read</sharingModel>
+    <sharingModel>ReadWrite</sharingModel>
     <visibility>Public</visibility>
 </CustomObject>
