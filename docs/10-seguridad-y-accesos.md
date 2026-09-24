@@ -181,11 +181,11 @@ administrador tiene borrado masivo desde la interfaz.
 
 | Objeto | Valor por defecto | Cómo se amplía |
 | --- | --- | --- |
-| `Edificio__c` | Privado | Reglas de compartición por región y grupos de operadores |
+| `Edificio__c` | Privado | Reglas de compartición por ciudad y grupos de operadores |
 | `Activo__c` | Controlado por el edificio | Hereda, por la relación principal-detalle |
 | `Estado_Actual__c` | Controlado por el activo | Hereda, por la relación principal-detalle |
-| `Umbral__c` | Lectura pública | Es configuración global, no tiene dueño |
-| `Senal__c` | Privado | Conjunto de permisos con «ver todo» para el administrador |
+| `Umbral__c` | Lectura y escritura públicas | El botón de editar lo controla el permiso de objeto, no el dueño |
+| `Senal__c` | Privado | «Ver todo» para administrador y coordinador. Solo el administrador ve `Carga__c` y `Detalle__c` |
 | `Case` | Privado | Colas y jerarquía de funciones |
 
 **El edificio es la unidad de autorización de todo el sistema.** Un operador tiene
@@ -197,9 +197,17 @@ relaciones principal-detalle en el [módulo 03](03-modelo-de-datos.md). Con rela
 búsqueda habría que mantener reglas de compartición en tres objetos y mantenerlas
 sincronizadas, que es donde aparecen los agujeros.
 
-Queda abierta Q-10: si el operador se asigna a edificios uno por uno o por ciudad o región.
-No bloquea la implementación —el mecanismo de compartición es el mismo— pero determina si
-la regla se escribe sobre un grupo público o sobre el campo de región.
+**Q-10, resuelta para la demostración: por ciudad.** Hay dos grupos públicos
+(`Operadores_Bogota`, `Operadores_Barranquilla`) y una regla de compartición por
+`Edificio__c.Ciudad__c`. El operador de Bogotá solo está en el primer grupo; el de
+Barranquilla, solo en el segundo. Coordinador y gerente están en los dos, porque tienen
+que ver ambas ciudades. Si más adelante el cliente prefiere asignar edificio a edificio,
+se cambia la membresía del grupo: el mecanismo de la regla no cambia.
+
+`Umbral__c` quedó en lectura y escritura públicas, no en solo lectura. Con solo lectura el
+coordinador no podría editar umbrales que sembró otro usuario, que es justo el caso de la
+demo. El operador sigue sin botón de editar porque su conjunto no concede edición de
+objeto.
 
 ## Los campos sensibles
 
