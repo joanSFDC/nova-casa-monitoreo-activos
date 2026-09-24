@@ -18,7 +18,14 @@ public without sharing class IngestaQueueable implements Queueable, Database.All
         try {
             IngestaServicio.ResultadoCiclo resultado = IngestaServicio.ejecutar(this.indicePagina);
             if (resultado != null && resultado.encadenar == true && !Test.isRunningTest()) {
-                System.enqueueJob(new IngestaQueueable(resultado.indiceSiguiente));
+                try {
+                    System.enqueueJob(new IngestaQueueable(resultado.indiceSiguiente));
+                } catch (System.AsyncException e) {
+                    // Trailhead y Developer Edition cortan la cadena a 5. No es un fallo del simulador.
+                    if (e.getMessage() == null || !e.getMessage().contains('Maximum stack depth')) {
+                        throw e;
+                    }
+                }
             }
         } catch (Exception e) {
             registrarFallo(e);

@@ -210,13 +210,19 @@ public without sharing class IngestaServicio {
             if (previa != null) {
                 senal.Id = previa.Id;
                 senal.Fecha_Recepcion__c = previa.Fecha_Recepcion__c;
-                senal.Fecha_Origen__c = previa.Fecha_Origen__c;
-                senal.Fecha_Publicacion__c = previa.Fecha_Publicacion__c;
                 senal.Entregas__c = nvlNum(previa.Entregas__c) + 1;
                 if (previa.Hash_Contenido__c == senal.Hash_Contenido__c) {
-                    senal.Resultado__c = previa.Resultado__c;
-                    senal.Motivo__c = previa.Motivo__c;
-                    senal.Reintentable__c = previa.Reintentable__c;
+                    if (previa.Reintentable__c == true) {
+                        if (senal.Resultado__c == IngestaConstantes.RESULTADO_PENDIENTE) {
+                            publicar.add(clave);
+                        }
+                    } else {
+                        senal.Resultado__c = previa.Resultado__c;
+                        senal.Motivo__c = previa.Motivo__c;
+                        senal.Reintentable__c = previa.Reintentable__c;
+                        senal.Fecha_Origen__c = previa.Fecha_Origen__c;
+                        senal.Fecha_Publicacion__c = previa.Fecha_Publicacion__c;
+                    }
                 } else {
                     senal.Resultado__c = IngestaConstantes.RESULTADO_CONFLICTO;
                     senal.Motivo__c = null;

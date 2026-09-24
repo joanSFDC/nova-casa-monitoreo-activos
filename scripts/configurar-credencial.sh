@@ -6,7 +6,7 @@
 #   ./scripts/configurar-credencial.sh novacasa2
 #
 # URL opcional (no es secreta; si cambia, hay que alinearla en la Named Credential):
-#   export NOVA_CASA_SIMULADOR_URL='https://tu-app.herokuapp.com'
+#   export NOVA_CASA_SIMULADOR_URL='https://mdss-study-01ed1c1eca26.herokuapp.com/api/sprint-2/simulator/v1'
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -48,7 +48,24 @@ open(destino, "w", encoding="utf-8").write(apex)
 PY
 
 echo "==> Guardando token cifrado en la org $ORG (no se imprime)"
-sf apex run -o "$ORG" -f "$TMP" >/dev/null
+set +e
+raw="$(sf apex run -o "$ORG" -f "$TMP" 2>&1)"
+status=$?
+set -e
+# El anonymous Apex incluye el valor: no reimprimir esas lineas.
+filtered="$(printf '%s\n' "$raw" | grep -vE "valor\\.value|Execute Anonymous" || true)"
+if [[ "$status" -ne 0 ]]; then
+  echo "Fallo al guardar el token. Revisa acceso al principal Equipo."
+  printf '%s\n' "$filtered" | tail -40
+  exit "$status"
+fi
+if printf '%s\n' "$filtered" | grep -q "CREDENTIAL created"; then
+  echo "Principal Equipo: token creado."
+elif printf '%s\n' "$filtered" | grep -q "CREDENTIAL updated"; then
+  echo "Principal Equipo: token actualizado."
+else
+  echo "Apex termino. Si el callout sigue en 401, vuelve a correr este script."
+fi
 
 if [[ -n "${NOVA_CASA_SIMULADOR_URL:-}" ]]; then
   echo "==> Recuerda alinear la URL de la Named Credential Nova_Casa_Simulador a:"

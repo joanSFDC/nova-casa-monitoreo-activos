@@ -19,9 +19,13 @@ echo "==> Control"
 sf data query -o "$ORG" -r human -q \
   "SELECT Name, Activo__c, Escenario__c, Cursor__c, Paginas_Procesadas__c, Fallos_Consecutivos__c, Ultimo_Error__c, Ultima_Consulta_Exitosa__c FROM Control_de_Ingesta__c"
 
-echo "==> Senales"
+echo "==> Resumen de senales"
 sf data query -o "$ORG" -r human -q \
-  "SELECT Clave__c, Resultado__c, Motivo__c, Fecha_Origen__c, Fecha_Publicacion__c, Fecha_Recepcion__c, Fecha_Procesamiento__c, Entregas__c FROM Senal__c ORDER BY CreatedDate DESC LIMIT 20"
+  "SELECT Resultado__c, Motivo__c, COUNT(Id) FROM Senal__c GROUP BY Resultado__c, Motivo__c"
+
+echo "==> Pendientes (criterio US-201: Fecha_Procesamiento__c vacia)"
+sf data query -o "$ORG" -r human -q \
+  "SELECT Clave__c, Resultado__c, Motivo__c, Fecha_Origen__c, Fecha_Recepcion__c, Fecha_Procesamiento__c FROM Senal__c WHERE Resultado__c = 'Pendiente' ORDER BY CreatedDate ASC LIMIT 20"
 
 echo "Si Ultimo_Error__c habla de 401, falta el token: ./scripts/configurar-credencial.sh $ORG"
-echo "Fecha_Procesamiento__c vacia y Resultado Pendiente son el criterio de US-201."
+echo "MIXED mezcla lecturas buenas, fechas futuras y algun activo desconocido."

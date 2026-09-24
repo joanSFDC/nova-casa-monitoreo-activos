@@ -2,7 +2,7 @@
 // No abre sesion ni guarda el token.
 
 List<Control_de_Ingesta__c> existentes = [
-    SELECT Id
+    SELECT Id, Name, Cursor__c, Fallos_Consecutivos__c, Paginas_Procesadas__c
     FROM Control_de_Ingesta__c
     WHERE Activo__c = true
     LIMIT 1
@@ -15,9 +15,7 @@ control.Activo__c = true;
 control.Escenario__c = 'MIXED';
 control.Semilla__c = 20260922;
 control.Tamano_Tanda__c = 50;
-if (control.Fallos_Consecutivos__c == null) {
-    control.Fallos_Consecutivos__c = 0;
-}
+control.Fallos_Consecutivos__c = 0;
 if (control.Paginas_Procesadas__c == null) {
     control.Paginas_Procesadas__c = 0;
 }

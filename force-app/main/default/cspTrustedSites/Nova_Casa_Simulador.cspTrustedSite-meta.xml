@@ -2,6 +2,6 @@
 <CspTrustedSite xmlns="http://soap.sforce.com/2006/04/metadata">
     <context>All</context>
     <description>Salida HTTP de la ingesta hacia el simulador de Nova Casa. La URL real se ajusta junto con la Named Credential; el token no vive aqui.</description>
-    <endpointUrl>https://nova-casa-simulator.herokuapp.com</endpointUrl>
+    <endpointUrl>https://mdss-study-01ed1c1eca26.herokuapp.com</endpointUrl>
     <isActive>true</isActive>
 </CspTrustedSite>

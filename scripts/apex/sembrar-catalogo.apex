@@ -5,10 +5,8 @@
 //   ./scripts/sembrar-catalogo.sh
 //
 // Es idempotente: upsert por External ID. Correrlo dos veces deja los mismos
-// 17 registros. Los codigos de edificio y activo siguen el catalogo del
-// simulador (docs/01 y docs/02). Los tres que aparecen en los ejemplos de
-// mensaje estan tomados de ahi; los siete restantes siguen el mismo patron
-// AST-{ciudad}-{tipo}-001.
+// 17 registros. Los codigos salen de GET /catalog del simulador MDSS
+// (AST-*-WATER-001 y AST-*-ENERGY-001, no WMET/EMET).
 
 List<Edificio__c> edificios = new List<Edificio__c>{
     new Edificio__c(
@@ -24,6 +22,17 @@ List<Edificio__c> edificios = new List<Edificio__c>{
 };
 Database.upsert(edificios, Edificio__c.Codigo_Externo__c);
 
+delete [
+    SELECT Id
+    FROM Activo__c
+    WHERE Codigo_Externo__c IN (
+        'AST-BOG-WMET-001',
+        'AST-BAQ-WMET-001',
+        'AST-BOG-EMET-001',
+        'AST-BAQ-EMET-001'
+    )
+];
+
 List<Activo__c> activos = new List<Activo__c>{
     // Bogota
     new Activo__c(
@@ -33,16 +42,16 @@ List<Activo__c> activos = new List<Activo__c>{
         Sensor_Id__c = 'SNS-BOG-TEMP-001',
         Edificio__r = new Edificio__c(Codigo_Externo__c = 'BLD-BOG-001')),
     new Activo__c(
-        Name = 'Medidor de agua',
-        Codigo_Externo__c = 'AST-BOG-WMET-001',
+        Name = 'Medidor de agua torre A',
+        Codigo_Externo__c = 'AST-BOG-WATER-001',
         Tipo__c = 'WATER_METER',
-        Sensor_Id__c = 'SNS-BOG-WMET-001',
+        Sensor_Id__c = 'SNS-BOG-WATER-001',
         Edificio__r = new Edificio__c(Codigo_Externo__c = 'BLD-BOG-001')),
     new Activo__c(
-        Name = 'Medidor de energía',
-        Codigo_Externo__c = 'AST-BOG-EMET-001',
+        Name = 'Medidor de energía torre A',
+        Codigo_Externo__c = 'AST-BOG-ENERGY-001',
         Tipo__c = 'ENERGY_METER',
-        Sensor_Id__c = 'SNS-BOG-EMET-001',
+        Sensor_Id__c = 'SNS-BOG-ENERGY-001',
         Edificio__r = new Edificio__c(Codigo_Externo__c = 'BLD-BOG-001')),
     new Activo__c(
         Name = 'Bomba de presión de agua',
@@ -64,16 +73,16 @@ List<Activo__c> activos = new List<Activo__c>{
         Sensor_Id__c = 'SNS-BAQ-TEMP-001',
         Edificio__r = new Edificio__c(Codigo_Externo__c = 'BLD-BAQ-001')),
     new Activo__c(
-        Name = 'Medidor de agua',
-        Codigo_Externo__c = 'AST-BAQ-WMET-001',
+        Name = 'Medidor de agua torre única',
+        Codigo_Externo__c = 'AST-BAQ-WATER-001',
         Tipo__c = 'WATER_METER',
-        Sensor_Id__c = 'SNS-BAQ-WMET-001',
+        Sensor_Id__c = 'SNS-BAQ-WATER-001',
         Edificio__r = new Edificio__c(Codigo_Externo__c = 'BLD-BAQ-001')),
     new Activo__c(
-        Name = 'Medidor de energía',
-        Codigo_Externo__c = 'AST-BAQ-EMET-001',
+        Name = 'Medidor de energía torre única',
+        Codigo_Externo__c = 'AST-BAQ-ENERGY-001',
         Tipo__c = 'ENERGY_METER',
-        Sensor_Id__c = 'SNS-BAQ-EMET-001',
+        Sensor_Id__c = 'SNS-BAQ-ENERGY-001',
         Edificio__r = new Edificio__c(Codigo_Externo__c = 'BLD-BAQ-001')),
     new Activo__c(
         Name = 'Bomba de presión de agua',
@@ -82,7 +91,7 @@ List<Activo__c> activos = new List<Activo__c>{
         Sensor_Id__c = 'SNS-BAQ-PUMP-001',
         Edificio__r = new Edificio__c(Codigo_Externo__c = 'BLD-BAQ-001')),
     new Activo__c(
-        Name = 'Cámara acceso vehicular',
+        Name = 'Cámara azotea',
         Codigo_Externo__c = 'AST-BAQ-CAM-001',
         Tipo__c = 'SECURITY_CAMERA',
         Sensor_Id__c = 'SNS-BAQ-CAM-001',

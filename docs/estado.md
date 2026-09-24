@@ -51,8 +51,8 @@ Correrlo dos veces deja exactamente 2 edificios, 10 activos y 5 umbrales.
 | `BLD-BOG-001` | Edificio Nova Alameda, Bogotá, región Andina |
 | `BLD-BAQ-001` | Edificio Nova Caribe, Barranquilla, región Caribe |
 | `AST-BOG-TEMP-001` / `AST-BAQ-TEMP-001` | Sala técnica |
-| `AST-BOG-WMET-001` / `AST-BAQ-WMET-001` | Medidor de agua |
-| `AST-BOG-EMET-001` / `AST-BAQ-EMET-001` | Medidor de energía |
+| `AST-BOG-WATER-001` / `AST-BAQ-WATER-001` | Medidor de agua |
+| `AST-BOG-ENERGY-001` / `AST-BAQ-ENERGY-001` | Medidor de energía |
 | `AST-BOG-PUMP-001` / `AST-BAQ-PUMP-001` | Bomba de presión |
 | `AST-BOG-CAM-001` / `AST-BAQ-CAM-001` | Cámara |
 
@@ -79,9 +79,14 @@ Clases en `force-app/main/default/classes/`:
 | `IngestaServicio` | Deduplica, upsert `Senal__c`, publica `Aviso_de_Senal__e`, avanza el cursor |
 
 Named Credential `Nova_Casa_Simulador` + External Credential del mismo nombre,
-principal `Equipo`. El token se carga con `./scripts/configurar-credencial.sh`
-y **no vive en git**. La URL del metadato es un marcador (`herokuapp`); se
-cambia en Setup si el simulador real usa otro host.
+principal `Equipo`. El administrador necesita el conjunto
+`Nova_Casa_Administracion`: el acceso al principal **no lo concede el perfil**.
+El token se carga con `./scripts/configurar-credencial.sh` y **no vive en git**.
+La URL base de la Named Credential es
+`https://mdss-study-01ed1c1eca26.herokuapp.com/api/sprint-2/simulator/v1`.
+Apex añade `/session` y `/telemetry`. MIXED mezcla lecturas buenas, fechas
+futuras y algún activo desconocido (`AST-UNKNOWN-0001`): Pendiente con
+`Fecha_Procesamiento__c` vacía es el criterio de US-201.
 
 Recorrido reproducible:
 
