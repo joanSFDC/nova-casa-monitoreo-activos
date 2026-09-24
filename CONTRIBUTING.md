@@ -12,7 +12,9 @@ deshacer un enredo.
 | Carpeta | Qué contiene |
 | --- | --- |
 | `docs/` | **La especificación técnica.** Trece documentos, uno por módulo |
+| `docs/estado.md` | **Qué ya está construido.** Se actualiza en cada Pull Request |
 | `force-app/` | El código de Salesforce |
+| `scripts/` | Scripts para sembrar datos y reconstruir la org |
 
 **Antes de escribir una sola línea de código, lee el documento del módulo que te toca.**
 No es burocracia: ahí están las decisiones ya tomadas, con el porqué. Si implementas algo
