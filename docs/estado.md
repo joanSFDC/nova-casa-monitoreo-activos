@@ -15,7 +15,7 @@ La especificación sigue en los módulos [01](01-contrato-del-mensaje.md) a
 | Modelo de datos (issue #2) | En `main` | [PR #16](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/16) |
 | Conjuntos de permisos (cinco roles) | En esta rama | `force-app/main/default/permissionsets/` |
 | Siembra del catálogo (issue #3) | En `main` | [PR #17](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/17) |
-| Usuarios de la demo (issue #14) | En curso | `scripts/crear-usuarios-demo.sh` |
+| Usuarios de la demo (issue #14) | En este PR | [PR #18](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/18) |
 | Ingesta US-201 | Pendiente | Issue #4 |
 | El resto de historias | Pendiente | Issues #5 a #13 |
 | Identidad visual | Pendiente | Issue #15 |
@@ -136,4 +136,4 @@ No estaban en la especificación y conviene no redescubrirlas.
 | --- | --- |
 | 2026-09-23 | Proyecto DX, modelo y permission set de administración. PR #16 fusionado. Cierra #2 |
 | 2026-09-24 | Script de siembra del catálogo. PR #17 fusionado. Cierra #3 |
-| 2026-09-24 | Usuarios de la demo, cinco conjuntos y reglas por ciudad. Issue #14 |
+| 2026-09-24 | Usuarios de la demo, cinco conjuntos y reglas por ciudad. [PR #18](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/18). Cierra #14 |
