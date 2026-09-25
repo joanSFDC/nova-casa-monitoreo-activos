@@ -33,7 +33,7 @@ Ocho elementos desplegados y verificados:
 
 - Objetos: `Edificio__c`, `Activo__c`, `Estado_Actual__c`, `Umbral__c`,
   `Senal__c`, `Control_de_Ingesta__c`
-- Evento: `Aviso_de_Senal__e` (publicación inmediata)
+- Evento: `Aviso_de_Senal__e` (`PublishAfterCommit`)
 - Campos en `Case`: `Clave_Abierta__c`, `Activo__c`, `Tipo_Medicion__c`,
   `Episodio_Id__c`, `Origen_Senal__c`
 - Catálogos globales: `Tipo_Activo`, `Tipo_Medicion`, `Unidad`, `Severidad`
@@ -179,6 +179,10 @@ No estaban en la especificación y conviene no redescubrirlas.
    nunca desde un archivo versionado.
 9. Un cron de Apex no admite "cada minuto" en una sola expresión: son sesenta
    `CronTrigger` con nombre `Nova Casa Ingesta mm`.
+10. **`Aviso_de_Senal__e` va con `PublishAfterCommit`.** `PublishImmediately`
+    disparaba el suscriptor antes de que `Senal__c` fuera visible: 70 aplicadas
+    y 155 Pendiente en el mismo ciclo de MIXED. `procesarPendientes` drena las
+    que ya se perdieron el aviso.
 
 ## Historial breve
 
