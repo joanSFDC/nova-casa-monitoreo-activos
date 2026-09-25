@@ -275,4 +275,36 @@ public class TestDataFactory {
         senal.Fecha_Origen__c = IngestaValidador.parsearIso(String.valueOf(mensaje.get('occurredAt')));
         return ProcesamientoServicio.avisoDesdeSenal(senal);
     }
+
+    public static User usuarioConConjunto(String apiConjunto) {
+        Profile perfil = [
+            SELECT Id
+            FROM Profile
+            WHERE Name IN ('Minimum Access - Salesforce', 'Acceso minimo - Salesforce')
+            LIMIT 1
+        ];
+        String sufijo = String.valueOf(Crypto.getRandomInteger()).replace('-', '');
+        User usuario = new User(
+            Alias = sufijo.left(8),
+            Email = sufijo + '@novacasa.test',
+            EmailEncodingKey = 'UTF-8',
+            LastName = 'Prueba',
+            LanguageLocaleKey = 'es',
+            LocaleSidKey = 'es_CO',
+            TimeZoneSidKey = 'America/Bogota',
+            Username = sufijo + '@novacasa.test',
+            ProfileId = perfil.Id
+        );
+        insert usuario;
+        PermissionSet conjunto = [
+            SELECT Id
+            FROM PermissionSet
+            WHERE Name = :apiConjunto
+        ];
+        insert new PermissionSetAssignment(
+            AssigneeId = usuario.Id,
+            PermissionSetId = conjunto.Id
+        );
+        return usuario;
+    }
 }

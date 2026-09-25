@@ -1,5 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <actionOverrides>
+        <actionName>View</actionName>
+        <comment>Investigacion: identidad, resultado, momentos y carga</comment>
+        <content>Senal_Registro</content>
+        <formFactor>Large</formFactor>
+        <skipRecordTypeSelect>false</skipRecordTypeSelect>
+        <type>Flexipage</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>View</actionName>
+        <content>Senal_Registro</content>
+        <formFactor>Small</formFactor>
+        <skipRecordTypeSelect>false</skipRecordTypeSelect>
+        <type>Flexipage</type>
+    </actionOverrides>
+    <compactLayoutAssignment>Senal_Compacto</compactLayoutAssignment>
     <deploymentStatus>Deployed</deploymentStatus>
     <description>Cada mensaje recibido queda aqui con su resultado. Es la unica tabla que crece sin techo y por eso la pantalla del operador nunca la consulta.</description>
     <enableActivities>false</enableActivities>
@@ -17,6 +33,20 @@
         <type>AutoNumber</type>
     </nameField>
     <pluralLabel>Señales</pluralLabel>
+    <searchLayouts>
+        <lookupDialogsAdditionalFields>Clave__c</lookupDialogsAdditionalFields>
+        <lookupDialogsAdditionalFields>Message_Id__c</lookupDialogsAdditionalFields>
+        <lookupDialogsAdditionalFields>Resultado__c</lookupDialogsAdditionalFields>
+        <searchFilterFields>Clave__c</searchFilterFields>
+        <searchFilterFields>Message_Id__c</searchFilterFields>
+        <searchFilterFields>Resultado__c</searchFilterFields>
+        <searchResultsAdditionalFields>Clave__c</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>Message_Id__c</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>Resultado__c</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>Motivo__c</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>Fecha_Recepcion__c</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>Reintentable__c</searchResultsAdditionalFields>
+    </searchLayouts>
     <sharingModel>Private</sharingModel>
     <visibility>Public</visibility>
 </CustomObject>

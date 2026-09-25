@@ -19,6 +19,14 @@ private class IngestaServicioTest {
 
         Test.startTest();
         IngestaServicio.ResultadoPagina r = IngestaServicio.procesarPagina(cuerpo, ahora);
+        Senal__c publicada = [
+            SELECT Resultado__c, Fecha_Origen__c, Fecha_Publicacion__c,
+                   Fecha_Recepcion__c, Fecha_Procesamiento__c, Clave__c, Entregas__c
+            FROM Senal__c
+            WHERE Clave__c = 'nova-casa-simulator|msg_000002'
+        ];
+        Assert.areEqual(IngestaConstantes.RESULTADO_PENDIENTE, publicada.Resultado__c, 'Pendiente, no aplicado');
+        Assert.isNull(publicada.Fecha_Procesamiento__c, 'Procesamiento lo llena el suscriptor');
         Test.stopTest();
 
         Assert.areEqual(1, r.senales, 'Una senal');
@@ -29,9 +37,9 @@ private class IngestaServicioTest {
             FROM Senal__c
             WHERE Clave__c = 'nova-casa-simulator|msg_000002'
         ];
-        Assert.areEqual(IngestaConstantes.RESULTADO_PENDIENTE, senal.Resultado__c, 'Pendiente, no aplicado');
+        Assert.areEqual(IngestaConstantes.RESULTADO_APLICADO, senal.Resultado__c, 'El suscriptor aplica al entregar');
         Assert.areEqual(ahora, senal.Fecha_Recepcion__c, 'Recepcion es ahora');
-        Assert.isNull(senal.Fecha_Procesamiento__c, 'Procesamiento lo llena US-202');
+        Assert.isNotNull(senal.Fecha_Procesamiento__c, 'Ya no esta pendiente');
         Assert.areNotEqual(senal.Fecha_Origen__c, senal.Fecha_Publicacion__c, 'Origen distinto de publicacion');
         Assert.areNotEqual(senal.Fecha_Origen__c, senal.Fecha_Recepcion__c, 'Origen distinto de recepcion');
         Assert.areNotEqual(senal.Fecha_Publicacion__c, senal.Fecha_Recepcion__c, 'Publicacion distinta de recepcion');
@@ -88,7 +96,7 @@ private class IngestaServicioTest {
         ];
         Assert.areEqual(2, senal.Entregas__c.intValue(), 'Dos entregas del mismo mensaje');
         Assert.areEqual('dlv_000004', senal.Ultimo_Delivery_Id__c, 'Ultima entrega');
-        Assert.areEqual(IngestaConstantes.RESULTADO_PENDIENTE, senal.Resultado__c, 'Sigue pendiente');
+        Assert.areNotEqual(IngestaConstantes.RESULTADO_DUPLICADO, senal.Resultado__c, 'No pisa a Duplicado');
     }
 
     @isTest
@@ -137,7 +145,7 @@ private class IngestaServicioTest {
             WHERE Clave__c = 'nova-casa-simulator|msg_000002'
         ];
         Assert.areEqual(2, senal.Entregas__c.intValue(), 'Contador');
-        Assert.areEqual(IngestaConstantes.RESULTADO_PENDIENTE, senal.Resultado__c, 'No cambia a Duplicado');
+        Assert.areNotEqual(IngestaConstantes.RESULTADO_DUPLICADO, senal.Resultado__c, 'No cambia a Duplicado');
         Assert.areEqual(ahora, senal.Fecha_Recepcion__c, 'La primera recepcion se conserva');
     }
 
@@ -153,10 +161,19 @@ private class IngestaServicioTest {
             TestDataFactory.sobre(mensajes, 'c', true),
             Datetime.newInstanceGmt(2026, 9, 22, 22, 0, 0)
         );
+        Assert.areEqual(
+            50,
+            [SELECT COUNT() FROM Senal__c WHERE Resultado__c = :IngestaConstantes.RESULTADO_PENDIENTE],
+            'Tras publicar, todavia pendientes'
+        );
         Test.stopTest();
         Assert.areEqual(50, r.senales, 'Cincuenta senales');
         Assert.areEqual(50, r.publicadas, 'Cincuenta avisos');
-        Assert.areEqual(50, [SELECT COUNT() FROM Senal__c WHERE Resultado__c = :IngestaConstantes.RESULTADO_PENDIENTE], 'Todas pendientes');
+        Assert.areEqual(
+            0,
+            [SELECT COUNT() FROM Senal__c WHERE Resultado__c = :IngestaConstantes.RESULTADO_PENDIENTE],
+            'El suscriptor drena la tanda'
+        );
     }
 
     @isTest
@@ -230,6 +247,14 @@ private class IngestaServicioTest {
             TestDataFactory.sobre(new List<Map<String, Object>>{ mensaje }, 'c2', true),
             ahora.addMinutes(1)
         );
+        Senal__c pendiente = [
+            SELECT Resultado__c, Motivo__c, Reintentable__c, Activo__c, Entregas__c
+            FROM Senal__c
+            WHERE Clave__c = 'nova-casa-simulator|msg_unknown'
+        ];
+        Assert.areEqual(IngestaConstantes.RESULTADO_PENDIENTE, pendiente.Resultado__c, 'El alta desbloquea');
+        Assert.isNull(pendiente.Motivo__c, 'Sin motivo');
+        Assert.isFalse(pendiente.Reintentable__c, 'Pendiente no se reintenta');
         Test.stopTest();
 
         Senal__c despues = [
@@ -237,9 +262,7 @@ private class IngestaServicioTest {
             FROM Senal__c
             WHERE Clave__c = 'nova-casa-simulator|msg_unknown'
         ];
-        Assert.areEqual(IngestaConstantes.RESULTADO_PENDIENTE, despues.Resultado__c, 'El alta desbloquea');
-        Assert.isNull(despues.Motivo__c, 'Sin motivo');
-        Assert.isFalse(despues.Reintentable__c, 'Pendiente no se reintenta');
+        Assert.areEqual(IngestaConstantes.RESULTADO_APLICADO, despues.Resultado__c, 'El aviso se aplica');
         Assert.isNotNull(despues.Activo__c, 'Resuelve el activo');
         Assert.areEqual(2, despues.Entregas__c.intValue(), 'Cuenta el reenvio');
         Assert.areEqual(1, r.publicadas, 'Publica al quedar pendiente');

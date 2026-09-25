@@ -17,8 +17,9 @@ La especificación sigue en los módulos [01](01-contrato-del-mensaje.md) a
 | Siembra del catálogo (issue #3) | En `main` | [PR #17](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/17) |
 | Usuarios de la demo (issue #14) | En `main` | [PR #18](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/18) |
 | Ingesta US-201 (issue #4) | En `main` | [PR #19](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/19) |
-| Procesamiento US-202 (issue #5) | En curso | Rama `us-202-procesamiento` |
-| El resto de historias | Pendiente | Issues #6 a #13 |
+| Procesamiento US-202 (issue #5) | En `main` | [PR #20](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/20) |
+| Trazabilidad US-209 (issue #12) | En curso | Rama `us-209-trazabilidad` |
+| El resto de historias | Pendiente | Issues #6 a #11 y #13 |
 | Identidad visual | Pendiente | Issue #15 |
 
 Org de trabajo: alias `novacasa2`, dominio
@@ -108,6 +109,28 @@ Después de una página buena: señales en **Pendiente**,
 cursor igual. Los diagramas de secuencia están al final del
 [módulo 02](02-ingesta.md).
 
+### Bitácora
+
+La investigación es vistas de lista estándar y la página de registro
+`Senal_Registro` (identidad, resultado, momentos, carga). No hay consola LWC
+ni botón de reproceso.
+
+| Vista | Filtro |
+| --- | --- |
+| Rechazadas hoy | `Rechazado` y recepción de hoy |
+| Reintentables | `Reintentable__c` y resultado rechazado o fallido |
+| Conflictos | Resultado conflicto |
+| Duplicadas | `Entregas__c` mayor que uno |
+| Atascadas | Pendiente con recepción anterior a hoy |
+| Últimas 24 horas | Recepción del último día, más reciente primero |
+
+`IngestaConstantes.aplicar` es el único sitio que escribe resultado, motivo y
+reintentable juntos. El reenvío idéntico **no** cambia el resultado a
+Duplicado: sube `Entregas__c`, que es lo que filtra la vista. `Message_Id__c`
+es External ID para la búsqueda global. El operador no tiene el objeto.
+
+La regla `Resultado_obligatorio` impide guardar una señal sin resultado.
+
 ### Usuarios y accesos de la demo
 
 Cinco conjuntos de permisos. Los humanos parten de `Minimum Access - Salesforce`.
@@ -142,16 +165,11 @@ sf org assign permset -o novacasa2 -n Nova_Casa_Administracion
 
 ## Qué se está haciendo ahora
 
-US-202, issue #5: procesar avisos en lote sin perder las válidas.
-El disparador `AvisoDeSenal` llama a `ProcesamientoServicio`. Una tanda
-hace siempre las mismas cuatro consultas y dos escrituras (estados y
-señales). Los casos son US-205.
+US-209, issue #12: investigar el resultado del procesamiento. Vistas de
+`Senal__c`, página de registro, `Reintentable__c` derivado del motivo y el
+operador fuera de la bitácora.
 
-Para drenar `Pendiente` ya guardadas: `./scripts/ejecutar-procesamiento.sh novacasa2`.
-
-El principal `Nova_Casa_Simulador-Equipo` se concede a administración (para
-correr la demo ahora) y a `Nova_Casa_Integracion` (el usuario de proceso).
-
+US-203 a US-206 siguen en Cali. El monitor (US-207) espera esas.
 
 ## Decisiones que aparecieron al implementar
 
@@ -183,6 +201,14 @@ No estaban en la especificación y conviene no redescubrirlas.
     disparaba el suscriptor antes de que `Senal__c` fuera visible: 70 aplicadas
     y 155 Pendiente en el mismo ciclo de MIXED. `procesarPendientes` drena las
     que ya se perdieron el aviso.
+11. **El resultado Duplicado no se escribe.** Un reenvío idéntico incrementa
+    `Entregas__c` y conserva Pendiente/Aplicado/etc. La vista Duplicadas filtra
+    por el contador, no por el valor de la lista. Cambiar a Duplicado perdería
+    si esa señal ya se aplicó.
+12. GitHub no cierra issues con `Cierra #N`. En el PR hay que escribir
+    `Closes #N`.
+13. Las vistas de lista **no aceptan** `LAST_N_HOURS`. Atascadas queda como
+    Pendiente con recepción anterior a hoy.
 
 ## Historial breve
 
@@ -192,3 +218,5 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-09-24 | Script de siembra del catálogo. PR #17 fusionado. Cierra #3 |
 | 2026-09-24 | Usuarios de la demo, cinco conjuntos y reglas por ciudad. PR #18 fusionado. Cierra #14 |
 | 2026-09-24 | Ingesta US-201: credenciales, cadena Queueable, diagramas. Cierra #4 |
+| 2026-09-25 | Procesamiento US-202: tanda, aislamiento, vigencia. PR #20 fusionado. Cierra #5 |
+| 2026-09-25 | Trazabilidad US-209: vistas, página de registro, reintentable. En curso |
