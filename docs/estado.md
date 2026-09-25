@@ -13,10 +13,10 @@ La especificación sigue en los módulos [01](01-contrato-del-mensaje.md) a
 | --- | --- | --- |
 | Proyecto Salesforce DX | Hecho | `sfdx-project.json`, `force-app/` |
 | Modelo de datos (issue #2) | En `main` | [PR #16](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/16) |
-| Conjuntos de permisos (cinco roles) | En esta rama | `force-app/main/default/permissionsets/` |
+| Conjuntos de permisos (cinco roles) | En `main` | [PR #18](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/18) |
 | Siembra del catálogo (issue #3) | En `main` | [PR #17](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/17) |
-| Usuarios de la demo (issue #14) | En este PR | [PR #18](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/18) |
-| Ingesta US-201 | Pendiente | Issue #4 |
+| Usuarios de la demo (issue #14) | En `main` | [PR #18](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/18) |
+| Ingesta US-201 (issue #4) | En curso | Rama `us-201-ingesta` |
 | El resto de historias | Pendiente | Issues #5 a #13 |
 | Identidad visual | Pendiente | Issue #15 |
 
@@ -51,15 +51,10 @@ Correrlo dos veces deja exactamente 2 edificios, 10 activos y 5 umbrales.
 | `BLD-BOG-001` | Edificio Nova Alameda, Bogotá, región Andina |
 | `BLD-BAQ-001` | Edificio Nova Caribe, Barranquilla, región Caribe |
 | `AST-BOG-TEMP-001` / `AST-BAQ-TEMP-001` | Sala técnica |
-| `AST-BOG-WMET-001` / `AST-BAQ-WMET-001` | Medidor de agua |
-| `AST-BOG-EMET-001` / `AST-BAQ-EMET-001` | Medidor de energía |
+| `AST-BOG-WATER-001` / `AST-BAQ-WATER-001` | Medidor de agua |
+| `AST-BOG-ENERGY-001` / `AST-BAQ-ENERGY-001` | Medidor de energía |
 | `AST-BOG-PUMP-001` / `AST-BAQ-PUMP-001` | Bomba de presión |
 | `AST-BOG-CAM-001` / `AST-BAQ-CAM-001` | Cámara |
-
-Tres códigos salen de los ejemplos de [módulo 01](01-contrato-del-mensaje.md):
-`AST-BOG-PUMP-001`, `AST-BOG-CAM-001`, `AST-BAQ-TEMP-001`. Los otros siete
-siguen el mismo patrón. Si `GET /catalog` usa IDs distintos, se cambian en el
-script, no en el modelo.
 
 Umbrales, clave `Tipo_Activo\|Tipo_Medicion`:
 
@@ -71,8 +66,43 @@ Umbrales, clave `Tipo_Activo\|Tipo_Medicion`:
 | `ENERGY_METER\|ENERGY_CONSUMPTION` | `KWH_PER_15_MIN` | solo alto: 40.1 / 65.1 |
 | `SECURITY_CAMERA\|CAMERA_CONNECTIVITY` | (vacío) | 15 min advertencia, 60 min crítico |
 
-La cámara no tiene umbrales de valor. `SECONDS` no está en el conjunto global
-`Unidad`; no se añadió en la siembra para no mezclar modelo con datos.
+### Ingesta
+
+Clases en `force-app/main/default/classes/`:
+
+| Clase | Rol |
+| --- | --- |
+| `IngestaSchedulable` | Cada minuto encola el primer eslabón |
+| `IngestaQueueable` | Una página por transacción, hasta seis por ciclo |
+| `IngestaCliente` | `callout:Nova_Casa_Simulador` — el token no está aquí |
+| `IngestaValidador` | Contrato del [módulo 01](01-contrato-del-mensaje.md) |
+| `IngestaServicio` | Deduplica, upsert `Senal__c`, publica `Aviso_de_Senal__e`, avanza el cursor |
+
+Named Credential `Nova_Casa_Simulador` + External Credential del mismo nombre,
+principal `Equipo`. El administrador necesita el conjunto
+`Nova_Casa_Administracion`: el acceso al principal **no lo concede el perfil**.
+El token se carga con `./scripts/configurar-credencial.sh` y **no vive en git**.
+La URL base de la Named Credential es
+`https://mdss-study-01ed1c1eca26.herokuapp.com/api/sprint-2/simulator/v1`.
+Apex añade `/session` y `/telemetry`. MIXED mezcla lecturas buenas, fechas
+futuras y algún activo desconocido (`AST-UNKNOWN-0001`): Pendiente con
+`Fecha_Procesamiento__c` vacía es el criterio de US-201.
+
+Recorrido reproducible:
+
+```bash
+sf project deploy start --source-dir force-app -o novacasa2
+sf org assign permset -o novacasa2 -n Nova_Casa_Administracion
+./scripts/sembrar-catalogo.sh novacasa2
+export NOVA_CASA_SIMULADOR_TOKEN='...'   # fuera del repo
+./scripts/configurar-credencial.sh novacasa2
+./scripts/ejecutar-ingesta.sh novacasa2
+```
+
+Después de una página buena: señales en **Pendiente**,
+`Fecha_Procesamiento__c` vacía, cursor distinto del inicial. Un 429 deja el
+cursor igual. Los diagramas de secuencia están al final del
+[módulo 02](02-ingesta.md).
 
 ### Usuarios y accesos de la demo
 
@@ -108,8 +138,12 @@ sf org assign permset -o novacasa2 -n Nova_Casa_Administracion
 
 ## Qué se está haciendo ahora
 
-Usuarios, conjuntos de permisos y compartición, issue #14. Desbloquea las
-pruebas de US-208. Joan sigue con US-201 (issue #4), la ingesta.
+US-201, issue #4: recibir señales del simulador y publicar
+`Aviso_de_Senal__e`. Desbloquea US-202 (el suscriptor, issue #5).
+
+El principal `Nova_Casa_Simulador-Equipo` se concede a administración (para
+correr la demo ahora) y a `Nova_Casa_Integracion` (el usuario de proceso).
+
 
 ## Decisiones que aparecieron al implementar
 
@@ -129,6 +163,14 @@ No estaban en la especificación y conviene no redescubrirlas.
 5. **`Umbral__c` en ReadWrite, no en Read.** Lectura pública no deja editar
    registros de otro dueño, y los umbrales los sembró la administración.
 6. **Q-10: compartición por ciudad**, no por región ni edificio a edificio.
+7. **Apex 67 y `without sharing` no saltan FLS.** Las consultas de ingesta van
+   con `WITH SYSTEM_MODE`. Sin eso, el proceso de sistema choca con los mismos
+   "No such column" del punto 1.
+8. **El token no cabe en el metadato de la External Credential.** Se crea el
+   principal vacío y el valor se cifra después con ConnectApi, desde el script,
+   nunca desde un archivo versionado.
+9. Un cron de Apex no admite "cada minuto" en una sola expresión: son sesenta
+   `CronTrigger` con nombre `Nova Casa Ingesta mm`.
 
 ## Historial breve
 
@@ -136,4 +178,5 @@ No estaban en la especificación y conviene no redescubrirlas.
 | --- | --- |
 | 2026-09-23 | Proyecto DX, modelo y permission set de administración. PR #16 fusionado. Cierra #2 |
 | 2026-09-24 | Script de siembra del catálogo. PR #17 fusionado. Cierra #3 |
-| 2026-09-24 | Usuarios de la demo, cinco conjuntos y reglas por ciudad. [PR #18](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/18). Cierra #14 |
+| 2026-09-24 | Usuarios de la demo, cinco conjuntos y reglas por ciudad. PR #18 fusionado. Cierra #14 |
+| 2026-09-24 | Ingesta US-201: credenciales, cadena Queueable, diagramas. Cierra #4 |

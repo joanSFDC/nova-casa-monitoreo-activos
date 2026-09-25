@@ -341,3 +341,243 @@ La siembra se materializa como un script de datos en el repositorio, no como una
 manual, para que cualquiera pueda reconstruir el entorno desde cero. El comando es
 `./scripts/sembrar-catalogo.sh`. Qué queda sembrado y con qué códigos está en
 [`estado.md`](estado.md).
+
+## Cómo se ejecuta
+
+Las credenciales se despliegan vacías de secreto. El token se cifra en la org:
+
+```bash
+export NOVA_CASA_SIMULADOR_TOKEN='...'   # nunca se commitea
+./scripts/configurar-credencial.sh novacasa2
+./scripts/sembrar-catalogo.sh novacasa2
+sf apex run -o novacasa2 -f scripts/apex/sembrar-control-ingesta.apex
+./scripts/ejecutar-ingesta.sh novacasa2
+```
+
+La cadencia continua es `./scripts/programar-ingesta.sh novacasa2`. Se cancela con
+`--abortar`. Lo que queda en `Senal__c` y en `Control_de_Ingesta__c` después de una
+página está en [`estado.md`](estado.md).
+
+## Diagramas de secuencia
+
+Estos diagramas son el mapa de US-201. El Mermaid se ve en GitHub; el ASCII está
+para quien lea el documento en un terminal.
+
+### 1. Un ciclo: del minuto a las seis páginas
+
+#### Mermaid
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Sch as IngestaSchedulable
+    participant Q as IngestaQueueable
+    participant Svc as IngestaServicio
+    participant NC as Named Credential
+    participant Sim as Simulador
+    participant DB as Control_de_Ingesta__c
+
+    Note over Sch,DB: Un minuto. Tope de seis paginas porque hasMore no termina.
+
+    Sch-)Q: enqueueJob(indice 0)
+    loop Mientras indice menor que 6 y hasMore y Activo
+        Q->>Svc: ejecutar(indice)
+        Svc->>DB: SELECT FOR UPDATE
+        alt Cursor vacio
+            Svc->>NC: POST /session
+            NC->>Sim: Authorization Bearer (inyectado)
+            Sim-->>Svc: 201 cursor inicial
+        end
+        Svc->>NC: GET /telemetry
+        NC->>Sim: X-Simulator-Cursor
+        Sim-->>Svc: 200 pagina + nextCursor
+        Svc->>DB: UPDATE cursor, fallos = 0
+        alt Aun hay cupo
+            Svc-)Q: enqueueJob(indice + 1)
+        else Tope, hasMore falso o inactiva
+            Svc-->>Q: no encadena
+        end
+    end
+    Note over Sch: El minuto siguiente vuelve a arrancar desde el cursor guardado
+```
+
+#### ASCII
+
+```text
+IngestaSchedulable          IngestaQueueable           Simulador         Control__c
+        |                          |                       |                 |
+        |  enqueue indice=0        |                       |                 |
+        |------------------------->|                       |                 |
+        |                          |  FOR UPDATE           |                 |
+        |                          |---------------------------------------->|
+        |                          |  POST /session        |                 |
+        |                          |---------------------->|                 |
+        |                          |  201 cursor           |                 |
+        |                          |<----------------------|                 |
+        |                          |  GET /telemetry       |                 |
+        |                          |---------------------->|                 |
+        |                          |  200 pagina           |                 |
+        |                          |<----------------------|                 |
+        |                          |  guardar nextCursor                     |
+        |                          |---------------------------------------->|
+        |                          |  enqueue indice+1     |                 |
+        |                          |-----+                 |                 |
+        |                          |     | (hasta 6)       |                 |
+        |                          |<----+                 |                 |
+```
+
+#### Notas
+
+- Cada eslabon es una transaccion: callout, DML y tope de eventos se renuevan.
+- `hasMore` en MIXED es siempre verdadero; el tope de seis es lo que evita el bucle infinito.
+- Si un eslabon muere, el Schedulable del minuto siguiente retoma el cursor guardado.
+
+### 2. Una pagina: validar, guardar, publicar, avanzar
+
+#### Mermaid
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Q as IngestaQueueable
+    participant Val as IngestaValidador
+    participant DB as Senal__c
+    participant Bus as EventBus
+    participant Ctl as Control_de_Ingesta__c
+
+    Note over Q,Ctl: Callouts ya ocurrieron. Ahora no hay mas HTTP.
+
+    Q->>Val: deduplicar en memoria por source|messageId
+    Q->>Val: validar cada mensaje contra edificio, activo y umbral
+    Q->>DB: upsert allOrNone=false por Clave__c
+    alt Valida y nueva
+        DB-->>Q: Resultado Pendiente
+        Q->>Bus: publish Aviso_de_Senal__e
+        Bus-->>Q: SaveResult
+    else Rechazada
+        DB-->>Q: Resultado Rechazado + Motivo
+        Note over Bus: No se publica
+    else Misma clave, mismo hash
+        DB-->>Q: Entregas + 1
+        Note over Bus: No se republica
+    else Misma clave, hash distinto
+        DB-->>Q: Resultado Conflicto
+        Note over Bus: No se publica
+    end
+    Q->>Ctl: Cursor = pagination.nextCursor
+```
+
+#### ASCII
+
+```text
+  pagina JSON
+       |
+       v
+  [deduplicar en memoria] ---- clave repetida ----> Entregas++ / Conflicto
+       |
+       v
+  [validar uno a uno] ------ motivo ----> Senal Rechazado (no evento)
+       |
+       v
+  upsert Senal.Clave__c  (allOrNone = false)
+       |
+       +--> Pendiente nueva ---- EventBus.publish(Aviso_de_Senal__e)
+       |
+       v
+  Control.Cursor = nextCursor
+```
+
+#### Notas
+
+- Guardar antes de publicar evita un aviso en el bus sin senal que lo respalde.
+- Pendiente significa publicado, no procesado. `Fecha_Procesamiento__c` queda vacia.
+- Una clave repetida en la misma pagina no se manda al upsert: si se mandara, fallaria entero.
+
+### 3. Credenciales: el token no entra a Apex
+
+#### Mermaid
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Dev as Quien configura
+    participant Org as External Credential
+    participant Apex as IngestaCliente
+    participant NC as Named Credential
+    participant Sim as Simulador
+
+    Dev->>Org: ./scripts/configurar-credencial.sh (token por env)
+    Note over Org: AES-256. No se lee desde Apex ni desde git.
+    Apex->>NC: callout:Nova_Casa_Simulador/telemetry
+    NC->>Org: resuelve Bearer
+    NC->>Sim: GET + Authorization + X-Simulator-Cursor
+    Sim-->>Apex: cuerpo JSON (sin eco del token)
+```
+
+#### ASCII
+
+```text
+  env TOKEN  -->  script  -->  External Credential (cifrada)
+                                      |
+                                      v
+  Apex  -->  callout:Nova_Casa_Simulador  -->  simulador
+             (sin el secreto en el codigo)
+```
+
+#### Notas
+
+- Prohibido: Apex, Custom Metadata, Custom Settings, archivos del repo, capturas.
+- El acceso al principal `Nova_Casa_Simulador-Equipo` va en permission set. Issue #14 lo mueve al usuario de integracion.
+
+### 4. Errores HTTP
+
+#### Mermaid
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Q as IngestaQueueable
+    participant Sim as Simulador
+    participant Ctl as Control_de_Ingesta__c
+
+    Q->>Sim: GET /telemetry (mismo cursor)
+
+    alt 200
+        Sim-->>Q: pagina
+        Q->>Ctl: avanzar cursor
+    else 409 cursor-conflict
+        Sim-->>Q: 409
+        Q->>Sim: POST /session
+        Sim-->>Q: cursor nuevo
+        Q->>Sim: GET /telemetry
+        Note over Ctl: Se registra el 409. El flujo de mensajes se reinicia.
+    else 429 o 503
+        Sim-->>Q: espera
+        Q->>Ctl: NO mover cursor. Cortar ciclo.
+        Note over Q: El minuto siguiente reintenta. No se reintenta en caliente.
+    else 401
+        Sim-->>Q: unauthorized
+        Q->>Ctl: error + Fallos_Consecutivos++
+        Note over Q: Cortar cadena. Hay que rotar o cargar el token.
+    else Tiempo agotado
+        Sim--xQ: timeout
+        Q->>Sim: GET otra vez, mismo cursor
+        Note over Sim: La llamada es idempotente.
+    end
+```
+
+#### ASCII
+
+```text
+  200  -> procesar, avanzar cursor, tal vez encadenar
+  409  -> POST /session, registrar, continuar (msg_000001 otra vez; deduplica)
+  429  -> cortar ciclo, cursor intacto, el minuto siguiente reintenta
+  503  -> igual que 429
+  401  -> cortar cadena, contar fallo, pedir token
+  timeout -> un reintento con el mismo cursor; si falla, cursor intacto
+```
+
+#### Notas
+
+- Reenviar el mismo cursor devuelve la misma pagina: por eso el timeout no pierde datos.
+- El 429 no se reintenta dentro del ciclo: reintentar al instante es lo que la API acaba de prohibir.

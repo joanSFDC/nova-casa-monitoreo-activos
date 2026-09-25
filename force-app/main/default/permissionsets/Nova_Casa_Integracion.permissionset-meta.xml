@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
     <description
-  >Usuario de sistema para la ingesta. Crear, leer y editar senales, estados y casos. Solo lectura en umbrales, edificios y activos. Borrado sobre nada. La Named Credential del simulador la anade US-201.</description>
+  >Usuario de sistema para la ingesta. Crear, leer y editar senales, estados y casos. Solo lectura en umbrales, edificios y activos. Borrado sobre nada. Incluye el principal Nova_Casa_Simulador-Equipo.</description>
     <fieldPermissions>
         <editable>false</editable>
         <field>Edificio__c.Ciudad__c</field>
@@ -402,4 +402,36 @@
     <hasActivationRequired>false</hasActivationRequired>
     <label>Nova Casa · Integración</label>
     <license>Salesforce Integration</license>
+    <classAccesses>
+        <apexClass>IngestaCliente</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>IngestaConstantes</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>IngestaException</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>IngestaQueueable</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>IngestaSchedulable</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>IngestaServicio</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>IngestaValidador</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <externalCredentialPrincipalAccesses>
+        <enabled>true</enabled>
+        <externalCredentialPrincipal>Nova_Casa_Simulador-Equipo</externalCredentialPrincipal>
+    </externalCredentialPrincipalAccesses>
 </PermissionSet>
