@@ -248,4 +248,31 @@ public class TestDataFactory {
             }
         );
     }
+
+    public static Senal__c senalPendiente(Map<String, Object> mensaje, Id activoId, Id edificioId) {
+        String messageId = String.valueOf(mensaje.get('messageId'));
+        Senal__c senal = new Senal__c();
+        senal.Clave__c = 'nova-casa-simulator|' + messageId;
+        senal.Message_Id__c = messageId;
+        senal.Tipo_Mensaje__c = String.valueOf(mensaje.get('messageType'));
+        senal.Resultado__c = IngestaConstantes.RESULTADO_PENDIENTE;
+        senal.Carga__c = JSON.serialize(mensaje);
+        senal.Fecha_Origen__c = IngestaValidador.parsearIso(String.valueOf(mensaje.get('occurredAt')));
+        senal.Fecha_Publicacion__c = IngestaValidador.parsearIso(String.valueOf(mensaje.get('publishedAt')));
+        senal.Fecha_Recepcion__c = Datetime.newInstanceGmt(2026, 9, 22, 22, 0, 0);
+        senal.Entregas__c = 1;
+        senal.Activo__c = activoId;
+        senal.Edificio__c = edificioId;
+        return senal;
+    }
+
+    public static Aviso_de_Senal__e avisoDe(Map<String, Object> mensaje) {
+        Senal__c senal = new Senal__c();
+        senal.Clave__c = 'nova-casa-simulator|' + String.valueOf(mensaje.get('messageId'));
+        senal.Message_Id__c = String.valueOf(mensaje.get('messageId'));
+        senal.Tipo_Mensaje__c = String.valueOf(mensaje.get('messageType'));
+        senal.Carga__c = JSON.serialize(mensaje);
+        senal.Fecha_Origen__c = IngestaValidador.parsearIso(String.valueOf(mensaje.get('occurredAt')));
+        return ProcesamientoServicio.avisoDesdeSenal(senal);
+    }
 }

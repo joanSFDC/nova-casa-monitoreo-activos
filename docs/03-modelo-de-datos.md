@@ -307,9 +307,13 @@ externos en texto y el suscriptor resuelve las referencias. Y **no se pueden mar
 como obligatorios de forma útil** en un evento que sirve para dos tipos de mensaje, que es
 el precio de la decisión de tener uno solo.
 
-El evento se publica con comportamiento **`Publish Immediately`**, no después de guardar.
-Como la señal ya se insertó antes en la misma transacción, no hay nada que esperar, y
-publicar de inmediato evita que un fallo posterior en la transacción retenga el aviso.
+El evento se publica con **`PublishAfterCommit`**, no `PublishImmediately`. El
+suscriptor corre en otra transacción: si el aviso sale antes del commit, consulta
+`Senal__c` y no la encuentra, consume el evento y deja la bitácora en Pendiente
+para siempre. Guardar y publicar en el mismo commit es lo que pide el
+[módulo 02](02-ingesta.md); `PublishAfterCommit` es ese orden a nivel de base de
+datos. Un fallo posterior en la transacción de ingesta echa atrás señal y aviso
+juntos, que es preferible a un aviso huérfano.
 
 ## `Control_de_Ingesta__c`
 

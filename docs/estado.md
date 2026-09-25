@@ -16,8 +16,9 @@ La especificación sigue en los módulos [01](01-contrato-del-mensaje.md) a
 | Conjuntos de permisos (cinco roles) | En `main` | [PR #18](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/18) |
 | Siembra del catálogo (issue #3) | En `main` | [PR #17](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/17) |
 | Usuarios de la demo (issue #14) | En `main` | [PR #18](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/18) |
-| Ingesta US-201 (issue #4) | En curso | Rama `us-201-ingesta` |
-| El resto de historias | Pendiente | Issues #5 a #13 |
+| Ingesta US-201 (issue #4) | En `main` | [PR #19](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/19) |
+| Procesamiento US-202 (issue #5) | En curso | Rama `us-202-procesamiento` |
+| El resto de historias | Pendiente | Issues #6 a #13 |
 | Identidad visual | Pendiente | Issue #15 |
 
 Org de trabajo: alias `novacasa2`, dominio
@@ -32,7 +33,7 @@ Ocho elementos desplegados y verificados:
 
 - Objetos: `Edificio__c`, `Activo__c`, `Estado_Actual__c`, `Umbral__c`,
   `Senal__c`, `Control_de_Ingesta__c`
-- Evento: `Aviso_de_Senal__e` (publicación inmediata)
+- Evento: `Aviso_de_Senal__e` (`PublishAfterCommit`)
 - Campos en `Case`: `Clave_Abierta__c`, `Activo__c`, `Tipo_Medicion__c`,
   `Episodio_Id__c`, `Origen_Senal__c`
 - Catálogos globales: `Tipo_Activo`, `Tipo_Medicion`, `Unidad`, `Severidad`
@@ -77,6 +78,8 @@ Clases en `force-app/main/default/classes/`:
 | `IngestaCliente` | `callout:Nova_Casa_Simulador` — el token no está aquí |
 | `IngestaValidador` | Contrato del [módulo 01](01-contrato-del-mensaje.md) |
 | `IngestaServicio` | Deduplica, upsert `Senal__c`, publica `Aviso_de_Senal__e`, avanza el cursor |
+| `ClasificacionServicio` | Severidad de medición y de conectividad contra `Umbral__c` |
+| `ProcesamientoServicio` | Suscriptor de `Aviso_de_Senal__e`: estado actual y bitácora. Sin casos (US-205) |
 
 Named Credential `Nova_Casa_Simulador` + External Credential del mismo nombre,
 principal `Equipo`. El administrador necesita el conjunto
@@ -97,6 +100,7 @@ sf org assign permset -o novacasa2 -n Nova_Casa_Administracion
 export NOVA_CASA_SIMULADOR_TOKEN='...'   # fuera del repo
 ./scripts/configurar-credencial.sh novacasa2
 ./scripts/ejecutar-ingesta.sh novacasa2
+./scripts/ejecutar-procesamiento.sh novacasa2
 ```
 
 Después de una página buena: señales en **Pendiente**,
@@ -138,8 +142,12 @@ sf org assign permset -o novacasa2 -n Nova_Casa_Administracion
 
 ## Qué se está haciendo ahora
 
-US-201, issue #4: recibir señales del simulador y publicar
-`Aviso_de_Senal__e`. Desbloquea US-202 (el suscriptor, issue #5).
+US-202, issue #5: procesar avisos en lote sin perder las válidas.
+El disparador `AvisoDeSenal` llama a `ProcesamientoServicio`. Una tanda
+hace siempre las mismas cuatro consultas y dos escrituras (estados y
+señales). Los casos son US-205.
+
+Para drenar `Pendiente` ya guardadas: `./scripts/ejecutar-procesamiento.sh novacasa2`.
 
 El principal `Nova_Casa_Simulador-Equipo` se concede a administración (para
 correr la demo ahora) y a `Nova_Casa_Integracion` (el usuario de proceso).
@@ -171,6 +179,10 @@ No estaban en la especificación y conviene no redescubrirlas.
    nunca desde un archivo versionado.
 9. Un cron de Apex no admite "cada minuto" en una sola expresión: son sesenta
    `CronTrigger` con nombre `Nova Casa Ingesta mm`.
+10. **`Aviso_de_Senal__e` va con `PublishAfterCommit`.** `PublishImmediately`
+    disparaba el suscriptor antes de que `Senal__c` fuera visible: 70 aplicadas
+    y 155 Pendiente en el mismo ciclo de MIXED. `procesarPendientes` drena las
+    que ya se perdieron el aviso.
 
 ## Historial breve
 

@@ -5,5 +5,5 @@
     <eventType>HighVolume</eventType>
     <label>Aviso de señal</label>
     <pluralLabel>Avisos de señal</pluralLabel>
-    <publishBehavior>PublishImmediately</publishBehavior>
+    <publishBehavior>PublishAfterCommit</publishBehavior>
 </CustomObject>

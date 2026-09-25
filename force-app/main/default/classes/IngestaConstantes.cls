@@ -17,9 +17,16 @@ public inherited sharing class IngestaConstantes {
     public static final String TIPO_CONECTIVIDAD = 'CONNECTIVITY';
 
     public static final String RESULTADO_PENDIENTE = 'Pendiente';
+    public static final String RESULTADO_APLICADO = 'Aplicado';
     public static final String RESULTADO_DUPLICADO = 'Duplicado';
+    public static final String RESULTADO_ATRASADO = 'Atrasado';
     public static final String RESULTADO_CONFLICTO = 'Conflicto';
     public static final String RESULTADO_RECHAZADO = 'Rechazado';
+    public static final String RESULTADO_FALLIDO = 'Fallido';
+
+    public static final String SEV_NORMAL = 'Normal';
+    public static final String SEV_ADVERTENCIA = 'Advertencia';
+    public static final String SEV_CRITICO = 'Critico';
 
     public static final String MOTIVO_VERSION = 'Version no soportada';
     public static final String MOTIVO_TIPO_MENSAJE = 'Tipo de mensaje desconocido';
