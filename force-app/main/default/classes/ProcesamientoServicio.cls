@@ -90,9 +90,11 @@ public without sharing class ProcesamientoServicio {
                 if (senal == null) {
                     continue;
                 }
-                senal.Resultado__c = IngestaConstantes.RESULTADO_FALLIDO;
-                senal.Motivo__c = IngestaConstantes.MOTIVO_SISTEMA;
-                senal.Reintentable__c = true;
+                IngestaConstantes.aplicar(
+                    senal,
+                    IngestaConstantes.RESULTADO_FALLIDO,
+                    IngestaConstantes.MOTIVO_SISTEMA
+                );
                 senal.Detalle__c = recortar(resEstados[i].getErrors()[0].getMessage());
                 senal.Fecha_Procesamiento__c = ahora;
             }
@@ -107,9 +109,11 @@ public without sharing class ProcesamientoServicio {
             );
             for (Integer i = 0; i < resSenales.size(); i++) {
                 if (!resSenales[i].isSuccess()) {
-                    listaSenales[i].Resultado__c = IngestaConstantes.RESULTADO_FALLIDO;
-                    listaSenales[i].Motivo__c = IngestaConstantes.MOTIVO_SISTEMA;
-                    listaSenales[i].Reintentable__c = true;
+                    IngestaConstantes.aplicar(
+                        listaSenales[i],
+                        IngestaConstantes.RESULTADO_FALLIDO,
+                        IngestaConstantes.MOTIVO_SISTEMA
+                    );
                     listaSenales[i].Detalle__c = recortar(resSenales[i].getErrors()[0].getMessage());
                 }
             }
@@ -195,9 +199,11 @@ public without sharing class ProcesamientoServicio {
         String claveEstado = aviso.Codigo_Activo__c + '|' + tipoMedicion;
         Estado_Actual__c vigente = estados.get(claveEstado);
         if (!esMasVigente(aviso, vigente)) {
-            senal.Resultado__c = IngestaConstantes.RESULTADO_ATRASADO;
-            senal.Motivo__c = null;
-            senal.Reintentable__c = false;
+            IngestaConstantes.aplicar(
+                senal,
+                IngestaConstantes.RESULTADO_ATRASADO,
+                null
+            );
             senal.Fecha_Procesamiento__c = ahora;
             return;
         }
@@ -234,9 +240,11 @@ public without sharing class ProcesamientoServicio {
         aUpsertar.put(claveEstado, estado);
         estadoAClaveSenal.put(claveEstado, senal.Clave__c);
 
-        senal.Resultado__c = IngestaConstantes.RESULTADO_APLICADO;
-        senal.Motivo__c = null;
-        senal.Reintentable__c = false;
+        IngestaConstantes.aplicar(
+            senal,
+            IngestaConstantes.RESULTADO_APLICADO,
+            null
+        );
         senal.Fecha_Procesamiento__c = ahora;
         senal.Activo__c = activo.Id;
     }
@@ -263,9 +271,11 @@ public without sharing class ProcesamientoServicio {
     }
 
     private static void rechazar(Senal__c senal, String motivo, Datetime ahora) {
-        senal.Resultado__c = IngestaConstantes.RESULTADO_RECHAZADO;
-        senal.Motivo__c = motivo;
-        senal.Reintentable__c = IngestaConstantes.esReintentable(motivo);
+        IngestaConstantes.aplicar(
+            senal,
+            IngestaConstantes.RESULTADO_RECHAZADO,
+            motivo
+        );
         senal.Fecha_Procesamiento__c = ahora;
     }
 

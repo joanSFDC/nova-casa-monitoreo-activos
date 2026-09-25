@@ -223,7 +223,7 @@ La bitácora. Cada mensaje recibido queda aquí con su resultado.
 | Campo | Tipo | Notas |
 | --- | --- | --- |
 | `Clave__c` | Text(120), External ID, Unique | `nova-casa-simulator\|msg_000002` |
-| `Message_Id__c` | Text(60) | El identificador desnudo |
+| `Message_Id__c` | Text(60), External ID | El identificador desnudo. No es único: la unicidad vive en `Clave__c` |
 | `Ultimo_Delivery_Id__c` | Text(60) | El último intento de entrega visto |
 | `Entregas__c` | Number(6,0) | Cuántas veces nos llegó. Empieza en 1 |
 | `Tipo_Mensaje__c` | Picklist | `MEASUREMENT`, `CONNECTIVITY` |

@@ -157,9 +157,11 @@ public without sharing class IngestaServicio {
                     IngestaValidador.texto(mensaje, 'publishedAt')
                 );
                 if (primera.Hash_Contenido__c != hash) {
-                    primera.Resultado__c = IngestaConstantes.RESULTADO_CONFLICTO;
-                    primera.Motivo__c = null;
-                    primera.Reintentable__c = false;
+                    IngestaConstantes.aplicar(
+                        primera,
+                        IngestaConstantes.RESULTADO_CONFLICTO,
+                        null
+                    );
                 }
                 continue;
             }
@@ -167,9 +169,11 @@ public without sharing class IngestaServicio {
             if (!versionOk) {
                 resultado.versionRechazada = true;
                 senal = nuevaSenal(mensaje, ahora, hash, clave);
-                senal.Resultado__c = IngestaConstantes.RESULTADO_RECHAZADO;
-                senal.Motivo__c = IngestaConstantes.MOTIVO_VERSION;
-                senal.Reintentable__c = true;
+                IngestaConstantes.aplicar(
+                    senal,
+                    IngestaConstantes.RESULTADO_RECHAZADO,
+                    IngestaConstantes.MOTIVO_VERSION
+                );
             } else {
                 senal = construirSenal(mensaje, catalogo, ahora, hash, clave);
             }
@@ -224,9 +228,11 @@ public without sharing class IngestaServicio {
                         senal.Fecha_Publicacion__c = previa.Fecha_Publicacion__c;
                     }
                 } else {
-                    senal.Resultado__c = IngestaConstantes.RESULTADO_CONFLICTO;
-                    senal.Motivo__c = null;
-                    senal.Reintentable__c = false;
+                    IngestaConstantes.aplicar(
+                        senal,
+                        IngestaConstantes.RESULTADO_CONFLICTO,
+                        null
+                    );
                 }
             } else if (senal.Resultado__c == IngestaConstantes.RESULTADO_PENDIENTE) {
                 publicar.add(clave);
@@ -246,9 +252,11 @@ public without sharing class IngestaServicio {
         List<Integer> indicesAviso = new List<Integer>();
         for (Integer i = 0; i < aGuardar.size(); i++) {
             if (!resultados[i].isSuccess()) {
-                aGuardar[i].Resultado__c = IngestaConstantes.RESULTADO_RECHAZADO;
-                aGuardar[i].Motivo__c = IngestaConstantes.MOTIVO_SISTEMA;
-                aGuardar[i].Reintentable__c = true;
+                IngestaConstantes.aplicar(
+                    aGuardar[i],
+                    IngestaConstantes.RESULTADO_RECHAZADO,
+                    IngestaConstantes.MOTIVO_SISTEMA
+                );
                 aGuardar[i].Detalle__c = recortar(resultados[i].getErrors()[0].getMessage());
                 publicar.remove(aGuardar[i].Clave__c);
                 continue;
@@ -267,7 +275,9 @@ public without sharing class IngestaServicio {
                 } else {
                     Integer idx = indicesAviso[i];
                     aGuardar[idx].Motivo__c = IngestaConstantes.MOTIVO_SISTEMA;
-                    aGuardar[idx].Reintentable__c = true;
+                    aGuardar[idx].Reintentable__c = IngestaConstantes.esReintentable(
+                        IngestaConstantes.MOTIVO_SISTEMA
+                    );
                     aGuardar[idx].Detalle__c = recortar(publicados[i].getErrors()[0].getMessage());
                 }
             }
@@ -391,13 +401,17 @@ public without sharing class IngestaServicio {
         senal.Fecha_Publicacion__c = dictamen.publicacion;
         senal.Ultima_Fecha_Publicacion__c = dictamen.publicacion;
         if (dictamen.esValido()) {
-            senal.Resultado__c = IngestaConstantes.RESULTADO_PENDIENTE;
-            senal.Motivo__c = null;
-            senal.Reintentable__c = false;
+            IngestaConstantes.aplicar(
+                senal,
+                IngestaConstantes.RESULTADO_PENDIENTE,
+                null
+            );
         } else {
-            senal.Resultado__c = IngestaConstantes.RESULTADO_RECHAZADO;
-            senal.Motivo__c = dictamen.motivo;
-            senal.Reintentable__c = IngestaConstantes.esReintentable(dictamen.motivo);
+            IngestaConstantes.aplicar(
+                senal,
+                IngestaConstantes.RESULTADO_RECHAZADO,
+                dictamen.motivo
+            );
             senal.Detalle__c = recortar(dictamen.detalle);
         }
         return senal;
@@ -436,9 +450,11 @@ public without sharing class IngestaServicio {
             IngestaValidador.hashDe(mensaje),
             'nova-casa-simulator|sin-id-' + String.valueOf(Crypto.getRandomInteger())
         );
-        senal.Resultado__c = IngestaConstantes.RESULTADO_RECHAZADO;
-        senal.Motivo__c = IngestaConstantes.MOTIVO_CAMPO;
-        senal.Reintentable__c = false;
+        IngestaConstantes.aplicar(
+            senal,
+            IngestaConstantes.RESULTADO_RECHAZADO,
+            IngestaConstantes.MOTIVO_CAMPO
+        );
         senal.Detalle__c = 'Falta source o messageId';
         return senal;
     }

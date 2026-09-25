@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Reintentables</fullName>
+    <booleanFilter>1 AND (2 OR 3)</booleanFilter>
+    <columns>NAME</columns>
+    <columns>Clave__c</columns>
+    <columns>Resultado__c</columns>
+    <columns>Motivo__c</columns>
+    <columns>Fecha_Recepcion__c</columns>
+    <columns>Fecha_Procesamiento__c</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>Reintentable__c</field>
+        <operation>equals</operation>
+        <value>1</value>
+    </filters>
+    <filters>
+        <field>Resultado__c</field>
+        <operation>equals</operation>
+        <value>Rechazado</value>
+    </filters>
+    <filters>
+        <field>Resultado__c</field>
+        <operation>equals</operation>
+        <value>Fallido</value>
+    </filters>
+    <label>Reintentables</label>
+</ListView>

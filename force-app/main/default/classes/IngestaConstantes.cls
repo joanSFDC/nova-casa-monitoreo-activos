@@ -71,4 +71,14 @@ public inherited sharing class IngestaConstantes {
     public static Boolean esReintentable(String motivo) {
         return String.isNotBlank(motivo) && REINTENTABLES.contains(motivo);
     }
+
+    /**
+     * Unico sitio que escribe Resultado, Motivo y Reintentable juntos.
+     * Reintentable se deriva del motivo; sin motivo queda en falso.
+     */
+    public static void aplicar(Senal__c senal, String resultado, String motivo) {
+        senal.Resultado__c = resultado;
+        senal.Motivo__c = motivo;
+        senal.Reintentable__c = esReintentable(motivo);
+    }
 }

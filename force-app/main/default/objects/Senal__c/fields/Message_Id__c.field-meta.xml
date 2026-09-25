@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Message_Id__c</fullName>
-    <externalId>false</externalId>
+    <externalId>true</externalId>
+    <inlineHelpText>El identificador desnudo. External ID para encontrarlo en la busqueda global, sin ser unico: la unicidad vive en Clave__c.</inlineHelpText>
     <label>Message id</label>
     <length>60</length>
     <required>false</required>
