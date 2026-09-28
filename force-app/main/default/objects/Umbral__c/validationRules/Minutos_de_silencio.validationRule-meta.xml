@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Minutos_de_silencio</fullName>
+    <active>true</active>
+    <errorConditionFormula>AND(
+  NOT(ISBLANK(Minutos_Advertencia__c)),
+  NOT(ISBLANK(Minutos_Critico__c)),
+  Minutos_Advertencia__c &gt;= Minutos_Critico__c
+)</errorConditionFormula>
+    <errorDisplayField>Minutos_Advertencia__c</errorDisplayField>
+    <errorMessage
+  >Los minutos de advertencia deben ser menores que los de crítico.</errorMessage>
+</ValidationRule>

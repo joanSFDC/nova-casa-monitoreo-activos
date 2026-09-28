@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Umbrales_por_tipo</fullName>
+    <columns>NAME</columns>
+    <columns>Tipo_Activo__c</columns>
+    <columns>Tipo_Medicion__c</columns>
+    <columns>Unidad__c</columns>
+    <columns>Critico_Bajo__c</columns>
+    <columns>Advertencia_Bajo__c</columns>
+    <columns>Advertencia_Alto__c</columns>
+    <columns>Critico_Alto__c</columns>
+    <columns>Minutos_Advertencia__c</columns>
+    <columns>Minutos_Critico__c</columns>
+    <columns>Vigente__c</columns>
+    <filterScope>Everything</filterScope>
+    <label>Umbrales por tipo de activo</label>
+    <sharedTo>
+        <allInternalUsers />
+    </sharedTo>
+</ListView>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Orden_alto</fullName>
+    <active>true</active>
+    <errorConditionFormula>AND(
+  NOT(ISBLANK(Critico_Alto__c)),
+  NOT(ISBLANK(Advertencia_Alto__c)),
+  Critico_Alto__c &lt; Advertencia_Alto__c
+)</errorConditionFormula>
+    <errorDisplayField>Critico_Alto__c</errorDisplayField>
+    <errorMessage
+  >El crítico alto no puede ser menor que la advertencia alta.</errorMessage>
+</ValidationRule>

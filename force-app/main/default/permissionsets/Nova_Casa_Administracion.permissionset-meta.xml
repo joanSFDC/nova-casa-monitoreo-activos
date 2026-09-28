@@ -482,8 +482,20 @@
         <apexClass>ProcesamientoServicio</apexClass>
         <enabled>true</enabled>
     </classAccesses>
+    <classAccesses>
+        <apexClass>UmbralAplicacionServicio</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <flowAccesses>
+        <enabled>true</enabled>
+        <flow>Aplicar_Limites</flow>
+    </flowAccesses>
     <externalCredentialPrincipalAccesses>
         <enabled>true</enabled>
         <externalCredentialPrincipal>Nova_Casa_Simulador-Equipo</externalCredentialPrincipal>
     </externalCredentialPrincipalAccesses>
+    <userPermissions>
+        <enabled>true</enabled>
+        <name>RunFlow</name>
+    </userPermissions>
 </PermissionSet>
