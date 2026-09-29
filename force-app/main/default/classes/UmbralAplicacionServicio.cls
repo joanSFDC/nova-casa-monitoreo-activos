@@ -45,7 +45,9 @@ public with sharing class UmbralAplicacionServicio {
           Critico_Bajo__c,
           Advertencia_Bajo__c,
           Advertencia_Alto__c,
-          Critico_Alto__c
+          Critico_Alto__c,
+          Minutos_Advertencia__c,
+          Minutos_Critico__c
         FROM Umbral__c
         WHERE Id IN :umbralIds
         WITH USER_MODE
@@ -72,6 +74,8 @@ public with sharing class UmbralAplicacionServicio {
           Tipo_Medicion__c,
           Severidad__c,
           Severidad_Nivel__c,
+          Estado_Comunicacion__c,
+          Gap_Segundos__c,
           Activo__r.Tipo__c
         FROM Estado_Actual__c
         WHERE Activo__r.Tipo__c IN :tipos AND Tipo_Medicion__c IN :mediciones
@@ -96,15 +100,9 @@ public with sharing class UmbralAplicacionServicio {
         if (estado.Tipo_Medicion__c != umbral.Tipo_Medicion__c) {
           continue;
         }
-        if (estado.Valor__c == null) {
-          continue;
-        }
 
-        ClasificacionServicio.Dictamen dictamen = ClasificacionServicio.clasificarMedicion(
-          estado.Valor__c,
-          umbral
-        );
-        if (!dictamen.esValido()) {
+        ClasificacionServicio.Dictamen dictamen = clasificar(estado, umbral);
+        if (dictamen == null || !dictamen.esValido()) {
           continue;
         }
         if (
@@ -128,5 +126,27 @@ public with sharing class UmbralAplicacionServicio {
     }
 
     return respuestas;
+  }
+
+  /**
+   * La conectividad guarda el silencio tambien en Valor__c. Clasificarla
+   * por bandas de medicion la deja siempre en Normal. Se usa el dictamen
+   * de minutos, igual que el procesamiento.
+   */
+  private static ClasificacionServicio.Dictamen clasificar(
+    Estado_Actual__c estado,
+    Umbral__c umbral
+  ) {
+    if (umbral.Tipo_Medicion__c == 'CAMERA_CONNECTIVITY') {
+      return ClasificacionServicio.clasificarConectividad(
+        estado.Estado_Comunicacion__c,
+        estado.Gap_Segundos__c,
+        umbral
+      );
+    }
+    if (estado.Valor__c == null) {
+      return null;
+    }
+    return ClasificacionServicio.clasificarMedicion(estado.Valor__c, umbral);
   }
 }

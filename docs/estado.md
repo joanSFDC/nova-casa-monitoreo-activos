@@ -169,10 +169,12 @@ En esta rama, aún sin fusionar:
 - Reutiliza `ClasificacionServicio` del PR #20 (intervalos cerrados,
   crítico primero). Sin umbral → motivo `Sin limite configurado`,
   reintentable vía `IngestaConstantes`.
-- Acción **Aplicar límites** (`UmbralAplicacionServicio` + flujo + quick
-  action en el layout). Recalcula `Estado_Actual__c`. No toca `Senal__c`
-  ni abre casos. El DML va en modo de sistema porque el coordinador no
-  edita el estado actual.
+- Acción **Aplicar límites** (`UmbralAplicacionServicio` + flujo +
+  FlexiPage `Umbral_Registro` con override de View). Recalcula
+  `Estado_Actual__c`. No toca `Senal__c` ni abre casos. El DML va en
+  modo de sistema porque el coordinador no edita el estado actual.
+  En cámara usa `clasificarConectividad`: el procesamiento copia el
+  silencio también en `Valor__c`.
 
 ## Cómo reconstruir el entorno
 
@@ -229,10 +231,16 @@ No estaban en la especificación y conviene no redescubrirlas.
     `Closes #N`.
 13. Las vistas de lista **no aceptan** `LAST_N_HOURS`. Atascadas queda como
     Pendiente con recepción anterior a hoy.
-14. **«Sin ninguna frontera» incluye los minutos.** La cámara no tiene valores,
-    solo 15/60 minutos: si la regla mirara solo los cuatro números, no se podría
-    guardar. La acción «aplicar límites» no reclasifica estados sin `Valor__c`
-    (conectividad es US-206).
+14. **«Sin ninguna frontera» incluye los minutos.** La cámara no tiene bandas
+    de valor, solo 15/60 minutos: si la regla mirara solo los cuatro números,
+    no se podría guardar.
+15. **Un `.layout` desplegado no llega al usuario.** Los perfiles están en
+    `.forceignore`, así que la página de registro por defecto ignora el layout.
+    El patrón es un FlexiPage con `actionOverrides` de View, como `Senal_Registro`.
+16. **Aplicar límites en cámara no usa `clasificarMedicion`.** El
+    procesamiento escribe `Gap_Segundos__c` también en `Valor__c`. Sin bandas,
+    esa magnitud caería en Normal y bajaría un LOST crítico. Se llama a
+    `clasificarConectividad` con estado y gap.
 
 ## Historial breve
 

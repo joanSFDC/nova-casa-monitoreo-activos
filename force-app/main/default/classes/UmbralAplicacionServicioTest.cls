@@ -164,4 +164,96 @@ private class UmbralAplicacionServicioTest {
     System.assertEquals('Advertencia', estado.Severidad__c);
     System.assertEquals(1, estado.Severidad_Nivel__c);
   }
+
+  @IsTest
+  static void aplicarCamaraLostNoBajaANormal() {
+    Umbral__c umbral = sembrarCamaraLost(4000, 15, 60);
+
+    Test.startTest();
+    UmbralAplicacionServicio.Peticion peticion = new UmbralAplicacionServicio.Peticion();
+    peticion.umbralId = umbral.Id;
+    List<UmbralAplicacionServicio.Respuesta> respuestas = UmbralAplicacionServicio.aplicar(
+      new List<UmbralAplicacionServicio.Peticion>{ peticion }
+    );
+    Test.stopTest();
+
+    System.assertEquals(0, respuestas[0].estadosActualizados);
+    Estado_Actual__c estado = [
+      SELECT Severidad__c, Severidad_Nivel__c
+      FROM Estado_Actual__c
+      WHERE Tipo_Medicion__c = 'CAMERA_CONNECTIVITY'
+      LIMIT 1
+    ];
+    System.assertEquals('Critico', estado.Severidad__c);
+    System.assertEquals(2, estado.Severidad_Nivel__c);
+  }
+
+  @IsTest
+  static void aplicarCamaraReclasificaPorMinutos() {
+    Umbral__c umbral = sembrarCamaraLost(4000, 15, 60);
+    umbral.Minutos_Critico__c = 90;
+    update umbral;
+
+    Test.startTest();
+    UmbralAplicacionServicio.Peticion peticion = new UmbralAplicacionServicio.Peticion();
+    peticion.umbralId = umbral.Id;
+    List<UmbralAplicacionServicio.Respuesta> respuestas = UmbralAplicacionServicio.aplicar(
+      new List<UmbralAplicacionServicio.Peticion>{ peticion }
+    );
+    Test.stopTest();
+
+    System.assertEquals(1, respuestas[0].estadosActualizados);
+    Estado_Actual__c estado = [
+      SELECT Severidad__c, Severidad_Nivel__c
+      FROM Estado_Actual__c
+      WHERE Tipo_Medicion__c = 'CAMERA_CONNECTIVITY'
+      LIMIT 1
+    ];
+    System.assertEquals('Advertencia', estado.Severidad__c);
+    System.assertEquals(1, estado.Severidad_Nivel__c);
+  }
+
+  private static Umbral__c sembrarCamaraLost(
+    Decimal gapSegundos,
+    Decimal minutosAdvertencia,
+    Decimal minutosCritico
+  ) {
+    String marca = sufijo();
+    Edificio__c edificio = new Edificio__c(
+      Name = 'Edificio camara ' + marca,
+      Codigo_Externo__c = 'C' + marca.left(12),
+      Ciudad__c = 'Bogotá'
+    );
+    insert edificio;
+
+    Activo__c activo = new Activo__c(
+      Name = 'Camara prueba',
+      Codigo_Externo__c = 'K' + marca.left(12),
+      Tipo__c = 'SECURITY_CAMERA',
+      Edificio__c = edificio.Id
+    );
+    insert activo;
+
+    Umbral__c umbral = new Umbral__c(
+      Clave__c = 'SECURITY_CAMERA|CAMERA_CONNECTIVITY|' + marca.left(8),
+      Tipo_Activo__c = 'SECURITY_CAMERA',
+      Tipo_Medicion__c = 'CAMERA_CONNECTIVITY',
+      Minutos_Advertencia__c = minutosAdvertencia,
+      Minutos_Critico__c = minutosCritico,
+      Vigente__c = true
+    );
+    insert umbral;
+
+    insert new Estado_Actual__c(
+      Activo__c = activo.Id,
+      Clave__c = activo.Codigo_Externo__c + '|CAMERA_CONNECTIVITY',
+      Tipo_Medicion__c = 'CAMERA_CONNECTIVITY',
+      Valor__c = gapSegundos,
+      Estado_Comunicacion__c = 'LOST',
+      Gap_Segundos__c = gapSegundos,
+      Severidad__c = 'Critico',
+      Severidad_Nivel__c = 2
+    );
+    return umbral;
+  }
 }
