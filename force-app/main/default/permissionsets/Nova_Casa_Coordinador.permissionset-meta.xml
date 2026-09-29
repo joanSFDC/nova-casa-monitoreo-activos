@@ -367,7 +367,15 @@
     </classAccesses>
     <flowAccesses>
         <enabled>true</enabled>
-        <flow>Aplicar_Limites</flow>
+        <flow>
+Liberar_Clave_Abierta;
+    </flow>
+    </flowAccesses>
+    <flowAccesses>
+        <enabled>true</enabled>
+        <flow>
+Aplicar_Limites;
+    </flow>
     </flowAccesses>
     <userPermissions>
         <enabled>true</enabled>
