@@ -22,7 +22,7 @@ La especificación sigue en los módulos [01](01-contrato-del-mensaje.md) a
 | Límites administrables US-204 (issue #7) | En `main` | [PR #22](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/22) |
 | Estado actual US-203 (issue #6) | En PR | [PR #23](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/23) |
 | Incidentes US-205 (issue #8) | En PR | [PR #24](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/24) |
-| Conectividad US-206 (issue #9) | En esta rama | Depende de #24 |
+| Conectividad US-206 (issue #9) | En PR | [PR #25](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/25) (encima de #24) |
 | El resto de historias | Pendiente | Issues #10, #11 y #13 |
 | Identidad visual | Pendiente | Issue #15 |
 
@@ -195,7 +195,9 @@ sf org assign permset -o novacasa2 -n Nova_Casa_Administracion
 
 ## Qué se está haciendo ahora
 
-US-206, issue #9, en esta rama (encima de US-205 / PR #24).
+US-206 está en el
+[PR #25](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/25),
+encima de US-205.
 US-205 está en el
 [PR #24](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/24).
 US-203 está en el
