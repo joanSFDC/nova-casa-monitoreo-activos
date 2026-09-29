@@ -19,8 +19,9 @@ La especificación sigue en los módulos [01](01-contrato-del-mensaje.md) a
 | Ingesta US-201 (issue #4) | En `main` | [PR #19](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/19) |
 | Procesamiento US-202 (issue #5) | En `main` | [PR #20](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/20) |
 | Trazabilidad US-209 (issue #12) | En `main` | [PR #21](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/21) |
-| Límites administrables US-204 | En esta rama | Issue #7 |
-| El resto de historias | Pendiente | Issues #6, #8 a #11 y #13 |
+| Límites administrables US-204 (issue #7) | En `main` | [PR #22](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/22) |
+| Estado actual US-203 | En esta rama | Issue #6 |
+| El resto de historias | Pendiente | Issues #8 a #11 y #13 |
 | Identidad visual | Pendiente | Issue #15 |
 
 Org de trabajo: alias `novacasa2`, dominio
@@ -157,24 +158,18 @@ tema son el issue #15.
 
 ### US-204 · Límites administrables
 
-En esta rama, aún sin fusionar:
+En `main` (PR #22): validaciones, historial, vista, FlexiPage `Umbral_Registro`
+y **Aplicar límites**. En cámara usa `clasificarConectividad`.
 
-- Seis reglas de validación en `Umbral__c`: orden bajo, orden alto, bandas
-  cruzadas, bandas altas incompletas, sin ninguna frontera (valores **o**
-  minutos) y minutos de silencio.
-- Historial de campo en los cuatro umbrales numéricos y en los dos de minutos.
-- Vista de lista `Umbrales_por_tipo`, compartida con todos los usuarios
-  internos. El agrupado por tipo de activo se hace en la interfaz: el
-  metadato de vistas no lo guarda.
-- Reutiliza `ClasificacionServicio` del PR #20 (intervalos cerrados,
-  crítico primero). Sin umbral → motivo `Sin limite configurado`,
-  reintentable vía `IngestaConstantes`.
-- Acción **Aplicar límites** (`UmbralAplicacionServicio` + flujo +
-  FlexiPage `Umbral_Registro` con override de View). Recalcula
-  `Estado_Actual__c`. No toca `Senal__c` ni abre casos. El DML va en
-  modo de sistema porque el coordinador no edita el estado actual.
-  En cámara usa `clasificarConectividad`: el procesamiento copia el
-  silencio también en `Valor__c`.
+### US-203 · Estado actual
+
+La vigencia vive en `ProcesamientoServicio` (PR #20). Esta rama cierra el
+hueco de la **misma tanda**: si llega primero la lectura vieja y después la
+nueva, la perdedora queda **Atrasado**, no Aplicado. Las pruebas de
+`EstadoActualTest` cubren LATE_MESSAGES, empate en los dos órdenes, crítico
+atrasado sin caso y dos mediciones del mismo activo.
+
+La antigüedad en pantalla es el monitor (US-207): no se guarda como dato.
 
 ## Cómo reconstruir el entorno
 
@@ -187,11 +182,8 @@ sf org assign permset -o novacasa2 -n Nova_Casa_Administracion
 
 ## Qué se está haciendo ahora
 
-US-204, issue #7: validaciones, historial, vista de umbrales y la acción
-«aplicar límites». Reutiliza el `ClasificacionServicio` que dejó el
-procesamiento.
-
-US-203, US-205 y US-206 siguen en Cali. El monitor (US-207) espera esas.
+US-203, issue #6: vigencia del estado actual. US-205 y US-206 siguen en Cali.
+El monitor (US-207) espera esas.
 
 ## Decisiones que aparecieron al implementar
 
@@ -242,6 +234,12 @@ No estaban en la especificación y conviene no redescubrirlas.
     esa magnitud caería en Normal y bajaría un LOST crítico. Se llama a
     `clasificarConectividad` con estado y gap.
 
+17. **En la misma tanda, la perdedora no puede quedar Aplicado.** El
+    procesamiento marcaba Aplicado al ir viendo cada aviso. Si después ganaba
+    otra lectura de la misma clave, el estado era el correcto pero la bitácora
+    mentía. Se corrige al aplicar el ganador: el previo de esa tanda pasa a
+    Atrasado.
+
 ## Historial breve
 
 | Fecha | Qué |
@@ -252,4 +250,5 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-09-24 | Ingesta US-201: credenciales, cadena Queueable, diagramas. Cierra #4 |
 | 2026-09-25 | Procesamiento US-202: tanda, aislamiento, vigencia. PR #20 fusionado. Cierra #5 |
 | 2026-09-25 | Trazabilidad US-209: vistas, página de registro, reintentable. PR #21 fusionado. Cierra #12 |
-| 2026-09-28 | Límites administrables US-204: validaciones, historial, aplicar límites. Issue #7 |
+| 2026-09-29 | Límites administrables US-204: validaciones, historial, aplicar límites. PR #22 fusionado. Cierra #7 |
+| 2026-09-29 | Estado actual US-203: vigencia, empate y perdedoras de tanda. Issue #6 |

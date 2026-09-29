@@ -65,8 +65,18 @@ public without sharing class ProcesamientoServicio {
                 continue;
             }
             resultado.senales++;
-            resolver(aviso, senal, activos, umbrales, estados, aUpsertar, estadoAClaveSenal, ahora);
             aActualizar.put(senal.Clave__c, senal);
+            resolver(
+                aviso,
+                senal,
+                activos,
+                umbrales,
+                estados,
+                aUpsertar,
+                aActualizar,
+                estadoAClaveSenal,
+                ahora
+            );
         }
 
         List<Estado_Actual__c> listaEstados = ordenarPorActivo(aUpsertar.values());
@@ -158,6 +168,7 @@ public without sharing class ProcesamientoServicio {
         Map<String, Umbral__c> umbrales,
         Map<String, Estado_Actual__c> estados,
         Map<String, Estado_Actual__c> aUpsertar,
+        Map<String, Senal__c> aActualizar,
         Map<String, String> estadoAClaveSenal,
         Datetime ahora
     ) {
@@ -236,6 +247,20 @@ public without sharing class ProcesamientoServicio {
             estado.Ultima_Vez_Visto__c = aviso.Ultima_Vez_Visto__c;
             estado.Sin_Comunicacion_Num__c = aviso.Estado_Comunicacion__c == 'LOST' ? 1 : 0;
         }
+
+        String ganadorPrevio = estadoAClaveSenal.get(claveEstado);
+        if (String.isNotBlank(ganadorPrevio) && ganadorPrevio != senal.Clave__c) {
+            Senal__c perdedora = aActualizar.get(ganadorPrevio);
+            if (perdedora != null) {
+                IngestaConstantes.aplicar(
+                    perdedora,
+                    IngestaConstantes.RESULTADO_ATRASADO,
+                    null
+                );
+                perdedora.Fecha_Procesamiento__c = ahora;
+            }
+        }
+
         estados.put(claveEstado, estado);
         aUpsertar.put(claveEstado, estado);
         estadoAClaveSenal.put(claveEstado, senal.Clave__c);
