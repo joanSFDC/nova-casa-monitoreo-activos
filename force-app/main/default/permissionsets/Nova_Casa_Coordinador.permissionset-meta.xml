@@ -357,6 +357,22 @@
         <tab>standard-home</tab>
         <visibility>Visible</visibility>
     </tabSettings>
+    <classAccesses>
+        <apexClass>ClasificacionServicio</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>UmbralAplicacionServicio</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <flowAccesses>
+        <enabled>true</enabled>
+        <flow>Aplicar_Limites</flow>
+    </flowAccesses>
+    <userPermissions>
+        <enabled>true</enabled>
+        <name>RunFlow</name>
+    </userPermissions>
     <hasActivationRequired>false</hasActivationRequired>
     <label>Nova Casa · Coordinador</label>
 </PermissionSet>

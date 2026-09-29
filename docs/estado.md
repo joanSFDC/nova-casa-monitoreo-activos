@@ -18,8 +18,9 @@ La especificación sigue en los módulos [01](01-contrato-del-mensaje.md) a
 | Usuarios de la demo (issue #14) | En `main` | [PR #18](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/18) |
 | Ingesta US-201 (issue #4) | En `main` | [PR #19](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/19) |
 | Procesamiento US-202 (issue #5) | En `main` | [PR #20](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/20) |
-| Trazabilidad US-209 (issue #12) | En curso | Rama `us-209-trazabilidad` |
-| El resto de historias | Pendiente | Issues #6 a #11 y #13 |
+| Trazabilidad US-209 (issue #12) | En `main` | [PR #21](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/21) |
+| Límites administrables US-204 | En esta rama | Issue #7 |
+| El resto de historias | Pendiente | Issues #6, #8 a #11 y #13 |
 | Identidad visual | Pendiente | Issue #15 |
 
 Org de trabajo: alias `novacasa2`, dominio
@@ -154,6 +155,27 @@ estado actual heredan.
 La aplicación `Nova_Casa` existe como cascarón (pestañas del modelo). Logo y
 tema son el issue #15.
 
+### US-204 · Límites administrables
+
+En esta rama, aún sin fusionar:
+
+- Seis reglas de validación en `Umbral__c`: orden bajo, orden alto, bandas
+  cruzadas, bandas altas incompletas, sin ninguna frontera (valores **o**
+  minutos) y minutos de silencio.
+- Historial de campo en los cuatro umbrales numéricos y en los dos de minutos.
+- Vista de lista `Umbrales_por_tipo`, compartida con todos los usuarios
+  internos. El agrupado por tipo de activo se hace en la interfaz: el
+  metadato de vistas no lo guarda.
+- Reutiliza `ClasificacionServicio` del PR #20 (intervalos cerrados,
+  crítico primero). Sin umbral → motivo `Sin limite configurado`,
+  reintentable vía `IngestaConstantes`.
+- Acción **Aplicar límites** (`UmbralAplicacionServicio` + flujo +
+  FlexiPage `Umbral_Registro` con override de View). Recalcula
+  `Estado_Actual__c`. No toca `Senal__c` ni abre casos. El DML va en
+  modo de sistema porque el coordinador no edita el estado actual.
+  En cámara usa `clasificarConectividad`: el procesamiento copia el
+  silencio también en `Valor__c`.
+
 ## Cómo reconstruir el entorno
 
 ```bash
@@ -165,11 +187,11 @@ sf org assign permset -o novacasa2 -n Nova_Casa_Administracion
 
 ## Qué se está haciendo ahora
 
-US-209, issue #12: investigar el resultado del procesamiento. Vistas de
-`Senal__c`, página de registro, `Reintentable__c` derivado del motivo y el
-operador fuera de la bitácora.
+US-204, issue #7: validaciones, historial, vista de umbrales y la acción
+«aplicar límites». Reutiliza el `ClasificacionServicio` que dejó el
+procesamiento.
 
-US-203 a US-206 siguen en Cali. El monitor (US-207) espera esas.
+US-203, US-205 y US-206 siguen en Cali. El monitor (US-207) espera esas.
 
 ## Decisiones que aparecieron al implementar
 
@@ -209,6 +231,16 @@ No estaban en la especificación y conviene no redescubrirlas.
     `Closes #N`.
 13. Las vistas de lista **no aceptan** `LAST_N_HOURS`. Atascadas queda como
     Pendiente con recepción anterior a hoy.
+14. **«Sin ninguna frontera» incluye los minutos.** La cámara no tiene bandas
+    de valor, solo 15/60 minutos: si la regla mirara solo los cuatro números,
+    no se podría guardar.
+15. **Un `.layout` desplegado no llega al usuario.** Los perfiles están en
+    `.forceignore`, así que la página de registro por defecto ignora el layout.
+    El patrón es un FlexiPage con `actionOverrides` de View, como `Senal_Registro`.
+16. **Aplicar límites en cámara no usa `clasificarMedicion`.** El
+    procesamiento escribe `Gap_Segundos__c` también en `Valor__c`. Sin bandas,
+    esa magnitud caería en Normal y bajaría un LOST crítico. Se llama a
+    `clasificarConectividad` con estado y gap.
 
 ## Historial breve
 
@@ -219,4 +251,5 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-09-24 | Usuarios de la demo, cinco conjuntos y reglas por ciudad. PR #18 fusionado. Cierra #14 |
 | 2026-09-24 | Ingesta US-201: credenciales, cadena Queueable, diagramas. Cierra #4 |
 | 2026-09-25 | Procesamiento US-202: tanda, aislamiento, vigencia. PR #20 fusionado. Cierra #5 |
-| 2026-09-25 | Trazabilidad US-209: vistas, página de registro, reintentable. En curso |
+| 2026-09-25 | Trazabilidad US-209: vistas, página de registro, reintentable. PR #21 fusionado. Cierra #12 |
+| 2026-09-28 | Límites administrables US-204: validaciones, historial, aplicar límites. Issue #7 |

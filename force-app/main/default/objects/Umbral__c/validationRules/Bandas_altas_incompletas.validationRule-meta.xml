@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Bandas_altas_incompletas</fullName>
+    <active>true</active>
+    <errorConditionFormula>AND(
+  ISBLANK(Advertencia_Alto__c),
+  NOT(ISBLANK(Critico_Alto__c))
+)</errorConditionFormula>
+    <errorDisplayField>Advertencia_Alto__c</errorDisplayField>
+    <errorMessage
+  >Si hay crítico alto, también hay que indicar la advertencia alta.</errorMessage>
+</ValidationRule>

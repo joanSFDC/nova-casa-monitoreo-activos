@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <actionCalls>
+        <name>Aplicar_en_Apex</name>
+        <label>Aplicar en Apex</label>
+        <locationX>176</locationX>
+        <locationY>287</locationY>
+        <actionName>UmbralAplicacionServicio</actionName>
+        <actionType>apex</actionType>
+        <connector>
+            <targetReference>Pantalla_resultado</targetReference>
+        </connector>
+        <flowTransactionModel>CurrentTransaction</flowTransactionModel>
+        <inputParameters>
+            <name>umbralId</name>
+            <value>
+                <elementReference>recordId</elementReference>
+            </value>
+        </inputParameters>
+        <nameSegment>UmbralAplicacionServicio</nameSegment>
+        <offset>0</offset>
+        <outputParameters>
+            <assignToReference>estadosActualizados</assignToReference>
+            <name>estadosActualizados</name>
+        </outputParameters>
+    </actionCalls>
+    <apiVersion>67.0</apiVersion>
+    <description
+  >Recalcula la severidad de los estados actuales de este umbral. No toca la bitácora ni abre casos.</description>
+    <environments>Default</environments>
+    <interviewLabel>Aplicar límites {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>Aplicar límites</label>
+    <processType>Flow</processType>
+    <screens>
+        <name>Pantalla_resultado</name>
+        <label>Resultado</label>
+        <locationX>176</locationX>
+        <locationY>395</locationY>
+        <allowBack>false</allowBack>
+        <allowFinish>true</allowFinish>
+        <allowPause>false</allowPause>
+        <fields>
+            <name>Mensaje</name>
+            <fieldText
+      >&lt;p&gt;Estados actualizados: {!estadosActualizados}. El historial de señales no se tocó y no se abrió ningún caso.&lt;/p&gt;</fieldText>
+            <fieldType>DisplayText</fieldType>
+        </fields>
+        <showFooter>true</showFooter>
+        <showHeader>true</showHeader>
+    </screens>
+    <start>
+        <locationX>50</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Aplicar_en_Apex</targetReference>
+        </connector>
+    </start>
+    <status>Active</status>
+    <variables>
+        <name>recordId</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>estadosActualizados</name>
+        <dataType>Number</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>true</isOutput>
+        <scale>0</scale>
+    </variables>
+</Flow>
