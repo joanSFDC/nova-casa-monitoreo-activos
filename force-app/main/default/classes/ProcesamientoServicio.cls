@@ -1,6 +1,6 @@
 /**
- * Orquesta una tanda de avisos: cuatro consultas, resuelve en memoria, dos escrituras.
- * Los incidentes (US-205) no se abren aqui.
+ * Orquesta una tanda de avisos: consulta, resuelve en memoria, escribe estado,
+ * incidente y bitacora. Orden: estado, caso, senal.
  *
  * without sharing: proceso de sistema. El disparador corre como usuario automatizado.
  */
@@ -33,6 +33,7 @@ public without sharing class ProcesamientoServicio {
         Set<String> clavesSenal = new Set<String>();
         Set<String> codigosActivo = new Set<String>();
         Set<String> clavesEstado = new Set<String>();
+        Set<String> clavesIncidente = new Set<String>();
         for (Aviso_de_Senal__e aviso : avisos) {
             if (String.isNotBlank(aviso.Clave__c)) {
                 clavesSenal.add(aviso.Clave__c);
@@ -44,17 +45,23 @@ public without sharing class ProcesamientoServicio {
                     clavesEstado.add(aviso.Codigo_Activo__c + '|' + tipo);
                 }
             }
+            String claveIncidente = IncidentesServicio.claveDe(aviso);
+            if (String.isNotBlank(claveIncidente)) {
+                clavesIncidente.add(claveIncidente);
+            }
         }
 
         Map<String, Senal__c> senales = cargarSenales(clavesSenal);
         Map<String, Activo__c> activos = cargarActivos(codigosActivo);
         Map<String, Estado_Actual__c> estados = cargarEstados(clavesEstado);
         Map<String, Umbral__c> umbrales = cargarUmbrales();
+        Map<String, Case> abiertos = IncidentesServicio.cargarAbiertos(clavesIncidente);
 
         Datetime ahora = Datetime.now();
         Map<String, Senal__c> aActualizar = new Map<String, Senal__c>();
         Map<String, Estado_Actual__c> aUpsertar = new Map<String, Estado_Actual__c>();
         Map<String, String> estadoAClaveSenal = new Map<String, String>();
+        Map<String, IncidentesServicio.Decision> decisiones = new Map<String, IncidentesServicio.Decision>();
 
         for (Aviso_de_Senal__e aviso : avisos) {
             if (String.isBlank(aviso.Clave__c) || !senales.containsKey(aviso.Clave__c)) {
@@ -65,7 +72,17 @@ public without sharing class ProcesamientoServicio {
                 continue;
             }
             resultado.senales++;
-            resolver(aviso, senal, activos, umbrales, estados, aUpsertar, estadoAClaveSenal, ahora);
+            resolver(
+                aviso,
+                senal,
+                activos,
+                umbrales,
+                estados,
+                aUpsertar,
+                estadoAClaveSenal,
+                decisiones,
+                ahora
+            );
             aActualizar.put(senal.Clave__c, senal);
         }
 
@@ -99,6 +116,8 @@ public without sharing class ProcesamientoServicio {
                 senal.Fecha_Procesamiento__c = ahora;
             }
         }
+
+        IncidentesServicio.escribir(decisiones, abiertos, aActualizar, ahora);
 
         List<Senal__c> listaSenales = aActualizar.values();
         if (!listaSenales.isEmpty()) {
@@ -159,6 +178,7 @@ public without sharing class ProcesamientoServicio {
         Map<String, Estado_Actual__c> estados,
         Map<String, Estado_Actual__c> aUpsertar,
         Map<String, String> estadoAClaveSenal,
+        Map<String, IncidentesServicio.Decision> decisiones,
         Datetime ahora
     ) {
         String tipoMensaje = aviso.Tipo_Mensaje__c;
@@ -247,6 +267,7 @@ public without sharing class ProcesamientoServicio {
         );
         senal.Fecha_Procesamiento__c = ahora;
         senal.Activo__c = activo.Id;
+        IncidentesServicio.acumular(decisiones, aviso, senal, activo, tipoMedicion, dictamen);
     }
 
     private static Boolean esMasVigente(Aviso_de_Senal__e aviso, Estado_Actual__c vigente) {
@@ -286,7 +307,7 @@ public without sharing class ProcesamientoServicio {
         }
         for (Senal__c senal : [
             SELECT Id, Clave__c, Resultado__c, Motivo__c, Reintentable__c, Detalle__c,
-                   Fecha_Procesamiento__c, Activo__c, Carga__c
+                   Fecha_Procesamiento__c, Activo__c, Carga__c, Incidente__c
             FROM Senal__c
             WHERE Clave__c IN :claves
             WITH SYSTEM_MODE
