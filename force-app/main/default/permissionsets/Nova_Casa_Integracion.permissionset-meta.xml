@@ -444,7 +444,6 @@
     </classAccesses>
     <externalCredentialPrincipalAccesses>
         <enabled>true</enabled>
-        <externalCredentialPrincipal
-    >Nova_Casa_Simulador-Equipo</externalCredentialPrincipal>
+        <externalCredentialPrincipal>Nova_Casa_Simulador-Equipo</externalCredentialPrincipal>
     </externalCredentialPrincipalAccesses>
 </PermissionSet>

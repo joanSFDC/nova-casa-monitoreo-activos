@@ -492,20 +492,15 @@
     </classAccesses>
     <flowAccesses>
         <enabled>true</enabled>
-        <flow>
-Liberar_Clave_Abierta;
-    </flow>
+        <flow>Liberar_Clave_Abierta</flow>
     </flowAccesses>
     <flowAccesses>
         <enabled>true</enabled>
-        <flow>
-Aplicar_Limites;
-    </flow>
+        <flow>Aplicar_Limites</flow>
     </flowAccesses>
     <externalCredentialPrincipalAccesses>
         <enabled>true</enabled>
-        <externalCredentialPrincipal
-    >Nova_Casa_Simulador-Equipo</externalCredentialPrincipal>
+        <externalCredentialPrincipal>Nova_Casa_Simulador-Equipo</externalCredentialPrincipal>
     </externalCredentialPrincipalAccesses>
     <userPermissions>
         <enabled>true</enabled>
