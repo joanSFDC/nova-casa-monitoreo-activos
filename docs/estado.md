@@ -20,9 +20,9 @@ La especificación sigue en los módulos [01](01-contrato-del-mensaje.md) a
 | Procesamiento US-202 (issue #5) | En `main` | [PR #20](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/20) |
 | Trazabilidad US-209 (issue #12) | En `main` | [PR #21](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/21) |
 | Límites administrables US-204 (issue #7) | En `main` | [PR #22](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/22) |
-| Estado actual US-203 (issue #6) | En PR | [PR #23](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/23) |
-| Incidentes US-205 (issue #8) | En PR | [PR #24](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/24) |
-| Conectividad US-206 (issue #9) | En PR | [PR #25](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/25) (encima de #24) |
+| Incidentes US-205 (issue #8) | En `main` | [PR #24](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/24) |
+| Conectividad US-206 (issue #9) | En `main` | [PR #25](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/25) |
+| Estado actual US-203 (issue #6) | En esta rama | [PR #23](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/23) |
 | El resto de historias | Pendiente | Issues #10, #11 y #13 |
 | Identidad visual | Pendiente | Issue #15 |
 
@@ -164,6 +164,16 @@ tema son el issue #15.
 En `main` (PR #22): validaciones, historial, vista, FlexiPage `Umbral_Registro`
 y **Aplicar límites**. En cámara usa `clasificarConectividad`.
 
+### US-203 · Estado actual
+
+La vigencia vive en `ProcesamientoServicio` (PR #20). Esta rama cierra el
+hueco de la **misma tanda**: si llega primero la lectura vieja y después la
+nueva, la perdedora queda **Atrasado**, no Aplicado. Las pruebas de
+`EstadoActualTest` cubren LATE_MESSAGES, empate en los dos órdenes, crítico
+atrasado sin caso y dos mediciones del mismo activo.
+
+La antigüedad en pantalla es el monitor (US-207): no se guarda como dato.
+
 ### US-205 · Una sola intervención
 
 `IncidentesServicio` abre el Case después del estado y antes de la bitácora.
@@ -195,13 +205,9 @@ sf org assign permset -o novacasa2 -n Nova_Casa_Administracion
 
 ## Qué se está haciendo ahora
 
-US-206 está en el
-[PR #25](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/25),
-encima de US-205.
-US-205 está en el
-[PR #24](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/24).
 US-203 está en el
 [PR #23](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/23).
+US-205 y US-206 ya están en `main` (PR #24 y #25).
 El monitor (US-207) espera esas.
 
 ## Decisiones que aparecieron al implementar
@@ -263,6 +269,11 @@ No estaban en la especificación y conviene no redescubrirlas.
     deja el valor vacío: el silencio está en `Gap_Segundos__c`. Copiar el gap
     al valor confundía Aplicar límites (punto 16) y pintaba segundos como si
     fueran una lectura.
+20. **En la misma tanda, la perdedora no puede quedar Aplicado.** El
+    procesamiento marcaba Aplicado al ir viendo cada aviso. Si después ganaba
+    otra lectura de la misma clave, el estado era el correcto pero la bitácora
+    mentía. Se corrige al aplicar el ganador: el previo de esa tanda pasa a
+    Atrasado.
 
 ## Historial breve
 
@@ -275,5 +286,6 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-09-25 | Procesamiento US-202: tanda, aislamiento, vigencia. PR #20 fusionado. Cierra #5 |
 | 2026-09-25 | Trazabilidad US-209: vistas, página de registro, reintentable. PR #21 fusionado. Cierra #12 |
 | 2026-09-28 | Límites administrables US-204: validaciones, historial, aplicar límites. PR #22 fusionado. Cierra #7 |
-| 2026-09-29 | Incidentes US-205: unicidad, escalada y clave al cerrar. Issue #8 |
-| 2026-09-29 | Conectividad US-206: silencio, episodios y resumen del activo. Issue #9 |
+| 2026-09-29 | Incidentes US-205: unicidad, escalada y clave al cerrar. PR #24 fusionado. Cierra #8 |
+| 2026-09-29 | Conectividad US-206: silencio, episodios y resumen del activo. PR #25 fusionado. Cierra #9 |
+| 2026-09-30 | Estado actual US-203: vigencia, empate y perdedoras de tanda. Issue #6 |

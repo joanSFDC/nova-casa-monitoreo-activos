@@ -144,7 +144,8 @@ private class ProcesamientoServicioTest {
 
         Assert.areEqual(q5, q200, 'Las consultas no crecen con el volumen');
         Assert.areEqual(d5, d200, 'Las escrituras no crecen con el volumen');
-        Assert.areEqual(200, r200.aplicadas, 'Doscientas aplicadas');
+        Assert.areEqual(1, r200.aplicadas, 'Un solo ganador por clave en la tanda');
+        Assert.areEqual(199, r200.atrasadas, 'El resto de la misma clave queda atrasado');
         Assert.areEqual(0, r200.senales - r200.aplicadas - r200.rechazadas - r200.atrasadas - r200.fallidas, 'Cuadre');
         Assert.areEqual(
             0,
