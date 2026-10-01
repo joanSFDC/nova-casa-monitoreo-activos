@@ -1,0 +1,190 @@
+<template>
+  <div class="slds-p-around_medium">
+    <div aria-live="polite" class="slds-assistive-text">{anuncio}</div>
+
+    <template lwc:if={cargando}>
+      <div class="slds-box">
+        <div class="slds-text-heading_small slds-m-bottom_small">
+          Cargando el monitor
+        </div>
+        <div class="slds-skeleton slds-skeleton_text"></div>
+        <div class="slds-skeleton slds-skeleton_text slds-m-top_small"></div>
+        <div class="slds-skeleton slds-skeleton_text slds-m-top_small"></div>
+      </div>
+    </template>
+
+    <template lwc:elseif={error}>
+      <div class="slds-notify slds-notify_alert slds-alert_error" role="alert">
+        <h2 class="slds-text-heading_small">No se pudo cargar el monitor</h2>
+        <p>{error}</p>
+        <template lwc:if={errorEsPermiso}>
+          <p>
+            No tienes permiso para ver estos equipos. Habla con tu coordinador.
+          </p>
+        </template>
+        <template lwc:else>
+          <lightning-button
+            class="slds-m-top_small"
+            variant="neutral"
+            label="Reintentar"
+            onclick={handleReintentar}
+          ></lightning-button>
+        </template>
+      </div>
+    </template>
+
+    <template lwc:elseif={panel}>
+      <template lwc:if={panel.consultaAtrasada}>
+        <div
+          class="slds-notify slds-notify_alert slds-alert_warning slds-m-bottom_small"
+          role="status"
+        >
+          La última consulta al proveedor se atrasó. Los datos de la tabla
+          pueden no estar al día.
+        </div>
+      </template>
+
+      <div
+        class="slds-grid slds-grid_vertical-align-center slds-wrap slds-m-bottom_small"
+      >
+        <div class="slds-col slds-grow">
+          <h1 class="slds-text-heading_medium">Monitor de activos</h1>
+        </div>
+        <div class="slds-col slds-no-flex">
+          <lightning-button
+            variant="neutral"
+            label="Actualizar"
+            onclick={handleActualizar}
+            disabled={actualizando}
+          ></lightning-button>
+        </div>
+      </div>
+
+      <div
+        class="slds-m-bottom_small"
+        role="toolbar"
+        aria-label="Filtros de severidad"
+      >
+        <button
+          type="button"
+          class={botonCriticos}
+          data-severidad="Critico"
+          aria-pressed={filtroCritico}
+          onclick={handleFiltro}
+        >
+          {etiquetaCriticos}
+        </button>
+        <button
+          type="button"
+          class={botonAdvertencias}
+          data-severidad="Advertencia"
+          aria-pressed={filtroAdvertencia}
+          onclick={handleFiltro}
+        >
+          {etiquetaAdvertencias}
+        </button>
+        <button
+          type="button"
+          class={botonNormales}
+          data-severidad="Normal"
+          aria-pressed={filtroNormal}
+          onclick={handleFiltro}
+        >
+          {etiquetaNormales}
+        </button>
+      </div>
+
+      <template lwc:if={mostrarSelectorEdificio}>
+        <lightning-combobox
+          class="slds-m-bottom_small slds-size_medium"
+          name="edificio"
+          label="Edificio"
+          value={edificioId}
+          options={opcionesEdificio}
+          onchange={handleEdificio}
+        ></lightning-combobox>
+      </template>
+
+      <template lwc:if={panel.sinEdificios}>
+        <p>
+          No tienes edificios asignados. Habla con tu coordinador para que te dé
+          acceso.
+        </p>
+      </template>
+      <template lwc:elseif={panel.sinLecturas}>
+        <p>Tus equipos no tienen lecturas todavía.</p>
+      </template>
+      <template lwc:elseif={sinResultadosDeFiltro}>
+        <p>Ningún equipo coincide con el filtro de severidad.</p>
+      </template>
+      <template lwc:else>
+        <div class="slds-scrollable_x">
+          <table class="slds-table slds-table_bordered slds-table_cell-buffer">
+            <thead>
+              <tr class="slds-line-height_reset">
+                <th scope="col"><div class="slds-truncate">Edificio</div></th>
+                <th scope="col"><div class="slds-truncate">Equipo</div></th>
+                <th scope="col"><div class="slds-truncate">Medición</div></th>
+                <th scope="col"><div class="slds-truncate">Valor</div></th>
+                <th scope="col"><div class="slds-truncate">Severidad</div></th>
+                <th scope="col"><div class="slds-truncate">Antigüedad</div></th>
+                <th scope="col">
+                  <div class="slds-truncate">Comunicación</div>
+                </th>
+                <th scope="col"><div class="slds-truncate">Acción</div></th>
+              </tr>
+            </thead>
+            <tbody>
+              <template for:each={filasVisibles} for:item="fila">
+                <tr key={fila.estadoId}>
+                  <td>
+                    <div class="slds-truncate">{fila.edificio}</div>
+                  </td>
+                  <th scope="row">
+                    <button
+                      type="button"
+                      class="slds-button slds-button_reset slds-text-link"
+                      data-id={fila.activoId}
+                      onclick={handleActivo}
+                    >
+                      {fila.equipo}
+                    </button>
+                  </th>
+                  <td>
+                    <div class="slds-truncate">{fila.medicion}</div>
+                  </td>
+                  <td>
+                    <div class="slds-truncate">{fila.valor}</div>
+                  </td>
+                  <td>
+                    <span class={fila.claseSeveridad}
+                      >{fila.severidadEtiqueta}</span
+                    >
+                  </td>
+                  <td>
+                    <div class="slds-truncate">{fila.antiguedad}</div>
+                  </td>
+                  <td>
+                    <div class="slds-truncate">{fila.comunicacion}</div>
+                  </td>
+                  <td>
+                    <template lwc:if={fila.puedeIntervenir}>
+                      <lightning-button
+                        variant="neutral"
+                        data-estado={fila.estadoId}
+                        data-caso={fila.casoId}
+                        label={fila.etiquetaAccion}
+                        title={fila.tituloAccion}
+                        onclick={handleAccion}
+                      ></lightning-button>
+                    </template>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+      </template>
+    </template>
+  </div>
+</template>
