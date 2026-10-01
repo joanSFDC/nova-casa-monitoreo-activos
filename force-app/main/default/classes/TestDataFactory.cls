@@ -172,6 +172,22 @@ public class TestDataFactory {
         };
     }
 
+    public static Map<String, Object> mensajeCamara(
+        String messageId,
+        String status,
+        Decimal gapSeconds,
+        String episodeId
+    ) {
+        Map<String, Object> mensaje = mensajeCamara();
+        mensaje.put('messageId', messageId);
+        mensaje.put('deliveryId', 'dlv_' + messageId);
+        Map<String, Object> comm = (Map<String, Object>) mensaje.get('communication');
+        comm.put('status', status);
+        comm.put('gapSeconds', gapSeconds);
+        comm.put('episodeId', episodeId);
+        return mensaje;
+    }
+
     public static Map<String, Object> mensajeTemperaturaNula() {
         return new Map<String, Object>{
             'deliveryId' => 'dlv_000001',

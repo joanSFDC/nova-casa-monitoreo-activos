@@ -479,6 +479,10 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>IncidentesServicio</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>ProcesamientoServicio</apexClass>
         <enabled>true</enabled>
     </classAccesses>
@@ -486,6 +490,10 @@
         <apexClass>UmbralAplicacionServicio</apexClass>
         <enabled>true</enabled>
     </classAccesses>
+    <flowAccesses>
+        <enabled>true</enabled>
+        <flow>Liberar_Clave_Abierta</flow>
+    </flowAccesses>
     <flowAccesses>
         <enabled>true</enabled>
         <flow>Aplicar_Limites</flow>

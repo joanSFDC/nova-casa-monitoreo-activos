@@ -20,8 +20,10 @@ La especificación sigue en los módulos [01](01-contrato-del-mensaje.md) a
 | Procesamiento US-202 (issue #5) | En `main` | [PR #20](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/20) |
 | Trazabilidad US-209 (issue #12) | En `main` | [PR #21](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/21) |
 | Límites administrables US-204 (issue #7) | En `main` | [PR #22](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/22) |
-| Estado actual US-203 | En esta rama | Issue #6 |
-| El resto de historias | Pendiente | Issues #8 a #11 y #13 |
+| Incidentes US-205 (issue #8) | En `main` | [PR #24](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/24) |
+| Conectividad US-206 (issue #9) | En `main` | [PR #25](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/25) |
+| Estado actual US-203 (issue #6) | En esta rama | [PR #23](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/23) |
+| El resto de historias | Pendiente | Issues #10, #11 y #13 |
 | Identidad visual | Pendiente | Issue #15 |
 
 Org de trabajo: alias `novacasa2`, dominio
@@ -82,7 +84,8 @@ Clases en `force-app/main/default/classes/`:
 | `IngestaValidador` | Contrato del [módulo 01](01-contrato-del-mensaje.md) |
 | `IngestaServicio` | Deduplica, upsert `Senal__c`, publica `Aviso_de_Senal__e`, avanza el cursor |
 | `ClasificacionServicio` | Severidad de medición y de conectividad contra `Umbral__c` |
-| `ProcesamientoServicio` | Suscriptor de `Aviso_de_Senal__e`: estado actual y bitácora. Sin casos (US-205) |
+| `ProcesamientoServicio` | Suscriptor de `Aviso_de_Senal__e`: estado actual, incidentes y bitácora |
+| `IncidentesServicio` | Un Case por `Clave_Abierta__c`; duplicado concurrente = éxito y reintenta escalada |
 
 Named Credential `Nova_Casa_Simulador` + External Credential del mismo nombre,
 principal `Equipo`. El administrador necesita el conjunto
@@ -171,6 +174,26 @@ atrasado sin caso y dos mediciones del mismo activo.
 
 La antigüedad en pantalla es el monitor (US-207): no se guarda como dato.
 
+### US-205 · Una sola intervención
+
+`IncidentesServicio` abre el Case después del estado y antes de la bitácora.
+La clave de medición es `activo|tipoMedicion`; la de conectividad es
+`CONN|episodioId`. Advertencia entra en prioridad baja; crítico sube a alta.
+Un error `DUPLICATE_VALUE` se trata como éxito y se reintenta la escalada.
+Al cerrar, el disparador `CaseLiberarClave` (y el flujo
+`Liberar_Clave_Abierta`) vacían `Clave_Abierta__c` (R-18).
+La vuelta a normal **no** cierra el caso. Si falla crear el Case, la señal
+queda Fallido y el estado actual sí se actualizó.
+
+### US-206 · Severidad y conectividad
+
+La clasificación ya venía de US-204. Aquí el procesamiento deja `Valor__c`
+vacío en cámara (el silencio vive en `Gap_Segundos__c`), vacía el episodio
+en `HEALTHY` y lo conserva en `RESTORED`. Un `LOST` de 90 s marca sin
+comunicación y no abre caso; a 15 min abre en baja; a 60 min el mismo caso
+sube a alta. `RESTORED` no cierra. Dos episodios son dos casos. El resumen
+del activo sigue siendo `MAX` de `Severidad_Nivel__c`.
+
 ## Cómo reconstruir el entorno
 
 ```bash
@@ -182,7 +205,9 @@ sf org assign permset -o novacasa2 -n Nova_Casa_Administracion
 
 ## Qué se está haciendo ahora
 
-US-203, issue #6: vigencia del estado actual. US-205 y US-206 siguen en Cali.
+US-203 está en el
+[PR #23](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/23).
+US-205 y US-206 ya están en `main` (PR #24 y #25).
 El monitor (US-207) espera esas.
 
 ## Decisiones que aparecieron al implementar
@@ -229,12 +254,22 @@ No estaban en la especificación y conviene no redescubrirlas.
 15. **Un `.layout` desplegado no llega al usuario.** Los perfiles están en
     `.forceignore`, así que la página de registro por defecto ignora el layout.
     El patrón es un FlexiPage con `actionOverrides` de View, como `Senal_Registro`.
-16. **Aplicar límites en cámara no usa `clasificarMedicion`.** El
-    procesamiento escribe `Gap_Segundos__c` también en `Valor__c`. Sin bandas,
-    esa magnitud caería en Normal y bajaría un LOST crítico. Se llama a
-    `clasificarConectividad` con estado y gap.
-
-17. **En la misma tanda, la perdedora no puede quedar Aplicado.** El
+16. **Aplicar límites en cámara no usa `clasificarMedicion`.** Aunque
+    `Valor__c` quede vacío, sin bandas de valor un `Gap_Segundos__c` copiado
+    ahí caería en Normal. Se llama a `clasificarConectividad` con estado y gap.
+17. **`Clave_Abierta__c` no lleva la severidad.** Advertencia y crítico del
+    mismo activo y medición son el mismo caso, que escala. El texto de ayuda
+    del campo en el modelo original decía `|severidad`; el [módulo 07](07-incidentes.md)
+    no.
+18. **El índice único no trata `''` como vacío.** Varios nulos sí conviven;
+    dos cadenas vacías chocan. El disparador `CaseLiberarClave` pone `null`.
+    El flujo `Liberar_Clave_Abierta` es la defensa del [módulo 07](07-incidentes.md);
+    el disparador es lo que deja el campo realmente nulo.
+19. **Conectividad no escribe `Valor__c`.** El [módulo 08](08-conectividad.md)
+    deja el valor vacío: el silencio está en `Gap_Segundos__c`. Copiar el gap
+    al valor confundía Aplicar límites (punto 16) y pintaba segundos como si
+    fueran una lectura.
+20. **En la misma tanda, la perdedora no puede quedar Aplicado.** El
     procesamiento marcaba Aplicado al ir viendo cada aviso. Si después ganaba
     otra lectura de la misma clave, el estado era el correcto pero la bitácora
     mentía. Se corrige al aplicar el ganador: el previo de esa tanda pasa a
@@ -250,5 +285,7 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-09-24 | Ingesta US-201: credenciales, cadena Queueable, diagramas. Cierra #4 |
 | 2026-09-25 | Procesamiento US-202: tanda, aislamiento, vigencia. PR #20 fusionado. Cierra #5 |
 | 2026-09-25 | Trazabilidad US-209: vistas, página de registro, reintentable. PR #21 fusionado. Cierra #12 |
-| 2026-09-29 | Límites administrables US-204: validaciones, historial, aplicar límites. PR #22 fusionado. Cierra #7 |
-| 2026-09-29 | Estado actual US-203: vigencia, empate y perdedoras de tanda. Issue #6 |
+| 2026-09-28 | Límites administrables US-204: validaciones, historial, aplicar límites. PR #22 fusionado. Cierra #7 |
+| 2026-09-29 | Incidentes US-205: unicidad, escalada y clave al cerrar. PR #24 fusionado. Cierra #8 |
+| 2026-09-29 | Conectividad US-206: silencio, episodios y resumen del activo. PR #25 fusionado. Cierra #9 |
+| 2026-09-30 | Estado actual US-203: vigencia, empate y perdedoras de tanda. Issue #6 |
