@@ -10,7 +10,7 @@ private class IngestaQueueableTest {
     }
 
     @isTest
-    static void shouldCrearSenalPendiente_WhenTelemetria200() {
+    static void shouldCrearYProcesarSenal_WhenTelemetria200() {
         IngestaSimuladorMock mock = new IngestaSimuladorMock();
         Test.setMock(HttpCalloutMock.class, mock);
 
@@ -18,12 +18,15 @@ private class IngestaQueueableTest {
         System.enqueueJob(new IngestaQueueable());
         Test.stopTest();
 
+        // stopTest entrega el aviso: el Pendiente previo lo cubre IngestaServicioTest.
         Senal__c senal = [
-            SELECT Resultado__c, Clave__c
+            SELECT Resultado__c, Clave__c, Fecha_Recepcion__c, Fecha_Procesamiento__c
             FROM Senal__c
             WHERE Clave__c = 'nova-casa-simulator|msg_000002'
         ];
-        Assert.areEqual(IngestaConstantes.RESULTADO_PENDIENTE, senal.Resultado__c, 'Pendiente');
+        Assert.isNotNull(senal.Fecha_Recepcion__c, 'Recibida por la ingesta');
+        Assert.areEqual(IngestaConstantes.RESULTADO_APLICADO, senal.Resultado__c, 'El aviso llego al suscriptor');
+        Assert.isNotNull(senal.Fecha_Procesamiento__c, 'Procesada');
         Control_de_Ingesta__c control = [
             SELECT Cursor__c, Fallos_Consecutivos__c, Paginas_Procesadas__c, Ultimo_Error__c
             FROM Control_de_Ingesta__c
