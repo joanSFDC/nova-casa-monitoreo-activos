@@ -23,7 +23,7 @@ La especificación sigue en los módulos [01](01-contrato-del-mensaje.md) a
 | Incidentes US-205 (issue #8) | En `main` | [PR #24](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/24) |
 | Conectividad US-206 (issue #9) | En `main` | [PR #25](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/25) |
 | Estado actual US-203 (issue #6) | En `main` | [PR #23](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/23) |
-| Monitor US-207 (issue #10) | En esta rama | Issue #10 |
+| Monitor US-207 (issue #10) | En revisión | [PR #26](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/26) |
 | El resto de historias | Pendiente | Issues #11 y #13 |
 | Identidad visual | Pendiente | Issue #15 |
 
@@ -306,4 +306,4 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-09-29 | Incidentes US-205: unicidad, escalada y clave al cerrar. PR #24 fusionado. Cierra #8 |
 | 2026-09-29 | Conectividad US-206: silencio, episodios y resumen del activo. PR #25 fusionado. Cierra #9 |
 | 2026-09-30 | Estado actual US-203: vigencia, empate y perdedoras de tanda. PR #23 fusionado. Cierra #6 |
-| 2026-10-01 | Monitor US-207: panel del operador, contadores y aviso de ingesta. Issue #10 |
+| 2026-10-01 | Monitor US-207: panel del operador, contadores y aviso de ingesta. PR #26. Cierra #10 |
