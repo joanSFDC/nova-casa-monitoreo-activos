@@ -22,7 +22,8 @@ La especificación sigue en los módulos [01](01-contrato-del-mensaje.md) a
 | Límites administrables US-204 (issue #7) | En `main` | [PR #22](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/22) |
 | Estado actual US-203 (issue #6) | En PR | [PR #23](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/23) |
 | Incidentes US-205 (issue #8) | En PR | [PR #24](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/24) |
-| El resto de historias | Pendiente | Issues #9 a #11 y #13 |
+| Conectividad US-206 (issue #9) | En PR | [PR #25](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/25) (encima de #24) |
+| El resto de historias | Pendiente | Issues #10, #11 y #13 |
 | Identidad visual | Pendiente | Issue #15 |
 
 Org de trabajo: alias `novacasa2`, dominio
@@ -174,6 +175,15 @@ Al cerrar, el disparador `CaseLiberarClave` (y el flujo
 La vuelta a normal **no** cierra el caso. Si falla crear el Case, la señal
 queda Fallido y el estado actual sí se actualizó.
 
+### US-206 · Severidad y conectividad
+
+La clasificación ya venía de US-204. Aquí el procesamiento deja `Valor__c`
+vacío en cámara (el silencio vive en `Gap_Segundos__c`), vacía el episodio
+en `HEALTHY` y lo conserva en `RESTORED`. Un `LOST` de 90 s marca sin
+comunicación y no abre caso; a 15 min abre en baja; a 60 min el mismo caso
+sube a alta. `RESTORED` no cierra. Dos episodios son dos casos. El resumen
+del activo sigue siendo `MAX` de `Severidad_Nivel__c`.
+
 ## Cómo reconstruir el entorno
 
 ```bash
@@ -185,11 +195,14 @@ sf org assign permset -o novacasa2 -n Nova_Casa_Administracion
 
 ## Qué se está haciendo ahora
 
+US-206 está en el
+[PR #25](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/25),
+encima de US-205.
 US-205 está en el
 [PR #24](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/24).
 US-203 está en el
 [PR #23](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/23).
-US-206 sigue en Cali. El monitor (US-207) espera esas.
+El monitor (US-207) espera esas.
 
 ## Decisiones que aparecieron al implementar
 
@@ -235,10 +248,9 @@ No estaban en la especificación y conviene no redescubrirlas.
 15. **Un `.layout` desplegado no llega al usuario.** Los perfiles están en
     `.forceignore`, así que la página de registro por defecto ignora el layout.
     El patrón es un FlexiPage con `actionOverrides` de View, como `Senal_Registro`.
-16. **Aplicar límites en cámara no usa `clasificarMedicion`.** El
-    procesamiento escribe `Gap_Segundos__c` también en `Valor__c`. Sin bandas,
-    esa magnitud caería en Normal y bajaría un LOST crítico. Se llama a
-    `clasificarConectividad` con estado y gap.
+16. **Aplicar límites en cámara no usa `clasificarMedicion`.** Aunque
+    `Valor__c` quede vacío, sin bandas de valor un `Gap_Segundos__c` copiado
+    ahí caería en Normal. Se llama a `clasificarConectividad` con estado y gap.
 17. **`Clave_Abierta__c` no lleva la severidad.** Advertencia y crítico del
     mismo activo y medición son el mismo caso, que escala. El texto de ayuda
     del campo en el modelo original decía `|severidad`; el [módulo 07](07-incidentes.md)
@@ -247,6 +259,10 @@ No estaban en la especificación y conviene no redescubrirlas.
     dos cadenas vacías chocan. El disparador `CaseLiberarClave` pone `null`.
     El flujo `Liberar_Clave_Abierta` es la defensa del [módulo 07](07-incidentes.md);
     el disparador es lo que deja el campo realmente nulo.
+19. **Conectividad no escribe `Valor__c`.** El [módulo 08](08-conectividad.md)
+    deja el valor vacío: el silencio está en `Gap_Segundos__c`. Copiar el gap
+    al valor confundía Aplicar límites (punto 16) y pintaba segundos como si
+    fueran una lectura.
 
 ## Historial breve
 
@@ -260,3 +276,4 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-09-25 | Trazabilidad US-209: vistas, página de registro, reintentable. PR #21 fusionado. Cierra #12 |
 | 2026-09-28 | Límites administrables US-204: validaciones, historial, aplicar límites. PR #22 fusionado. Cierra #7 |
 | 2026-09-29 | Incidentes US-205: unicidad, escalada y clave al cerrar. Issue #8 |
+| 2026-09-29 | Conectividad US-206: silencio, episodios y resumen del activo. Issue #9 |

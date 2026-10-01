@@ -248,13 +248,17 @@ public without sharing class ProcesamientoServicio {
             estado.Ultima_Vez_Visto__c = null;
             estado.Sin_Comunicacion_Num__c = 0;
         } else {
-            estado.Valor__c = aviso.Gap_Segundos__c;
+            estado.Valor__c = null;
             estado.Unidad__c = null;
             estado.Estado_Comunicacion__c = aviso.Estado_Comunicacion__c;
             estado.Gap_Segundos__c = aviso.Gap_Segundos__c;
-            estado.Episodio_Id__c = aviso.Episodio_Id__c;
             estado.Ultima_Vez_Visto__c = aviso.Ultima_Vez_Visto__c;
             estado.Sin_Comunicacion_Num__c = aviso.Estado_Comunicacion__c == 'LOST' ? 1 : 0;
+            if (aviso.Estado_Comunicacion__c == 'HEALTHY') {
+                estado.Episodio_Id__c = null;
+            } else {
+                estado.Episodio_Id__c = aviso.Episodio_Id__c;
+            }
         }
         estados.put(claveEstado, estado);
         aUpsertar.put(claveEstado, estado);

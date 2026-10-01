@@ -194,6 +194,67 @@ private class ClasificacionServicioTest {
     );
   }
 
+  @isTest
+  static void shouldSerNormal_WhenLostDeNoventaSegundos() {
+    Umbral__c umbral = umbralDe('SECURITY_CAMERA|CAMERA_CONNECTIVITY');
+    Test.startTest();
+    ClasificacionServicio.Dictamen d = ClasificacionServicio.clasificarConectividad(
+      'LOST',
+      90,
+      umbral
+    );
+    Test.stopTest();
+    Assert.areEqual(
+      IngestaConstantes.SEV_NORMAL,
+      d.severidad,
+      '90 s marca silencio pero no escala'
+    );
+  }
+
+  @isTest
+  static void shouldSerCritico_WhenLostDeUnaHora() {
+    Umbral__c umbral = umbralDe('SECURITY_CAMERA|CAMERA_CONNECTIVITY');
+    Test.startTest();
+    ClasificacionServicio.Dictamen d = ClasificacionServicio.clasificarConectividad(
+      'LOST',
+      60 * 60,
+      umbral
+    );
+    Test.stopTest();
+    Assert.areEqual(
+      IngestaConstantes.SEV_CRITICO,
+      d.severidad,
+      'Exactamente 60 min ya es critico'
+    );
+  }
+
+  @isTest
+  static void shouldSerNormal_WhenHealthyORestored() {
+    Umbral__c umbral = umbralDe('SECURITY_CAMERA|CAMERA_CONNECTIVITY');
+    Test.startTest();
+    ClasificacionServicio.Dictamen sano = ClasificacionServicio.clasificarConectividad(
+      'HEALTHY',
+      60,
+      umbral
+    );
+    ClasificacionServicio.Dictamen recuperado = ClasificacionServicio.clasificarConectividad(
+      'RESTORED',
+      450,
+      umbral
+    );
+    Test.stopTest();
+    Assert.areEqual(
+      IngestaConstantes.SEV_NORMAL,
+      sano.severidad,
+      'HEALTHY siempre normal'
+    );
+    Assert.areEqual(
+      IngestaConstantes.SEV_NORMAL,
+      recuperado.severidad,
+      'RESTORED siempre normal'
+    );
+  }
+
   private static Umbral__c umbralDe(String clave) {
     return [
       SELECT
