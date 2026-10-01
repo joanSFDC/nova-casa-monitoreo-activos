@@ -51,9 +51,24 @@ private class IncidentesServicioTest {
     Assert.areEqual(CLAVE_PRESION, incidente.Clave_Abierta__c);
     Assert.areEqual(bomba.Id, incidente.Activo__c);
     Assert.areEqual(
-      10,
-      [SELECT COUNT() FROM Senal__c WHERE Incidente__c = :incidente.Id],
-      'Las diez senales de la rafaga apuntan al mismo caso'
+      1,
+      [
+        SELECT COUNT()
+        FROM Senal__c
+        WHERE
+          Incidente__c = :incidente.Id
+          AND Resultado__c = :IngestaConstantes.RESULTADO_APLICADO
+      ],
+      'Solo la vigente de la tanda liga al caso'
+    );
+    Assert.areEqual(
+      9,
+      [
+        SELECT COUNT()
+        FROM Senal__c
+        WHERE Resultado__c = :IngestaConstantes.RESULTADO_ATRASADO
+      ],
+      'Las otras nueve de la misma clave quedan atrasadas'
     );
   }
 
