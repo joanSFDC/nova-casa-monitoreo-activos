@@ -443,6 +443,10 @@
         <visibility>Visible</visibility>
     </tabSettings>
     <tabSettings>
+        <tab>Monitor</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
+    <tabSettings>
         <tab>standard-home</tab>
         <visibility>Visible</visibility>
     </tabSettings>
@@ -480,6 +484,10 @@
     </classAccesses>
     <classAccesses>
         <apexClass>IncidentesServicio</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>MonitorControlador</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>

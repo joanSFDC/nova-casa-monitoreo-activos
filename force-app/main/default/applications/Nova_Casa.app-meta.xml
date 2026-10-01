@@ -13,6 +13,7 @@
     <isNavTabPersistenceDisabled>false</isNavTabPersistenceDisabled>
     <label>Nova Casa</label>
     <navType>Standard</navType>
+    <tabs>Monitor</tabs>
     <tabs>standard-home</tabs>
     <tabs>Edificio__c</tabs>
     <tabs>Activo__c</tabs>

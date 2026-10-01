@@ -22,8 +22,9 @@ La especificación sigue en los módulos [01](01-contrato-del-mensaje.md) a
 | Límites administrables US-204 (issue #7) | En `main` | [PR #22](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/22) |
 | Incidentes US-205 (issue #8) | En `main` | [PR #24](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/24) |
 | Conectividad US-206 (issue #9) | En `main` | [PR #25](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/25) |
-| Estado actual US-203 (issue #6) | En esta rama | [PR #23](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/23) |
-| El resto de historias | Pendiente | Issues #10, #11 y #13 |
+| Estado actual US-203 (issue #6) | En `main` | [PR #23](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/23) |
+| Monitor US-207 (issue #10) | En revisión | [PR #26](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/26) |
+| El resto de historias | Pendiente | Issues #11 y #13 |
 | Identidad visual | Pendiente | Issue #15 |
 
 Org de trabajo: alias `novacasa2`, dominio
@@ -156,8 +157,8 @@ Q-10 quedó en **por ciudad**: regla sobre `Edificio__c.Ciudad__c` hacia los gru
 los dos grupos. El edificio sigue siendo la unidad de autorización; activo y
 estado actual heredan.
 
-La aplicación `Nova_Casa` existe como cascarón (pestañas del modelo). Logo y
-tema son el issue #15.
+La aplicación `Nova_Casa` abre en la pestaña **Monitor**. Logo y tema son el
+issue #15.
 
 ### US-204 · Límites administrables
 
@@ -166,9 +167,9 @@ y **Aplicar límites**. En cámara usa `clasificarConectividad`.
 
 ### US-203 · Estado actual
 
-La vigencia vive en `ProcesamientoServicio` (PR #20). Esta rama cierra el
-hueco de la **misma tanda**: si llega primero la lectura vieja y después la
-nueva, la perdedora queda **Atrasado**, no Aplicado. Las pruebas de
+La vigencia vive en `ProcesamientoServicio` (PR #20). El hueco de la **misma
+tanda** está en `main` (PR #23): si llega primero la lectura vieja y después
+la nueva, la perdedora queda **Atrasado**, no Aplicado. Las pruebas de
 `EstadoActualTest` cubren LATE_MESSAGES, empate en los dos órdenes, crítico
 atrasado sin caso y dos mediciones del mismo activo.
 
@@ -194,6 +195,19 @@ comunicación y no abre caso; a 15 min abre en baja; a 60 min el mismo caso
 sube a alta. `RESTORED` no cierra. Dos episodios son dos casos. El resumen
 del activo sigue siendo `MAX` de `Severidad_Nivel__c`.
 
+### US-207 · Monitor del operador
+
+`MonitorControlador` arma el panel en el servidor (`with sharing`, `USER_MODE`):
+contadores, filas de `Estado_Actual__c` y aviso de consulta atrasada (5 min).
+No consulta `Senal__c`. La antigüedad se calcula en Apex. El LWC
+`monitorDeActivos` filtra severidad en el navegador sobre esos datos, se
+suscribe a `Aviso_de_Senal__e` solo como disparador (R-07) y agrupa 2 s.
+
+«Abrir intervención» solo aparece si hay algo que atender (advertencia,
+crítico o sin comunicación) o si ya hay caso, y entonces dice «Ver
+incidente». El valor conserva los decimales del umbral («0,80 bar», no
+«0,8»). La pestaña **Monitor** es la primera de la aplicación.
+
 ## Cómo reconstruir el entorno
 
 ```bash
@@ -205,10 +219,8 @@ sf org assign permset -o novacasa2 -n Nova_Casa_Administracion
 
 ## Qué se está haciendo ahora
 
-US-203 está en el
-[PR #23](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/23).
-US-205 y US-206 ya están en `main` (PR #24 y #25).
-El monitor (US-207) espera esas.
+US-207, issue #10: monitor del operador. US-208 espera esa pantalla.
+US-203, US-205 y US-206 ya están en `main`.
 
 ## Decisiones que aparecieron al implementar
 
@@ -274,6 +286,11 @@ No estaban en la especificación y conviene no redescubrirlas.
     otra lectura de la misma clave, el estado era el correcto pero la bitácora
     mentía. Se corrige al aplicar el ganador: el previo de esa tanda pasa a
     Atrasado.
+21. **El monitor lee `Ultima_Consulta_Exitosa__c` y nada más del control.**
+    El aviso de ingesta atrasada necesita esa fecha. El cursor y la semilla
+    siguen ocultos. El objeto es privado, así que operador, coordinador y
+    gerente tienen «ver todo» sobre ese único registro: si no, `USER_MODE`
+    no devolvería la fila. No tienen pestaña ni el resto de campos.
 
 ## Historial breve
 
@@ -288,4 +305,5 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-09-28 | Límites administrables US-204: validaciones, historial, aplicar límites. PR #22 fusionado. Cierra #7 |
 | 2026-09-29 | Incidentes US-205: unicidad, escalada y clave al cerrar. PR #24 fusionado. Cierra #8 |
 | 2026-09-29 | Conectividad US-206: silencio, episodios y resumen del activo. PR #25 fusionado. Cierra #9 |
-| 2026-09-30 | Estado actual US-203: vigencia, empate y perdedoras de tanda. Issue #6 |
+| 2026-09-30 | Estado actual US-203: vigencia, empate y perdedoras de tanda. PR #23 fusionado. Cierra #6 |
+| 2026-10-01 | Monitor US-207: panel del operador, contadores y aviso de ingesta. PR #26. Cierra #10 |

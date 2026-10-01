@@ -1,0 +1,21 @@
+.sev {
+  font-weight: 700;
+}
+
+.sev_critico {
+  color: var(--slds-g-color-error-1, #ba0517);
+}
+
+.sev_advertencia {
+  color: var(--slds-g-color-warning-1, #a15c00);
+}
+
+.sev_normal {
+  color: var(--slds-g-color-success-1, #2e844a);
+}
+
+.slds-skeleton {
+  height: 0.75rem;
+  border-radius: 0.25rem;
+  background: var(--slds-g-color-neutral-base-80, #e5e5e5);
+}
