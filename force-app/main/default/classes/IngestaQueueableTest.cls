@@ -22,8 +22,13 @@ private class IngestaQueueableTest {
         Senal__c senal = [
             SELECT Resultado__c, Clave__c, Fecha_Recepcion__c, Fecha_Procesamiento__c
             FROM Senal__c
-            WHERE Clave__c = 'nova-casa-simulator|msg_000002'
+            WHERE Message_Id__c = 'msg_000002'
         ];
+        Assert.areEqual(
+            'nova-casa-simulator|2026-09-22T21:51:49Z|msg_000002',
+            senal.Clave__c,
+            'La clave lleva el inicio de la sesion abierta'
+        );
         Assert.isNotNull(senal.Fecha_Recepcion__c, 'Recibida por la ingesta');
         Assert.areEqual(IngestaConstantes.RESULTADO_APLICADO, senal.Resultado__c, 'El aviso llego al suscriptor');
         Assert.isNotNull(senal.Fecha_Procesamiento__c, 'Procesada');
@@ -86,6 +91,45 @@ private class IngestaQueueableTest {
         Assert.areEqual('cursor-siguiente', despues.Cursor__c, 'Continua con la sesion nueva');
         Assert.areEqual(1, [SELECT COUNT() FROM Senal__c], 'Procesa la pagina posterior al 409');
         Assert.isTrue(mock.metodos.contains('POST'), 'Abre sesion nueva');
+    }
+
+    @isTest
+    static void shouldNoChocarConLaSesionAnterior_When409() {
+        Control_de_Ingesta__c control = [SELECT Id FROM Control_de_Ingesta__c LIMIT 1];
+        control.Cursor__c = 'cursor-viejo';
+        control.Sesion_Iniciada__c = Datetime.newInstanceGmt(2026, 9, 1, 8, 0, 0);
+        update control;
+        insert new Senal__c(
+            Clave__c = 'nova-casa-simulator|msg_000002',
+            Message_Id__c = 'msg_000002',
+            Tipo_Mensaje__c = 'MEASUREMENT',
+            Resultado__c = IngestaConstantes.RESULTADO_APLICADO,
+            Hash_Contenido__c = 'huella-de-otra-lectura',
+            Entregas__c = 1
+        );
+
+        IngestaSimuladorMock mock = new IngestaSimuladorMock();
+        mock.primerGetEs409 = true;
+        Test.setMock(HttpCalloutMock.class, mock);
+
+        Test.startTest();
+        System.enqueueJob(new IngestaQueueable(0));
+        Test.stopTest();
+
+        Senal__c nueva = [
+            SELECT Resultado__c, Entregas__c
+            FROM Senal__c
+            WHERE Clave__c = 'nova-casa-simulator|2026-09-22T21:51:49Z|msg_000002'
+        ];
+        Assert.areEqual(IngestaConstantes.RESULTADO_APLICADO, nueva.Resultado__c, 'La sesion nueva llega al estado, no a Conflicto');
+        Assert.areEqual(1, nueva.Entregas__c.intValue(), 'Primera entrega de su sesion');
+        Senal__c vieja = [
+            SELECT Resultado__c, Entregas__c
+            FROM Senal__c
+            WHERE Clave__c = 'nova-casa-simulator|msg_000002'
+        ];
+        Assert.areEqual(IngestaConstantes.RESULTADO_APLICADO, vieja.Resultado__c, 'La de la sesion anterior no se toca');
+        Assert.areEqual(1, vieja.Entregas__c.intValue(), 'Ni suma entregas');
     }
 
     @isTest

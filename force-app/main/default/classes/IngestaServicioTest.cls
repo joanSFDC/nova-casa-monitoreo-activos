@@ -123,30 +123,69 @@ private class IngestaServicioTest {
     @isTest
     static void shouldIncrementarEntregas_WhenReenvioEnOtraPagina() {
         Datetime ahora = Datetime.newInstanceGmt(2026, 9, 22, 22, 0, 0);
+        Datetime sesion = Datetime.newInstanceGmt(2026, 9, 22, 21, 51, 49);
         IngestaServicio.procesarPagina(
             TestDataFactory.sobre(
                 new List<Map<String, Object>>{ TestDataFactory.mensajePresion() },
                 'c1',
                 true
             ),
-            ahora
+            ahora,
+            sesion
         );
         Map<String, Object> reenvio = TestDataFactory.mensajePresion('msg_000002', 'dlv_000099', 2.76, 'BAR');
         Test.startTest();
         IngestaServicio.ResultadoPagina r = IngestaServicio.procesarPagina(
             TestDataFactory.sobre(new List<Map<String, Object>>{ reenvio }, 'c2', true),
-            ahora.addMinutes(2)
+            ahora.addMinutes(2),
+            sesion
         );
         Test.stopTest();
         Assert.areEqual(0, r.publicadas, 'Reenvio no republica');
         Senal__c senal = [
             SELECT Entregas__c, Resultado__c, Fecha_Recepcion__c
             FROM Senal__c
-            WHERE Clave__c = 'nova-casa-simulator|msg_000002'
+            WHERE Message_Id__c = 'msg_000002'
         ];
         Assert.areEqual(2, senal.Entregas__c.intValue(), 'Contador');
         Assert.areNotEqual(IngestaConstantes.RESULTADO_DUPLICADO, senal.Resultado__c, 'No cambia a Duplicado');
         Assert.areEqual(ahora, senal.Fecha_Recepcion__c, 'La primera recepcion se conserva');
+    }
+
+    @isTest
+    static void shouldCrearOtraSenal_WhenMismoMessageIdEnSesionNueva() {
+        Datetime ahora = Datetime.newInstanceGmt(2026, 9, 22, 22, 0, 0);
+        Datetime sesionVieja = Datetime.newInstanceGmt(2026, 9, 22, 21, 51, 49);
+        IngestaServicio.procesarPagina(
+            TestDataFactory.sobre(
+                new List<Map<String, Object>>{ TestDataFactory.mensajePresion() },
+                'c1',
+                true
+            ),
+            ahora,
+            sesionVieja
+        );
+        Map<String, Object> otraSesion = TestDataFactory.mensajePresion('msg_000002', 'dlv_000002', 3.10, 'BAR');
+        otraSesion.put('occurredAt', '2026-09-30T21:52:27.806Z');
+        otraSesion.put('publishedAt', '2026-09-30T21:52:29.498Z');
+        Test.startTest();
+        IngestaServicio.ResultadoPagina r = IngestaServicio.procesarPagina(
+            TestDataFactory.sobre(new List<Map<String, Object>>{ otraSesion }, 'c1', true),
+            ahora.addDays(8),
+            sesionVieja.addDays(8)
+        );
+        Test.stopTest();
+        Assert.areEqual(1, r.publicadas, 'La sesion nueva trae un mensaje nuevo');
+        List<Senal__c> senales = [
+            SELECT Clave__c, Resultado__c, Entregas__c
+            FROM Senal__c
+            WHERE Message_Id__c = 'msg_000002'
+        ];
+        Assert.areEqual(2, senales.size(), 'Una senal por sesion');
+        for (Senal__c senal : senales) {
+            Assert.areNotEqual(IngestaConstantes.RESULTADO_CONFLICTO, senal.Resultado__c, 'No es una contradiccion: ' + senal.Clave__c);
+            Assert.areEqual(1, senal.Entregas__c.intValue(), 'Cada una con su entrega');
+        }
     }
 
     @isTest

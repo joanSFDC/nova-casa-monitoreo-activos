@@ -109,9 +109,31 @@ private class IngestaValidadorTest {
         b.put('publishedAt', '2026-09-22T21:56:30.273Z');
         Assert.areEqual(
             'nova-casa-simulator|msg_000002',
-            IngestaValidador.claveDe(a),
+            IngestaValidador.claveDe(a, null),
             'Clave estable'
         );
         Assert.areEqual(IngestaValidador.hashDe(a), IngestaValidador.hashDe(b), 'Mismo hecho, mismo hash');
+    }
+
+    @isTest
+    static void shouldIncluirInicioDeSesion_WhenArmaLaClave() {
+        Map<String, Object> mensaje = TestDataFactory.mensajePresion();
+        Datetime recienAbierta = IngestaValidador.parsearIso('2026-09-24T21:44:55.383Z');
+        Datetime guardada = Datetime.newInstanceGmt(2026, 9, 24, 21, 44, 55);
+        Assert.areEqual(
+            'nova-casa-simulator|2026-09-24T21:44:55Z|msg_000002',
+            IngestaValidador.claveDe(mensaje, recienAbierta),
+            'La sesion forma parte de la clave'
+        );
+        Assert.areEqual(
+            IngestaValidador.claveDe(mensaje, recienAbierta),
+            IngestaValidador.claveDe(mensaje, guardada),
+            'Recien abierta o leida del control, la sesion da la misma clave'
+        );
+        Assert.areNotEqual(
+            IngestaValidador.claveDe(mensaje, guardada),
+            IngestaValidador.claveDe(mensaje, guardada.addDays(8)),
+            'El mismo messageId en otra sesion es otro mensaje'
+        );
     }
 }

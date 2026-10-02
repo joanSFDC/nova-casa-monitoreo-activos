@@ -391,6 +391,14 @@ No estaban en la especificación y conviene no redescubrirlas.
     org se pinta «hace un momento». Las 471 rechazadas se quedan como están:
     esos activos ya tienen lecturas más nuevas y reprocesarlas no cambiaría
     ningún estado.
+31. **Cada sesión del simulador empieza en `msg_000001`.** Con cualquier
+    semilla, y con fechas que arrancan al abrirla. Con la clave
+    `source|messageId`, una sesión nueva (409, cursor perdido, caducidad o
+    cambio de escenario) chocaba con la bitácora y quedaba entera en
+    Conflicto. La clave lleva el inicio de la sesión
+    ([módulo 01](01-contrato-del-mensaje.md)). Las 1.693 señales anteriores
+    conservan su clave; en el paso, un reenvío en vuelo puede dejar una
+    segunda fila con el mismo hecho, sin efecto en el estado.
 
 ## Historial breve
 
@@ -408,4 +416,5 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-09-30 | Estado actual US-203: vigencia, empate y perdedoras de tanda. PR #23 fusionado. Cierra #6 |
 | 2026-10-01 | Monitor US-207: panel del operador, contadores y aviso de ingesta. PR #26 fusionado. Cierra #10 |
 | 2026-10-01 | Autorización US-208: casos por ciudad, acciones comprobadas, suscriptor como integración. PR #27 fusionado. Cierra #11 |
-| 2026-10-01 | Fecha futura contra `publishedAt`: el reloj del simulador no es el de la org. Cierra #28 |
+| 2026-10-01 | Fecha futura contra `publishedAt`: el reloj del simulador no es el de la org. PR #32 fusionado. Cierra #28 |
+| 2026-10-01 | La sesión del simulador entra en la clave de la señal. Cierra #31 |

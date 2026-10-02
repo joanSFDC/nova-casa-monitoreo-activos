@@ -88,7 +88,7 @@ public without sharing class IngestaServicio {
             return registrarCorte(control, tel, true);
         }
 
-        ResultadoPagina pagina = procesarPagina(tel.cuerpo, Datetime.now());
+        ResultadoPagina pagina = procesarPagina(tel.cuerpo, Datetime.now(), control.Sesion_Iniciada__c);
         if (String.isNotBlank(pagina.siguienteCursor)) {
             control.Cursor__c = pagina.siguienteCursor;
         }
@@ -110,10 +110,14 @@ public without sharing class IngestaServicio {
         return r;
     }
 
+    public static ResultadoPagina procesarPagina(String cuerpo, Datetime ahora) {
+        return procesarPagina(cuerpo, ahora, null);
+    }
+
     /**
      * Deduplica, valida, upsert y publica. Pensado tambien para tests sin callout.
      */
-    public static ResultadoPagina procesarPagina(String cuerpo, Datetime ahora) {
+    public static ResultadoPagina procesarPagina(String cuerpo, Datetime ahora, Datetime inicioSesion) {
         ResultadoPagina resultado = new ResultadoPagina();
         resultado.senales = 0;
         resultado.publicadas = 0;
@@ -141,7 +145,7 @@ public without sharing class IngestaServicio {
                 continue;
             }
             Map<String, Object> mensaje = (Map<String, Object>) item;
-            String clave = IngestaValidador.claveDe(mensaje);
+            String clave = IngestaValidador.claveDe(mensaje, inicioSesion);
             if (String.isBlank(clave)) {
                 Senal__c huerfana = senalRechazadaSinClave(mensaje, ahora);
                 porClave.put(huerfana.Clave__c, huerfana);
