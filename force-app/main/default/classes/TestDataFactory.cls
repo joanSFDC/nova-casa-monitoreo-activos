@@ -323,4 +323,50 @@ public class TestDataFactory {
         );
         return usuario;
     }
+
+    /**
+     * Igual que el usuario de la demo: perfil solo API, licencia de integracion
+     * y Nova_Casa_Integracion. El conjunto exige la licencia antes de asignarse.
+     */
+    public static User usuarioDeIntegracion() {
+        Profile perfil = [
+            SELECT Id
+            FROM Profile
+            WHERE Name = 'Salesforce API Only System Integrations'
+            LIMIT 1
+        ];
+        String sufijo = String.valueOf(Crypto.getRandomInteger()).replace('-', '');
+        User usuario = new User(
+            Alias = sufijo.left(8),
+            Email = sufijo + '@novacasa.test',
+            EmailEncodingKey = 'UTF-8',
+            LastName = 'Integracion',
+            LanguageLocaleKey = 'es',
+            LocaleSidKey = 'es_CO',
+            TimeZoneSidKey = 'America/Bogota',
+            Username = sufijo + '.integracion@novacasa.test',
+            ProfileId = perfil.Id
+        );
+        insert usuario;
+        PermissionSetLicense licencia = [
+            SELECT Id
+            FROM PermissionSetLicense
+            WHERE DeveloperName = 'SalesforceAPIIntegrationPsl'
+            LIMIT 1
+        ];
+        insert new PermissionSetLicenseAssign(
+            AssigneeId = usuario.Id,
+            PermissionSetLicenseId = licencia.Id
+        );
+        PermissionSet conjunto = [
+            SELECT Id
+            FROM PermissionSet
+            WHERE Name = 'Nova_Casa_Integracion'
+        ];
+        insert new PermissionSetAssignment(
+            AssigneeId = usuario.Id,
+            PermissionSetId = conjunto.Id
+        );
+        return usuario;
+    }
 }

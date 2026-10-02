@@ -2,7 +2,8 @@
  * Orquesta una tanda de avisos: consulta, resuelve en memoria, escribe estado,
  * incidente y bitacora. Orden: estado, caso, senal.
  *
- * without sharing: proceso de sistema. El disparador corre como usuario automatizado.
+ * without sharing: proceso de sistema. El disparador corre como el usuario de
+ * integracion (scripts/configurar-suscriptor.sh), que no ve por ciudad.
  */
 public without sharing class ProcesamientoServicio {
     public class ResultadoTanda {

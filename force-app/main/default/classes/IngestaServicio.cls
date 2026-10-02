@@ -1,7 +1,7 @@
 /**
  * Orquesta un ciclo de ingesta: llama al simulador, valida, guarda senales y publica avisos.
  *
- * without sharing: Control_de_Ingesta__c es Private y la senal cubre todos los edificios.
+ * without sharing: la senal cubre todos los edificios, sin importar quien programe la ingesta.
  * Las consultas van en SYSTEM_MODE porque en API 67 without sharing no salta FLS.
  */
 public without sharing class IngestaServicio {

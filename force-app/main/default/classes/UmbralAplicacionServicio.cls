@@ -3,12 +3,24 @@
  * estados actuales que coinciden con el umbral. No toca Senal__c. No abre ni
  * cierra casos. No es automatica: la dispara el coordinador.
  *
- * with sharing para que solo vea estados de sus edificios. El DML va en modo
- * de sistema porque el coordinador no edita Estado_Actual__c: su trabajo es
- * cambiar el umbral, no la foto operativa. Esa excepcion esta acotada a esta
- * clase, que ningun LWC invoca.
+ * Solo la ejecuta quien puede editar Umbral__c (coordinador y administracion).
+ * El resto recibe SinPermisoException, llegue por el boton o llamando a Apex.
+ *
+ * with sharing para que solo vea estados de sus edificios. La escritura va en
+ * Escritura, without sharing: el coordinador lee sus edificios pero no los
+ * edita, y un detalle principal-detalle exige editar el padre. Solo toca la
+ * severidad de estados que ya pasaron el filtro de sharing. Ningun LWC la invoca.
  */
 public with sharing class UmbralAplicacionServicio {
+  public class SinPermisoException extends Exception {
+  }
+
+  private without sharing class Escritura {
+    void actualizar(List<Estado_Actual__c> estados) {
+      Database.update(estados, AccessLevel.SYSTEM_MODE);
+    }
+  }
+
   public class Peticion {
     @InvocableVariable(required=true)
     public Id umbralId;
@@ -24,6 +36,11 @@ public with sharing class UmbralAplicacionServicio {
     description='Recalcula la severidad de los estados actuales de este umbral. No toca la bitácora ni abre casos.'
   )
   public static List<Respuesta> aplicar(List<Peticion> peticiones) {
+    if (!Schema.SObjectType.Umbral__c.isUpdateable()) {
+      throw new SinPermisoException(
+        'Solo quien edita umbrales puede aplicar l\u00edmites.'
+      );
+    }
     List<Respuesta> respuestas = new List<Respuesta>();
     if (peticiones == null || peticiones.isEmpty()) {
       return respuestas;
@@ -118,8 +135,7 @@ public with sharing class UmbralAplicacionServicio {
       }
 
       if (!paraActualizar.isEmpty()) {
-        // El coordinador no edita Estado_Actual__c; la accion si, en su nombre.
-        Database.update(paraActualizar, AccessLevel.SYSTEM_MODE);
+        new Escritura().actualizar(paraActualizar);
         respuesta.estadosActualizados = paraActualizar.size();
       }
       respuestas.add(respuesta);

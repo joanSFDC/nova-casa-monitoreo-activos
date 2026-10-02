@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<SharingRules xmlns="http://soap.sforce.com/2006/04/metadata">
+    <sharingCriteriaRules>
+        <fullName>Casos_Bogota</fullName>
+        <accessLevel>Edit</accessLevel>
+        <description
+    >Case es privado. Los casos de equipos de Bogotá van al grupo de esa ciudad. Edit para que el coordinador, que está en el grupo, los edite; el operador no tiene editar sobre Case y se queda en lectura.</description>
+        <label>Casos Bogotá</label>
+        <sharedTo>
+            <group>Operadores_Bogota</group>
+        </sharedTo>
+        <criteriaItems>
+            <field>Ciudad__c</field>
+            <operation>equals</operation>
+            <value>Bogotá</value>
+        </criteriaItems>
+        <includeRecordsOwnedByAll>true</includeRecordsOwnedByAll>
+    </sharingCriteriaRules>
+    <sharingCriteriaRules>
+        <fullName>Casos_Barranquilla</fullName>
+        <accessLevel>Edit</accessLevel>
+        <description
+    >Case es privado. Los casos de equipos de Barranquilla van al grupo de esa ciudad. Edit para que el coordinador, que está en el grupo, los edite; el operador no tiene editar sobre Case y se queda en lectura.</description>
+        <label>Casos Barranquilla</label>
+        <sharedTo>
+            <group>Operadores_Barranquilla</group>
+        </sharedTo>
+        <criteriaItems>
+            <field>Ciudad__c</field>
+            <operation>equals</operation>
+            <value>Barranquilla</value>
+        </criteriaItems>
+        <includeRecordsOwnedByAll>true</includeRecordsOwnedByAll>
+    </sharingCriteriaRules>
+</SharingRules>
