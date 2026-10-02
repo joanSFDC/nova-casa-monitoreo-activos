@@ -57,7 +57,7 @@ public inherited sharing class IngestaValidador {
         return catalogo;
     }
 
-    public static Dictamen validar(Map<String, Object> mensaje, Catalogo catalogo, Datetime ahora) {
+    public static Dictamen validar(Map<String, Object> mensaje, Catalogo catalogo) {
         Dictamen dictamen = new Dictamen();
         String messageId = texto(mensaje, 'messageId');
         String messageType = texto(mensaje, 'messageType');
@@ -104,7 +104,9 @@ public inherited sharing class IngestaValidador {
             dictamen.motivo = IngestaConstantes.MOTIVO_FECHA;
             return dictamen;
         }
-        if (dictamen.origen > ahora.addMinutes(IngestaConstantes.TOLERANCIA_FUTURO_MINUTOS)) {
+        // Contra publishedAt y no contra la hora de la org: el reloj del simulador
+        // avanza un minuto por mensaje, no con el tiempo real.
+        if (dictamen.origen > dictamen.publicacion.addMinutes(IngestaConstantes.TOLERANCIA_FUTURO_MINUTOS)) {
             dictamen.motivo = IngestaConstantes.MOTIVO_FUTURA;
             return dictamen;
         }

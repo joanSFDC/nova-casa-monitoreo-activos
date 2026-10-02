@@ -242,7 +242,7 @@ y no impide que los demás de la misma página sigan su camino.
 | Existe un `Activo__c` con ese `asset.id` | Activo no encontrado | Sí |
 | El activo pertenece a ese edificio | Activo no coincide con el edificio | No |
 | `occurredAt` es una fecha válida | Fecha inválida | No |
-| `occurredAt` no supera la tolerancia de futuro | Fecha futura | No |
+| `occurredAt` no supera a `publishedAt` en más de la tolerancia | Fecha futura | No |
 | `measurement.type` en el catálogo | Tipo de medición desconocido | Sí |
 | `measurement.value` presente y numérico | Valor inválido | No |
 | `measurement.unit` coincide con la del límite | Unidad no compatible | No |
@@ -267,9 +267,17 @@ publishedAt 2026-09-22T21:55:28.402Z
 ```
 
 Un reloj mal sincronizado en un sensor produce desfases de segundos o minutos, no de días.
-**Decisión: se aceptan hasta cinco minutos de adelanto sobre la hora del sistema y se
-rechaza por encima.** El valor se guarda en una constante nombrada y no repartida por el
-código, para que cambiarlo sea una línea.
+**Decisión: se aceptan hasta cinco minutos de adelanto de `occurredAt` sobre el
+`publishedAt` del mismo mensaje y se rechaza por encima.** El valor se guarda en una
+constante nombrada y no repartida por el código, para que cambiarlo sea una línea.
+
+La referencia es `publishedAt` y no la hora de la organización porque el reloj del
+simulador no es el real: arranca al abrir la sesión y avanza un minuto por mensaje.
+Consultado deprisa se adelanta a la organización, y consultado despacio se queda atrás. Con
+la hora de la organización como referencia, la primera ingesta rechazó como futuras 471
+lecturas normales, sin reintento posible. Un hecho no puede ocurrir después de publicarse,
+así que la comparación dentro del propio mensaje separa el dato malo del bueno sin depender
+del ritmo de consulta.
 
 ### Sobre las claves repetidas dentro de una misma página
 
