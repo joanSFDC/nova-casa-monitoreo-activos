@@ -4,6 +4,7 @@ import { refreshApex } from "@salesforce/apex";
 import { subscribe, unsubscribe, onError } from "lightning/empApi";
 import obtenerPanel from "@salesforce/apex/MonitorControlador.obtenerPanel";
 import abrirIntervencion from "@salesforce/apex/MonitorControlador.abrirIntervencion";
+import NotaIntervencion from "c/notaIntervencion";
 
 const CANAL_AVISO = "/event/Aviso_de_Senal__e";
 const ESPERA_MS = 2000;
@@ -249,8 +250,20 @@ export default class MonitorDeActivos extends NavigationMixin(
       this.irAlCaso(casoId);
       return;
     }
+    const fila = this.filas.find((item) => item.estadoId === estadoId);
+    NotaIntervencion.open({
+      size: "small",
+      equipo: fila ? fila.equipo + " · " + fila.medicion : ""
+    }).then((respuesta) => {
+      if (respuesta) {
+        this.abrir(estadoId, respuesta.nota);
+      }
+    });
+  }
+
+  abrir(estadoId, nota) {
     this.actualizando = true;
-    abrirIntervencion({ estadoId, nota: null })
+    abrirIntervencion({ estadoId, nota })
       .then((id) => {
         this.irAlCaso(id);
       })

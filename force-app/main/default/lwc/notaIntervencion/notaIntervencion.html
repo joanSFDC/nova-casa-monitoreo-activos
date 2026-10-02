@@ -1,0 +1,26 @@
+<template>
+  <lightning-modal-header label="Abrir intervención">
+    {equipo}
+  </lightning-modal-header>
+  <lightning-modal-body>
+    <lightning-textarea
+      name="nota"
+      label="Nota para la actividad del caso (opcional)"
+      max-length="32000"
+      value={nota}
+      onchange={handleNota}
+    ></lightning-textarea>
+  </lightning-modal-body>
+  <lightning-modal-footer>
+    <lightning-button
+      label="Cancelar"
+      onclick={handleCancelar}
+    ></lightning-button>
+    <lightning-button
+      class="slds-m-left_x-small"
+      variant="brand"
+      label="Abrir"
+      onclick={handleAbrir}
+    ></lightning-button>
+  </lightning-modal-footer>
+</template>

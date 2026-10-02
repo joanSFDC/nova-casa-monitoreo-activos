@@ -177,11 +177,16 @@ permisos.
 | `Senal__c` | — | Leer, sin `Carga__c` ni `Detalle__c` | — | Leer, entera | Crear, leer, editar |
 | `Control_de_Ingesta__c` | Solo la última consulta | Solo la última consulta | Solo la última consulta | Leer, editar | Leer, editar |
 | `Case` | Leer, crear | Leer, crear, editar | Leer | Todo | Crear, leer, editar |
-| `Task` | Leer, crear | Leer, crear, editar | Leer | Todo | — |
+| `Task` | Leer, crear, editar las suyas | Leer, crear, editar | Leer | Todo | — |
 
 «Solo la última consulta» es `Ultima_Consulta_Exitosa__c`, la fecha que necesita el aviso
 de ingesta atrasada del monitor. El cursor, la semilla y el resto del control siguen
 ocultos.
+
+Crear tareas exige además el permiso de usuario «Edit Tasks»: el permiso de objeto sobre
+`Task` no basta. Sin él, la nota con la que el operador abre una intervención se perdía en
+silencio. Salesforce no separa crear de editar tareas, así que el operador también puede
+editar sus propias notas; las de otros no, porque no edita el caso.
 
 Dos ausencias que son decisiones, no olvidos.
 

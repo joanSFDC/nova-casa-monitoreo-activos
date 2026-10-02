@@ -199,6 +199,60 @@ private class MonitorControladorTest {
   }
 
   @isTest
+  static void shouldDejarLaNotaEnLaActividad_WhenSeAbreConNota() {
+    Estado_Actual__c estado = estadoCriticoDeLaBomba();
+
+    Test.startTest();
+    Id casoId = MonitorControlador.abrirIntervencion(
+      estado.Id,
+      'Revisar la bomba'
+    );
+    Test.stopTest();
+
+    List<Task> tareas = [
+      SELECT Subject, Description, Status
+      FROM Task
+      WHERE WhatId = :casoId
+    ];
+    Assert.areEqual(1, tareas.size(), 'La nota es la primera actividad');
+    Assert.areEqual('Revisar la bomba', tareas[0].Description);
+    Assert.areEqual('Nota del operador', tareas[0].Subject);
+    Assert.areEqual('Completed', tareas[0].Status);
+  }
+
+  @isTest
+  static void shouldAbrirSinTarea_WhenNotaEnBlanco() {
+    Estado_Actual__c estado = estadoCriticoDeLaBomba();
+
+    Test.startTest();
+    Id casoId = MonitorControlador.abrirIntervencion(estado.Id, null);
+    Test.stopTest();
+
+    Assert.isNotNull(casoId, 'Sin nota el caso se abre igual');
+    Assert.areEqual(0, [SELECT COUNT() FROM Task WHERE WhatId = :casoId]);
+  }
+
+  private static Estado_Actual__c estadoCriticoDeLaBomba() {
+    Activo__c bomba = [
+      SELECT Id, Codigo_Externo__c
+      FROM Activo__c
+      WHERE Codigo_Externo__c = :TestDataFactory.AST_PUMP
+    ];
+    Estado_Actual__c estado = new Estado_Actual__c(
+      Activo__c = bomba.Id,
+      Clave__c = bomba.Codigo_Externo__c + '|WATER_PRESSURE',
+      Tipo_Medicion__c = 'WATER_PRESSURE',
+      Valor__c = 0.8,
+      Unidad__c = 'BAR',
+      Severidad__c = IngestaConstantes.SEV_CRITICO,
+      Severidad_Nivel__c = 2,
+      Fecha_Origen__c = Datetime.now()
+    );
+    insert estado;
+    return estado;
+  }
+
+  @isTest
   static void shouldConservarCerosFinales_WhenUmbralPideDecimales() {
     String separador = Decimal.valueOf('1.5').format().substring(1, 2);
     Assert.areEqual(

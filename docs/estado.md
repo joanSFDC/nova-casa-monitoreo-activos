@@ -399,6 +399,12 @@ No estaban en la especificación y conviene no redescubrirlas.
     ([módulo 01](01-contrato-del-mensaje.md)). Las 1.693 señales anteriores
     conservan su clave; en el paso, un reenvío en vuelo puede dejar una
     segunda fila con el mismo hecho, sin efecto en el estado.
+32. **Crear tareas exige «Edit Tasks».** El permiso de objeto sobre `Task`
+    no basta, y ni el operador ni el coordinador lo tenían: la nota de una
+    intervención se perdía en silencio porque la tarea se inserta con
+    `allOrNone` en falso. Los dos conjuntos lo llevan ahora. Salesforce no
+    separa crear de editar tareas, así que el operador edita sus notas,
+    no las ajenas ([módulo 10](10-seguridad-y-accesos.md)).
 
 ## Historial breve
 
@@ -417,4 +423,5 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-01 | Monitor US-207: panel del operador, contadores y aviso de ingesta. PR #26 fusionado. Cierra #10 |
 | 2026-10-01 | Autorización US-208: casos por ciudad, acciones comprobadas, suscriptor como integración. PR #27 fusionado. Cierra #11 |
 | 2026-10-01 | Fecha futura contra `publishedAt`: el reloj del simulador no es el de la org. PR #32 fusionado. Cierra #28 |
-| 2026-10-01 | La sesión del simulador entra en la clave de la señal. Cierra #31 |
+| 2026-10-01 | La sesión del simulador entra en la clave de la señal. PR #33 fusionado. Cierra #31 |
+| 2026-10-01 | Nota opcional al abrir una intervención y «Edit Tasks» para operador y coordinador. Cierra #29 |

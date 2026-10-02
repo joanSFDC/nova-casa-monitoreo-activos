@@ -80,6 +80,73 @@ private class SeguridadAccesosTest {
   }
 
   @isTest
+  static void shouldDejarLaNota_WhenOperadorIntervieneEnSuCiudad() {
+    User operador = operadorDeAlameda();
+    Estado_Actual__c bomba = estado(CLAVE_BOMBA);
+    bomba.Severidad__c = IngestaConstantes.SEV_ADVERTENCIA;
+    bomba.Severidad_Nivel__c = 1;
+    update bomba;
+
+    Id casoId;
+    Test.startTest();
+    System.runAs(operador) {
+      casoId = MonitorControlador.abrirIntervencion(
+        bomba.Id,
+        'Revisar la bomba'
+      );
+    }
+    Test.stopTest();
+
+    List<Task> tareas = [
+      SELECT Description, CreatedById
+      FROM Task
+      WHERE WhatId = :casoId
+    ];
+    Assert.areEqual(1, tareas.size(), 'El operador deja su nota en el caso');
+    Assert.areEqual('Revisar la bomba', tareas[0].Description);
+    Assert.areEqual(operador.Id, tareas[0].CreatedById, 'Y queda a su nombre');
+  }
+
+  @isTest
+  static void shouldNoEditarNotaAjena_WhenOperador() {
+    User operador = operadorDeAlameda();
+    Case incidente = new Case(
+      Subject = 'Lectura fuera de rango ' + CLAVE_BOMBA,
+      Status = 'New',
+      Origin = 'Web',
+      Priority = 'Low',
+      Activo__c = activo(TestDataFactory.AST_PUMP).Id,
+      Tipo_Medicion__c = 'WATER_PRESSURE',
+      Clave_Abierta__c = CLAVE_BOMBA
+    );
+    insert incidente;
+    Task ajena = new Task(
+      WhatId = incidente.Id,
+      Subject = 'Nota del operador',
+      Description = 'Nota del coordinador',
+      Status = 'Completed'
+    );
+    insert ajena;
+
+    Database.SaveResult resultado;
+    Test.startTest();
+    System.runAs(operador) {
+      resultado = Database.update(
+        new Task(Id = ajena.Id, Description = 'Cambiada'),
+        false,
+        AccessLevel.USER_MODE
+      );
+    }
+    Test.stopTest();
+
+    Assert.isFalse(resultado.isSuccess(), 'Edit Tasks no le deja tocar notas de otros');
+    Assert.areEqual(
+      'Nota del coordinador',
+      [SELECT Description FROM Task WHERE Id = :ajena.Id].Description
+    );
+  }
+
+  @isTest
   static void shouldNegarCasoYEquipo_WhenOperadorLosPideDirectoAApex() {
     User operador = operadorDeAlameda();
     Case casoCaribe = [

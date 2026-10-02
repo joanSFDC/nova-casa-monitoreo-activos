@@ -100,6 +100,12 @@ La ordenación por defecto es severidad descendente y, dentro de cada severidad,
 descendente. Así lo primero que se ve es lo más grave y, entre cosas igual de graves, lo
 que lleva más tiempo sin atenderse.
 
+**Abrir intervención** pregunta antes por una nota opcional, en un diálogo con el equipo y
+la medición en la cabecera. Con nota, el caso nace con ella en la descripción y como
+primera tarea de su actividad, a nombre del operador. Sin nota, se abre igual. Cancelar,
+la X o Escape no crean nada. El diálogo es `lightning-modal`: lleva el foco a su título al
+abrirse, lo mantiene dentro mientras está abierto y lo devuelve al botón al cerrarse.
+
 ### Detalle del incidente
 
 Una sola página. Muestra el caso con su prioridad, su estado, su propietario si lo tiene,
