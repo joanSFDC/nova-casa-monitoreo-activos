@@ -191,6 +191,7 @@ export default class MonitorDeActivos extends NavigationMixin(
     if (this.temporizador) {
       clearTimeout(this.temporizador);
     }
+    // eslint-disable-next-line @lwc/lwc/no-async-operation -- una sola consulta por rafaga de avisos
     this.temporizador = setTimeout(() => {
       this.temporizador = undefined;
       this.consultar();

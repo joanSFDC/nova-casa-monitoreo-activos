@@ -83,6 +83,7 @@ const PANEL = {
 
 function flushPromises() {
   return new Promise((resolve) => {
+    // eslint-disable-next-line @lwc/lwc/no-async-operation -- deja terminar las promesas pendientes
     setTimeout(resolve, 0);
   });
 }

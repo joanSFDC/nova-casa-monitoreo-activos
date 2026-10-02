@@ -62,36 +62,6 @@ public with sharing class MonitorControlador {
     public String comunicacion;
   }
 
-  public class IncidenteDTO {
-    @AuraEnabled
-    public Id id;
-    @AuraEnabled
-    public String asunto;
-    @AuraEnabled
-    public String estado;
-    @AuraEnabled
-    public String prioridad;
-    @AuraEnabled
-    public String propietario;
-    @AuraEnabled
-    public String equipo;
-    @AuraEnabled
-    public String medicion;
-    @AuraEnabled
-    public String descripcion;
-    @AuraEnabled
-    public List<ActividadDTO> actividades;
-  }
-
-  public class ActividadDTO {
-    @AuraEnabled
-    public String cuando;
-    @AuraEnabled
-    public String autor;
-    @AuraEnabled
-    public String texto;
-  }
-
   @AuraEnabled(cacheable=true)
   public static PanelDTO obtenerPanel(String edificioId) {
     PanelDTO panel = new PanelDTO();
@@ -193,61 +163,6 @@ public with sharing class MonitorControlador {
     }
     rellenarIngesta(panel);
     return panel;
-  }
-
-  @AuraEnabled(cacheable=true)
-  public static IncidenteDTO obtenerIncidente(Id casoId) {
-    if (casoId == null) {
-      throw new AuraHandledException('Falta el incidente.');
-    }
-    List<Case> casos = [
-      SELECT
-        Id,
-        Subject,
-        Status,
-        Priority,
-        Description,
-        Owner.Name,
-        Activo__r.Name,
-        Tipo_Medicion__c
-      FROM Case
-      WHERE Id = :casoId
-      WITH USER_MODE
-      LIMIT 1
-    ];
-    if (casos.isEmpty()) {
-      throw new AuraHandledException(
-        'No tienes acceso a este incidente o no existe.'
-      );
-    }
-    Case incidente = casos[0];
-    IncidenteDTO dto = new IncidenteDTO();
-    dto.id = incidente.Id;
-    dto.asunto = incidente.Subject;
-    dto.estado = incidente.Status;
-    dto.prioridad = incidente.Priority;
-    dto.descripcion = incidente.Description;
-    dto.propietario = incidente.Owner == null ? null : incidente.Owner.Name;
-    dto.equipo = incidente.Activo__r == null ? null : incidente.Activo__r.Name;
-    dto.medicion = etiquetaMedicion(incidente.Tipo_Medicion__c);
-    dto.actividades = new List<ActividadDTO>();
-    for (Task tarea : [
-      SELECT Subject, Description, CreatedDate, CreatedBy.Name
-      FROM Task
-      WHERE WhatId = :casoId
-      WITH USER_MODE
-      ORDER BY CreatedDate DESC
-      LIMIT 20
-    ]) {
-      ActividadDTO actividad = new ActividadDTO();
-      actividad.cuando = antiguedadDe(tarea.CreatedDate, Datetime.now());
-      actividad.autor = tarea.CreatedBy.Name;
-      actividad.texto = String.isBlank(tarea.Description)
-        ? tarea.Subject
-        : tarea.Description;
-      dto.actividades.add(actividad);
-    }
-    return dto;
   }
 
   @AuraEnabled

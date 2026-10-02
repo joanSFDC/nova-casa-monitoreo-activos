@@ -300,7 +300,7 @@ Lo que cada prueba verifica. Salvo las dos primeras filas, están en `SeguridadA
 | Operador con un edificio | `MonitorControladorTest.shouldMostrarSoloSuCiudad_WhenOperadorBogota` | Solo ve los estados de ese edificio |
 | Operador sobre la bitácora | `TrazabilidadTest.shouldOcultarBitacora_WhenOperador` | No tiene acceso |
 | Operador con otro edificio | `shouldDevolverVacio_WhenOperadorPideOtroEdificio` | Pedir Caribe da vacío y contadores en cero, no un error |
-| Operador llamando a Apex | `shouldNegarCasoYEquipo_WhenOperadorLosPideDirectoAApex` | No lee el caso de Caribe ni interviene su equipo; no se crea nada |
+| Operador llamando a Apex | `shouldNegarCasoYEquipo_WhenOperadorLosPideDirectoAApex` | En modo usuario no le llega el caso de Caribe, y abrir intervención sobre su equipo falla; no se crea nada |
 | Operador sobre umbrales | `shouldLeerSinEditarNiAplicar_WhenOperadorSobreUmbrales` | Lee, **no** edita, y Aplicar límites lo rechaza |
 | Coordinador sobre umbrales | `shouldEditarYAplicar_WhenCoordinadorSobreUmbrales` | Edita y aplica: la bomba pasa a crítico |
 | Administrador sobre la bitácora | `shouldVerTodaSinEditarNiBorrar_WhenAdministradorSobreBitacora` | Ve todas, con carga y detalle; no edita ni borra |

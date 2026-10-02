@@ -139,7 +139,10 @@ private class SeguridadAccesosTest {
     }
     Test.stopTest();
 
-    Assert.isFalse(resultado.isSuccess(), 'Edit Tasks no le deja tocar notas de otros');
+    Assert.isFalse(
+      resultado.isSuccess(),
+      'Edit Tasks no le deja tocar notas de otros'
+    );
     Assert.areEqual(
       'Nota del coordinador',
       [SELECT Description FROM Task WHERE Id = :ajena.Id].Description
@@ -156,15 +159,16 @@ private class SeguridadAccesosTest {
     ];
     Estado_Actual__c salaCaribe = estado(CLAVE_SALA);
 
-    Boolean incidenteNegado = false;
+    List<Case> casosVistos;
     Boolean intervencionNegada = false;
     Test.startTest();
     System.runAs(operador) {
-      try {
-        MonitorControlador.obtenerIncidente(casoCaribe.Id);
-      } catch (AuraHandledException e) {
-        incidenteNegado = true;
-      }
+      casosVistos = [
+        SELECT Id
+        FROM Case
+        WHERE Id = :casoCaribe.Id
+        WITH USER_MODE
+      ];
       try {
         MonitorControlador.abrirIntervencion(salaCaribe.Id, 'Desde la consola');
       } catch (AuraHandledException e) {
@@ -173,10 +177,7 @@ private class SeguridadAccesosTest {
     }
     Test.stopTest();
 
-    Assert.isTrue(
-      incidenteNegado,
-      'El caso de Caribe no se lee llamando a Apex'
-    );
+    Assert.isTrue(casosVistos.isEmpty(), 'El caso de Caribe no se lee');
     Assert.isTrue(intervencionNegada, 'Ni se interviene un equipo de Caribe');
     Assert.areEqual(1, [SELECT COUNT() FROM Case], 'No se creo ningun caso');
     Assert.areEqual(0, [SELECT COUNT() FROM Task], 'Ni una nota');

@@ -166,7 +166,7 @@ private class MonitorControladorTest {
   }
 
   @isTest
-  static void shouldCrearCasoYLeerlo_WhenNoHayAbierto() {
+  static void shouldCrearCaso_WhenNoHayAbierto() {
     Activo__c bomba = [
       SELECT Id, Codigo_Externo__c
       FROM Activo__c
@@ -186,16 +186,31 @@ private class MonitorControladorTest {
 
     Test.startTest();
     Id casoId = MonitorControlador.abrirIntervencion(estado.Id, 'voy');
-    MonitorControlador.IncidenteDTO detalle = MonitorControlador.obtenerIncidente(
-      casoId
-    );
     Test.stopTest();
 
-    Assert.isNotNull(casoId);
-    Assert.areEqual(casoId, detalle.id);
-    Assert.areEqual('High', detalle.prioridad);
-    Assert.areEqual('voy', detalle.descripcion);
-    Assert.areEqual(1, detalle.actividades.size());
+    Case incidente = [
+      SELECT
+        Priority,
+        Description,
+        Activo__c,
+        Tipo_Medicion__c,
+        Clave_Abierta__c
+      FROM Case
+      WHERE Id = :casoId
+    ];
+    Assert.areEqual(
+      'High',
+      incidente.Priority,
+      'Critico abre en prioridad alta'
+    );
+    Assert.areEqual('voy', incidente.Description);
+    Assert.areEqual(bomba.Id, incidente.Activo__c);
+    Assert.areEqual('WATER_PRESSURE', incidente.Tipo_Medicion__c);
+    Assert.areEqual(
+      estado.Clave__c,
+      incidente.Clave_Abierta__c,
+      'Un caso abierto por equipo y medicion'
+    );
   }
 
   @isTest
