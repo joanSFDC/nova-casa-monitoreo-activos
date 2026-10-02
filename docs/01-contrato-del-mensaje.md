@@ -160,14 +160,25 @@ un reenvío: es una contradicción sobre un hecho que ya se afirmó.
 
 ### La decisión
 
-**La clave de identidad es `source` + `messageId`**, concatenados con una barra vertical:
-`nova-casa-simulator|msg_000002`. Se guarda en `Senal__c.Clave__c`, marcado como External
+**La clave de identidad es `source` + `messageId` dentro de la sesión del simulador**,
+concatenados con una barra vertical: `nova-casa-simulator|2026-09-24T21:44:55Z|msg_000002`.
+Se guarda en `Senal__c.Clave__c`, marcado como External
 ID y Unique. La unicidad la impone la base de datos, no una comprobación escrita a mano
 que alguien pueda olvidar en una rama del código.
 
 Se incluye `source` en la clave aunque hoy solo haya un origen, porque el día que haya
 dos proveedores sus numeraciones van a colisionar y el cambio de esquema en ese momento
 sería caro.
+
+El inicio de la sesión está en la clave porque cada sesión nueva del simulador vuelve a
+empezar en `msg_000001`, con cualquier semilla, y con fechas que arrancan al abrirla. El
+mismo `messageId` en otra sesión es otro hecho, no un reenvío. Sin la sesión, el primer
+mensaje de una sesión nueva coincidía en clave con el de la anterior pero no en resumen, y
+quedaba como conflicto: una sesión nueva entera no llegaba nunca al estado. El inicio sale
+de `Control_de_Ingesta__c.Sesion_Iniciada__c` y va en segundos, porque el campo guardado
+pierde los milisegundos. Los reenvíos ocurren dentro de una misma sesión y se siguen
+reconociendo igual. Las señales guardadas antes de este cambio conservan
+`source|messageId`.
 
 **Para distinguir un reenvío de un conflicto se guarda además un resumen del contenido**,
 en `Senal__c.Hash_Contenido__c`. Es un SHA-256 en base 64 calculado sobre los campos que

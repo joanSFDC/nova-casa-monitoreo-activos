@@ -250,10 +250,11 @@ rompa, el siguiente minuto la vuelve a arrancar desde el cursor guardado.
 
 El caso 409 merece una aclaración, porque tiene una consecuencia que no es obvia. Abrir
 una sesión nueva **reinicia el flujo de mensajes desde el principio**: el simulador
-vuelve a emitir `msg_000001`. Eso no corrompe nada, porque la clave del mensaje es la
-misma y la deduplicación los reconoce como reenvíos, pero sí infla el contador de entregas
-y llena la bitácora de duplicados. Por eso el 409 se registra explícitamente en
-`Ultimo_Error__c` en lugar de tratarse como un caso rutinario.
+vuelve a emitir `msg_000001`, con fechas que arrancan al abrir la sesión. No son reenvíos
+de la sesión anterior, porque el mismo `messageId` trae otro hecho. Por eso la clave de la
+señal lleva el inicio de la sesión ([módulo 01](01-contrato-del-mensaje.md)); sin él, la
+sesión nueva entera quedaba en conflicto y no llegaba nunca al estado. El 409 se registra
+igualmente en `Ultimo_Error__c`, porque perder el cursor no es un caso rutinario.
 
 El 429 no se reintenta dentro del mismo ciclo. Reintentar de inmediato ante una respuesta
 que dice «vas demasiado rápido» es exactamente lo que no hay que hacer. Cortar el ciclo y
@@ -447,7 +448,7 @@ sequenceDiagram
 
     Note over Q,Ctl: Callouts ya ocurrieron. Ahora no hay mas HTTP.
 
-    Q->>Val: deduplicar en memoria por source|messageId
+    Q->>Val: deduplicar en memoria por source|sesion|messageId
     Q->>Val: validar cada mensaje contra edificio, activo y umbral
     Q->>DB: upsert allOrNone=false por Clave__c
     alt Valida y nueva

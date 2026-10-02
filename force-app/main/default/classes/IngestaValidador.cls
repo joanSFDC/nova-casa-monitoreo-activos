@@ -198,13 +198,21 @@ public inherited sharing class IngestaValidador {
         }
     }
 
-    public static String claveDe(Map<String, Object> mensaje) {
+    /**
+     * source|inicio de sesion|messageId. Cada sesion del simulador vuelve a empezar
+     * en msg_000001: sin el inicio, una sesion nueva chocaria con la bitacora.
+     * El inicio va en segundos porque el campo guardado pierde los milisegundos.
+     */
+    public static String claveDe(Map<String, Object> mensaje, Datetime inicioSesion) {
         String source = texto(mensaje, 'source');
         String messageId = texto(mensaje, 'messageId');
         if (String.isBlank(source) || String.isBlank(messageId)) {
             return null;
         }
-        return source + '|' + messageId;
+        if (inicioSesion == null) {
+            return source + '|' + messageId;
+        }
+        return source + '|' + inicioSesion.formatGmt('yyyy-MM-dd\'T\'HH:mm:ss\'Z\'') + '|' + messageId;
     }
 
     public static String hashDe(Map<String, Object> mensaje) {
