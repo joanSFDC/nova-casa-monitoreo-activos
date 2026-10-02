@@ -23,8 +23,9 @@ La especificación sigue en los módulos [01](01-contrato-del-mensaje.md) a
 | Incidentes US-205 (issue #8) | En `main` | [PR #24](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/24) |
 | Conectividad US-206 (issue #9) | En `main` | [PR #25](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/25) |
 | Estado actual US-203 (issue #6) | En `main` | [PR #23](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/23) |
-| Monitor US-207 (issue #10) | En revisión | [PR #26](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/26) |
-| El resto de historias | Pendiente | Issues #11 y #13 |
+| Monitor US-207 (issue #10) | En `main` | [PR #26](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/26) |
+| Autorización US-208 (issue #11) | En revisión | [PR #27](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/27) |
+| El resto de historias | Pendiente | Issue #13 |
 | Identidad visual | Pendiente | Issue #15 |
 
 Org de trabajo: alias `novacasa2`, dominio
@@ -41,7 +42,7 @@ Ocho elementos desplegados y verificados:
   `Senal__c`, `Control_de_Ingesta__c`
 - Evento: `Aviso_de_Senal__e` (`PublishAfterCommit`)
 - Campos en `Case`: `Clave_Abierta__c`, `Activo__c`, `Tipo_Medicion__c`,
-  `Episodio_Id__c`, `Origen_Senal__c`
+  `Episodio_Id__c`, `Origen_Senal__c`, `Ciudad__c`
 - Catálogos globales: `Tipo_Activo`, `Tipo_Medicion`, `Unidad`, `Severidad`
 
 Las claves External ID y Unique funcionan: dos estados con la misma
@@ -155,7 +156,8 @@ y la licencia Salesforce Integration: no inicia sesión.
 Q-10 quedó en **por ciudad**: regla sobre `Edificio__c.Ciudad__c` hacia los grupos
 `Operadores_Bogota` y `Operadores_Barranquilla`. Coordinador y gerente están en
 los dos grupos. El edificio sigue siendo la unidad de autorización; activo y
-estado actual heredan.
+estado actual heredan. Los casos se comparten igual, por `Case.Ciudad__c`
+(US-208).
 
 La aplicación `Nova_Casa` abre en la pestaña **Monitor**. Logo y tema son el
 issue #15.
@@ -208,6 +210,41 @@ crítico o sin comunicación) o si ya hay caso, y entonces dice «Ver
 incidente». El valor conserva los decimales del umbral («0,80 bar», no
 «0,8»). La pestaña **Monitor** es la primera de la aplicación.
 
+### US-208 · Autorización
+
+La matriz del [módulo 10](10-seguridad-y-accesos.md) es lo desplegado. Lo que
+cambió para que lo fuera:
+
+- **`Case` privado**, con reglas `Casos_Bogota` y `Casos_Barranquilla` sobre
+  `Case.Ciudad__c`. Lo escribe el disparador `CaseCiudad` desde el edificio
+  del activo, sin importar lo que traiga el registro.
+  `scripts/apex/sellar-ciudad-casos.apex` rellena los casos que ya existían.
+- **`Control_de_Ingesta__c` en lectura y escritura públicas**, para que el
+  administrador edite el control aunque no sea suyo.
+- **Aplicar límites** exige poder editar `Umbral__c` y escribe en una clase
+  interna `without sharing`. Antes fallaba para el coordinador.
+- **Operador, coordinador y gerente** recibieron FLS sobre los campos estándar
+  de `Case` y `Task` que lee el monitor. Sin eso, el panel del incidente
+  fallaba con "No such column 'Subject'".
+- **Administración** lee la bitácora entera sin editarla ni borrarla.
+- **El procesamiento corre como integración**, configurado por
+  `./scripts/configurar-suscriptor.sh`.
+
+Comprobado en la org con `UserRecordAccess`, sobre los cuatro casos de Caribe
+y el control:
+
+| Usuario | Casos de Caribe | Control |
+| --- | --- | --- |
+| Operador Bogotá | Sin acceso | Lee |
+| Operador Barranquilla | Lee | Lee |
+| Coordinador | Lee, edita | Lee |
+| Gerente | Lee | Lee |
+| Administrador | Lee, edita | Lee, edita |
+
+Tras suspender y reanudar la suscripción, un ciclo de MIXED dejó 234 señales
+procesadas por Usuario Integración. Las 5 rechazadas o en conflicto quedan a
+nombre de quien lanzó la ingesta, porque se deciden al llegar.
+
 ## Cómo reconstruir el entorno
 
 ```bash
@@ -215,12 +252,19 @@ sf project deploy start --source-dir force-app -o novacasa2
 sf org assign permset -o novacasa2 -n Nova_Casa_Administracion
 ./scripts/sembrar-catalogo.sh novacasa2
 ./scripts/crear-usuarios-demo.sh novacasa2
+./scripts/configurar-suscriptor.sh novacasa2
 ```
+
+`configurar-suscriptor.sh` va después de los usuarios porque busca al de
+integración. Si el disparador ya estaba suscrito, hay que suspender y
+reanudar la suscripción (el script dice dónde). Pasar `Case` a privado lanza
+un recálculo de compartición: hasta que termina, las pruebas de
+`SeguridadAccesosTest` pueden ver los casos como públicos.
 
 ## Qué se está haciendo ahora
 
-US-207, issue #10: monitor del operador. US-208 espera esa pantalla.
-US-203, US-205 y US-206 ya están en `main`.
+US-208, issue #11: autorización más allá de la pantalla. Queda US-210
+(issue #13) y la identidad visual (issue #15).
 
 ## Decisiones que aparecieron al implementar
 
@@ -290,7 +334,33 @@ No estaban en la especificación y conviene no redescubrirlas.
     El aviso de ingesta atrasada necesita esa fecha. El cursor y la semilla
     siguen ocultos. El objeto es privado, así que operador, coordinador y
     gerente tienen «ver todo» sobre ese único registro: si no, `USER_MODE`
-    no devolvería la fila. No tienen pestaña ni el resto de campos.
+    no devolvería la fila. No tienen pestaña ni el resto de campos. Desde
+    US-208 el objeto es público (punto 26) y el «ver todo» sobra, pero se
+    queda: el aviso no depende del valor por defecto.
+22. **`Case` estaba en lectura y escritura públicas.** Es el valor de fábrica
+    de la org y nadie lo había tocado: el operador de Bogotá leía los casos de
+    Caribe por su Id. La regla del edificio no alcanza al caso, que solo tiene
+    una búsqueda al activo.
+23. **Las reglas por criterio no aceptan fórmulas.** `Case.Ciudad__c` no puede
+    ser `Activo__r.Edificio__r.Ciudad__c`: es texto y lo escribe `CaseCiudad`.
+24. **`with sharing` también frena la escritura en modo de sistema.**
+    `Database.update(..., AccessLevel.SYSTEM_MODE)` salta permisos de objeto y
+    campo, pero la compartición la decide la clase. Editar un detalle exige
+    editar el principal: Aplicar límites daba
+    `INSUFFICIENT_ACCESS_ON_CROSS_REFERENCE_ENTITY` al coordinador.
+25. **Los campos estándar de `Case` y `Task` también llevan FLS.** Subject,
+    Description, Priority y Origin en Case; Description y WhatId en Task.
+    Status, OwnerId o CaseNumber no se pueden conceder ni quitar. El monitor
+    pedía Subject con `USER_MODE` y el operador no lo tenía.
+26. **«Modificar todo» exige borrar.** Para que el administrador edite un
+    control ajeno sin poder borrarlo, el objeto pasó a lectura y escritura
+    públicas, como `Umbral__c` (punto 5). Solo administración e integración
+    tienen editar.
+27. **El suscriptor del evento no va como metadato.** El
+    `PlatformEventSubscriberConfig` lleva el Username escrito, y cambia en cada
+    org. Lo crea un script por Tooling API. Si el disparador ya estaba
+    suscrito, el cambio no entra hasta suspender y reanudar (Resume, no
+    Resume from Tip).
 
 ## Historial breve
 
@@ -306,4 +376,5 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-09-29 | Incidentes US-205: unicidad, escalada y clave al cerrar. PR #24 fusionado. Cierra #8 |
 | 2026-09-29 | Conectividad US-206: silencio, episodios y resumen del activo. PR #25 fusionado. Cierra #9 |
 | 2026-09-30 | Estado actual US-203: vigencia, empate y perdedoras de tanda. PR #23 fusionado. Cierra #6 |
-| 2026-10-01 | Monitor US-207: panel del operador, contadores y aviso de ingesta. PR #26. Cierra #10 |
+| 2026-10-01 | Monitor US-207: panel del operador, contadores y aviso de ingesta. PR #26 fusionado. Cierra #10 |
+| 2026-10-01 | Autorización US-208: casos por ciudad, acciones comprobadas, suscriptor como integración. PR #27. Cierra #11 |

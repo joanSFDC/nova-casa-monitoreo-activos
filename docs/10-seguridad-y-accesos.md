@@ -78,9 +78,11 @@ su control, de modo que saltarse una no abra las demás.
 Las credenciales viven en una External Credential y se invocan por Named Credential, según
 el [módulo 02](02-ingesta.md). El código nunca ve el token y rotarlo no implica desplegar.
 
-El acceso a esa credencial se concede por conjunto de permisos y ese conjunto **se asigna
-solo al usuario de integración**. Ningún operador puede hacer la llamada al proveedor,
-aunque conozca el endpoint.
+El acceso a esa credencial se concede por conjunto de permisos y **solo lo tienen dos**:
+`Nova_Casa_Integracion` y `Nova_Casa_Administracion`. Ningún operador, coordinador ni
+gerente puede hacer la llamada al proveedor, aunque conozca el endpoint. El administrador
+lo necesita porque programar la ingesta es una acción suya, y un trabajo programado corre
+como quien lo programó.
 
 ### Frontera 2 · El proceso de ingesta
 
@@ -105,11 +107,23 @@ da exactamente lo que necesita y nada más:
 No tiene borrado sobre nada. No tiene acceso a la configuración del sistema. Y no es un
 usuario con el que nadie inicie sesión.
 
+**Quién ejecuta cada parte.** El procesamiento, que es el disparador de
+`Aviso_de_Senal__e`, corre como el usuario de integración. Lo fija un
+`PlatformEventSubscriberConfig` que crea `./scripts/configurar-suscriptor.sh`: sin él, el
+disparador correría como Automated Process, un usuario al que no se le pueden quitar
+permisos. No va como metadato porque lleva escrito el Username, que cambia en cada org. La
+llamada al proveedor la hace la cadena `IngestaQueueable`, que corre como quien programó
+la ingesta: el administrador, que es quien tiene la credencial. Así, las señales que se
+deciden al llegar (rechazadas, en conflicto) quedan a nombre del administrador y las que se
+aplican después, a nombre de integración.
+
 Las clases de ingesta y de procesamiento se declaran `without sharing`, deliberadamente y
 con un comentario que lo explique. Tienen que poder escribir el estado de cualquier activo
 con independencia de a quién se le haya compartido, porque no actúan en nombre de ninguna
-persona. **Esa es la única excepción del sistema, y está acotada a clases que ningún
-componente de interfaz puede invocar.**
+persona. **Es la excepción del sistema, y está acotada a clases que ningún componente de
+interfaz puede invocar.** Hay una segunda, más estrecha: la escritura de Aplicar límites,
+descrita en [Las acciones](#las-acciones). Corre después de comprobar que quien la pide
+edita umbrales, y solo sobre estados que ya leyó con su compartición.
 
 ### Frontera 3 · La consulta del operador
 
@@ -154,16 +168,20 @@ permisos.
 
 ### Acceso a objetos
 
-| Objeto | Operador | Coordinador | Gerente | Administrador |
-| --- | --- | --- | --- | --- |
-| `Edificio__c` | Leer | Leer | Leer | Todo |
-| `Activo__c` | Leer | Leer | Leer | Todo |
-| `Estado_Actual__c` | Leer | Leer | Leer | Todo |
-| `Umbral__c` | Leer | Leer, editar | Leer | Todo |
-| `Senal__c` | — | Leer | — | Leer |
-| `Control_de_Ingesta__c` | — | — | — | Leer, editar |
-| `Case` | Leer, crear | Leer, crear, editar | Leer | Todo |
-| `Task` | Leer, crear | Leer, crear, editar | Leer | Todo |
+| Objeto | Operador | Coordinador | Gerente | Administrador | Integración |
+| --- | --- | --- | --- | --- | --- |
+| `Edificio__c` | Leer | Leer | Leer | Todo | Leer |
+| `Activo__c` | Leer | Leer | Leer | Todo | Leer |
+| `Estado_Actual__c` | Leer | Leer | Leer | Todo | Crear, leer, editar |
+| `Umbral__c` | Leer | Leer, editar | Leer | Todo | Leer |
+| `Senal__c` | — | Leer, sin `Carga__c` ni `Detalle__c` | — | Leer, entera | Crear, leer, editar |
+| `Control_de_Ingesta__c` | Solo la última consulta | Solo la última consulta | Solo la última consulta | Leer, editar | Leer, editar |
+| `Case` | Leer, crear | Leer, crear, editar | Leer | Todo | Crear, leer, editar |
+| `Task` | Leer, crear | Leer, crear, editar | Leer | Todo | — |
+
+«Solo la última consulta» es `Ultima_Consulta_Exitosa__c`, la fecha que necesita el aviso
+de ingesta atrasada del monitor. El cursor, la semilla y el resto del control siguen
+ocultos.
 
 Dos ausencias que son decisiones, no olvidos.
 
@@ -173,9 +191,11 @@ su experiencia y ampliaría la superficie de exposición sin ningún beneficio. 
 que pide el criterio de US-209 sobre restringir la vista de investigación a personas
 autorizadas.
 
-**Nadie borra nada, salvo el administrador.** La bitácora es un registro de auditoría y un
-registro de auditoría que se puede borrar no es un registro de auditoría. Ni siquiera el
-administrador tiene borrado masivo desde la interfaz.
+**Nadie borra la bitácora, ni el administrador.** La bitácora es un registro de auditoría y
+un registro de auditoría que se puede borrar no es un registro de auditoría. El
+administrador la lee entera, con carga y detalle, y no la edita: corregir una señal a mano
+borraría la prueba de lo que pasó. El control de ingesta sí lo edita (escenario, tanda,
+reactivarlo), pero no lo crea ni lo borra: es un registro único.
 
 ### Acceso a registros
 
@@ -185,8 +205,9 @@ administrador tiene borrado masivo desde la interfaz.
 | `Activo__c` | Controlado por el edificio | Hereda, por la relación principal-detalle |
 | `Estado_Actual__c` | Controlado por el activo | Hereda, por la relación principal-detalle |
 | `Umbral__c` | Lectura y escritura públicas | El botón de editar lo controla el permiso de objeto, no el dueño |
-| `Senal__c` | Privado | «Ver todo» para administrador y coordinador. Solo el administrador ve `Carga__c` y `Detalle__c` |
-| `Case` | Privado | Colas y jerarquía de funciones |
+| `Senal__c` | Privado | «Ver todo» para administrador, coordinador e integración. Solo el administrador ve `Carga__c` y `Detalle__c` |
+| `Control_de_Ingesta__c` | Lectura y escritura públicas | Como en `Umbral__c`: edita quien tiene el permiso de objeto, administración e integración |
+| `Case` | Privado | Reglas por `Case.Ciudad__c` hacia los grupos de operadores. Coordinador y gerente con «ver todo» |
 
 **El edificio es la unidad de autorización de todo el sistema.** Un operador tiene
 edificios asignados y de ahí hereda el acceso a sus activos y a sus estados, sin que haya
@@ -209,6 +230,39 @@ coordinador no podría editar umbrales que sembró otro usuario, que es justo el
 demo. El operador sigue sin botón de editar porque su conjunto no concede edición de
 objeto.
 
+`Control_de_Ingesta__c` sigue el mismo razonamiento. Privado con editar y «ver todo», el
+administrador solo editaría los controles que fueran suyos, y el registro lo crea quien
+siembra el entorno. «Modificar todo» lo resolvería, pero exige borrar, y el control no se
+borra.
+
+**`Case` es privado y se comparte por ciudad.** Estaba en lectura y escritura públicas,
+el valor de fábrica de la org: el operador de Bogotá abría por su Id los casos de Caribe
+aunque no viera el edificio. Las reglas por criterio no aceptan fórmulas, así que
+`Case.Ciudad__c` es un texto que escribe el disparador `CaseCiudad` desde el edificio del
+activo, al crear y al actualizar. No se toma lo que traiga el registro: si no, quien crea el
+caso elegiría qué grupo lo ve. Un caso sin activo no tiene ciudad y solo lo ven su dueño y
+quien tiene «ver todo». La regla concede edición, que es lo que deja al coordinador editar
+casos de las dos ciudades. El operador no los edita porque su conjunto no lo concede.
+
+## Las acciones
+
+Ver no basta: cada acción comprueba también quién la pide, en el servidor.
+
+| Acción | Quién | Cómo se impide al resto |
+| --- | --- | --- |
+| Abrir intervención, en el monitor | Operador y coordinador | `abrirIntervencion` lee el estado con `USER_MODE` y crea caso y nota con `USER_MODE`. Sobre un equipo ajeno responde que no existe |
+| Aplicar límites | Quien edita `Umbral__c`: coordinador y administrador | `UmbralAplicacionServicio.aplicar` lo comprueba antes de nada y lanza `SinPermisoException` |
+| Programar la ingesta | Administrador | Es quien tiene la credencial. `./scripts/programar-ingesta.sh` |
+| Procesar avisos | Usuario de integración | `./scripts/configurar-suscriptor.sh` |
+
+Aplicar límites dependía de que el botón no estuviera en la página del operador. Llamada
+desde Apex, la habría ejecutado cualquiera con lectura. Y fallaba justo a quien debía
+poder usarla: la clase es `with sharing`, y en una clase así la escritura en modo de
+sistema comprueba igual la compartición. Editar un estado actual, que es detalle del activo
+y este del edificio, exige editar el edificio, y el coordinador solo lo lee. La lectura
+sigue `with sharing`; la escritura va en una clase interna `without sharing`, después de
+la comprobación.
+
 ## Los campos sensibles
 
 Dos campos de `Senal__c` merecen tratamiento propio.
@@ -229,27 +283,35 @@ clase de cosa que se olvida al añadir una columna.
 El criterio de US-208 pide probar con dos usuarios de permisos diferentes. La prueba tiene
 que estar escrita, no ser una comprobación manual en la demo.
 
-**Decisión: se crean cuatro usuarios de prueba en el código de pruebas, uno por rol, y las
-pruebas de la capa de consulta se ejecutan dentro de `System.runAs`.**
+**Decisión: cada prueba crea su usuario en el código de pruebas, con el perfil de acceso
+mínimo y un solo conjunto de permisos, y corre dentro de `System.runAs`.** En prueba, la
+pertenencia a los grupos no se recalcula a tiempo, así que el edificio se comparte a mano
+con un `Edificio__Share`. Las reglas por ciudad se comprueban en la org.
 
-Lo que cada prueba verifica:
+Lo que cada prueba verifica. Salvo las dos primeras filas, están en `SeguridadAccesosTest`:
 
-| Prueba | Afirma |
-| --- | --- |
-| Operador con un edificio | Solo ve los estados de ese edificio |
-| Operador con otro edificio | No ve los del primero, y el resultado es vacío, no un error |
-| Operador sobre umbrales | Puede leer, **no** puede editar |
-| Coordinador sobre umbrales | Puede editar |
-| Operador sobre la bitácora | No tiene acceso |
-| Administrador sobre la bitácora | Ve todas las señales |
-| Operador sobre `Carga__c` | El campo no viene en la respuesta |
-| Ingesta sin usuario | Procesa y escribe correctamente |
+| Prueba | Método | Afirma |
+| --- | --- | --- |
+| Operador con un edificio | `MonitorControladorTest.shouldMostrarSoloSuCiudad_WhenOperadorBogota` | Solo ve los estados de ese edificio |
+| Operador sobre la bitácora | `TrazabilidadTest.shouldOcultarBitacora_WhenOperador` | No tiene acceso |
+| Operador con otro edificio | `shouldDevolverVacio_WhenOperadorPideOtroEdificio` | Pedir Caribe da vacío y contadores en cero, no un error |
+| Operador llamando a Apex | `shouldNegarCasoYEquipo_WhenOperadorLosPideDirectoAApex` | No lee el caso de Caribe ni interviene su equipo; no se crea nada |
+| Operador sobre umbrales | `shouldLeerSinEditarNiAplicar_WhenOperadorSobreUmbrales` | Lee, **no** edita, y Aplicar límites lo rechaza |
+| Coordinador sobre umbrales | `shouldEditarYAplicar_WhenCoordinadorSobreUmbrales` | Edita y aplica: la bomba pasa a crítico |
+| Administrador sobre la bitácora | `shouldVerTodaSinEditarNiBorrar_WhenAdministradorSobreBitacora` | Ve todas, con carga y detalle; no edita ni borra |
+| Coordinador sobre `Carga__c` | `shouldOmitirCargaYDetalle_WhenCoordinadorLeeBitacora` | Lee la bitácora; `Carga__c` y `Detalle__c` no vienen |
+| Administrador sobre el control | `shouldEditarControlAjeno_WhenAdministradorYNoCoordinador` | Edita un control que no es suyo; el coordinador no |
+| Ingesta como integración | `shouldProcesarYEscribir_WhenUsuarioDeIntegracion` | Solo con su conjunto, guarda, aplica y abre el caso con ciudad |
+| Ciudad del caso | `shouldSellarCiudadDelActivo_WhenCasoSeGuardaOCambia` | La ciudad sale del activo, no de lo que se escriba |
 
-La penúltima es la que más veces se olvida y la que más vale: comprueba que la seguridad a
-nivel de campo funciona de verdad, no solo la de registro.
+La de `Carga__c` es la que más veces se olvida y la que más vale: comprueba que la
+seguridad a nivel de campo funciona de verdad, no solo la de registro. Se hace con el
+coordinador y no con el operador: el operador no tiene la bitácora, así que con él solo se
+probaría el acceso al objeto. El coordinador sí lee las señales y aun así no recibe la
+carga.
 
-La última verifica la segunda frontera: que el procesamiento no dependa de que haya una
-persona con permisos detrás.
+La de integración verifica la segunda frontera: que el procesamiento no dependa de que
+haya una persona con permisos detrás.
 
 ## El resumen en una frase
 
