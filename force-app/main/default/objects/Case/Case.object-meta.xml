@@ -188,13 +188,18 @@
     </actionOverrides>
     <actionOverrides>
         <actionName>View</actionName>
+        <comment>Incidente sin formato de pagina: los perfiles de acceso minimo no tienen uno para Case</comment>
+        <content>Caso_Registro</content>
         <formFactor>Large</formFactor>
-        <type>Default</type>
+        <skipRecordTypeSelect>false</skipRecordTypeSelect>
+        <type>Flexipage</type>
     </actionOverrides>
     <actionOverrides>
         <actionName>View</actionName>
+        <content>Caso_Registro</content>
         <formFactor>Small</formFactor>
-        <type>Default</type>
+        <skipRecordTypeSelect>false</skipRecordTypeSelect>
+        <type>Flexipage</type>
     </actionOverrides>
     <compactLayoutAssignment>SYSTEM</compactLayoutAssignment>
     <enableFeeds>true</enableFeeds>

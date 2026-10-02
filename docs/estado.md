@@ -229,6 +229,9 @@ cambió para que lo fuera:
 - **Administración** lee la bitácora entera sin editarla ni borrarla.
 - **El procesamiento corre como integración**, configurado por
   `./scripts/configurar-suscriptor.sh`.
+- **Página `Caso_Registro`** para ver un caso: incidente, equipo y
+  actividades. La estándar dejaba el panel de detalles en error para todos
+  los usuarios de la demo (punto 28).
 
 Comprobado en la org con `UserRecordAccess`, sobre los cuatro casos de Caribe
 y el control:
@@ -361,6 +364,13 @@ No estaban en la especificación y conviene no redescubrirlas.
     org. Lo crea un script por Tooling API. Si el disparador ya estaba
     suscrito, el cambio no entra hasta suspender y reanudar (Resume, no
     Resume from Tip).
+28. **El perfil de acceso mínimo no tiene formato de página para `Case`.** La
+    página estándar del caso abría con el panel de detalles en error ("One or
+    more profiles have no page layout assigned"). Con Case público ya pasaba,
+    pero nadie lo veía: el administrador de la org tiene otro perfil. Mismo
+    remedio que el punto 15: `Caso_Registro`, con secciones de campos que no
+    dependen del formato, en `actionOverrides` de View. El botón Editar solo
+    aparece a quien puede editar el caso.
 
 ## Historial breve
 
