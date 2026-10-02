@@ -323,4 +323,8 @@
     </classAccesses>
     <hasActivationRequired>false</hasActivationRequired>
     <label>Nova Casa · Operador</label>
+    <userPermissions>
+        <enabled>true</enabled>
+        <name>EditTask</name>
+    </userPermissions>
 </PermissionSet>

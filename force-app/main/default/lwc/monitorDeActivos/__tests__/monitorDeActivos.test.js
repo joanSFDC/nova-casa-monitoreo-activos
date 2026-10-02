@@ -1,6 +1,8 @@
 import { createElement } from "lwc";
 import MonitorDeActivos from "c/monitorDeActivos";
 import obtenerPanel from "@salesforce/apex/MonitorControlador.obtenerPanel";
+import abrirIntervencion from "@salesforce/apex/MonitorControlador.abrirIntervencion";
+import NotaIntervencion from "c/notaIntervencion";
 import { subscribe } from "lightning/empApi";
 
 jest.mock(
@@ -159,5 +161,46 @@ describe("c-monitor-de-activos", () => {
     expect(el.shadowRoot.querySelectorAll("tbody tr")).toHaveLength(1);
     expect(el.shadowRoot.textContent).toContain("Bomba");
     expect(el.shadowRoot.textContent).not.toContain("Camara");
+  });
+
+  async function pulsarIntervenir(respuesta) {
+    NotaIntervencion.open.mockResolvedValue(respuesta);
+    abrirIntervencion.mockResolvedValue("500xx0000001");
+    const el = elemento();
+    obtenerPanel.emit(PANEL);
+    await flushPromises();
+    el.shadowRoot
+      .querySelector('lightning-button[data-estado="a08xx0000001"]')
+      .click();
+    await flushPromises();
+    return el;
+  }
+
+  it("pide la nota antes de abrir la intervención y la envía", async () => {
+    await pulsarIntervenir({ nota: "Revisar la bomba" });
+
+    expect(NotaIntervencion.open).toHaveBeenCalledWith(
+      expect.objectContaining({ equipo: "Bomba · Presion de agua" })
+    );
+    expect(abrirIntervencion).toHaveBeenCalledWith({
+      estadoId: "a08xx0000001",
+      nota: "Revisar la bomba"
+    });
+  });
+
+  it("abre la intervención sin nota si se deja en blanco", async () => {
+    await pulsarIntervenir({ nota: null });
+
+    expect(abrirIntervencion).toHaveBeenCalledWith({
+      estadoId: "a08xx0000001",
+      nota: null
+    });
+  });
+
+  it("cancelar el diálogo no abre nada", async () => {
+    await pulsarIntervenir(undefined);
+
+    expect(NotaIntervencion.open).toHaveBeenCalled();
+    expect(abrirIntervencion).not.toHaveBeenCalled();
   });
 });
