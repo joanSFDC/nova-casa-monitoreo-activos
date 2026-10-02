@@ -14,8 +14,7 @@ private class IngestaValidadorTest {
         Test.startTest();
         IngestaValidador.Dictamen dictamen = IngestaValidador.validar(
             TestDataFactory.mensajePresion(),
-            catalogo,
-            Datetime.newInstanceGmt(2026, 9, 22, 22, 0, 0)
+            catalogo
         );
         Test.stopTest();
         Assert.isTrue(dictamen.esValido(), 'Una lectura de 2.76 BAR debe pasar');
@@ -28,8 +27,7 @@ private class IngestaValidadorTest {
         Test.startTest();
         IngestaValidador.Dictamen dictamen = IngestaValidador.validar(
             TestDataFactory.mensajeTemperaturaNula(),
-            catalogo,
-            Datetime.newInstanceGmt(2026, 9, 22, 22, 0, 0)
+            catalogo
         );
         Test.stopTest();
         Assert.areEqual(IngestaConstantes.MOTIVO_VALOR, dictamen.motivo, 'Valor nulo');
@@ -42,8 +40,7 @@ private class IngestaValidadorTest {
         Test.startTest();
         IngestaValidador.Dictamen dictamen = IngestaValidador.validar(
             TestDataFactory.mensajeActivoDesconocido(),
-            catalogo,
-            Datetime.newInstanceGmt(2026, 9, 22, 22, 0, 0)
+            catalogo
         );
         Test.stopTest();
         Assert.areEqual(IngestaConstantes.MOTIVO_ACTIVO, dictamen.motivo, 'Activo desconocido');
@@ -56,26 +53,41 @@ private class IngestaValidadorTest {
         Test.startTest();
         IngestaValidador.Dictamen dictamen = IngestaValidador.validar(
             TestDataFactory.mensajePresion('msg_psi', 'dlv_psi', 40, 'PSI'),
-            catalogo,
-            Datetime.newInstanceGmt(2026, 9, 22, 22, 0, 0)
+            catalogo
         );
         Test.stopTest();
         Assert.areEqual(IngestaConstantes.MOTIVO_UNIDAD, dictamen.motivo, 'PSI no se convierte');
     }
 
     @isTest
-    static void shouldRechazarFuturo_WhenAdelantoMayorACincoMinutos() {
+    static void shouldRechazarFuturo_WhenOcurreMasDeCincoMinutosDespuesDePublicarse() {
         IngestaValidador.Catalogo catalogo = IngestaValidador.cargarCatalogo();
         Map<String, Object> mensaje = TestDataFactory.mensajePresion();
+        mensaje.put('publishedAt', '2026-09-22T22:00:00.000Z');
         mensaje.put('occurredAt', '2026-09-22T22:20:00.000Z');
         Test.startTest();
         IngestaValidador.Dictamen dictamen = IngestaValidador.validar(
             mensaje,
-            catalogo,
-            Datetime.newInstanceGmt(2026, 9, 22, 22, 0, 0)
+            catalogo
         );
         Test.stopTest();
         Assert.areEqual(IngestaConstantes.MOTIVO_FUTURA, dictamen.motivo, '20 minutos es demasiado');
+    }
+
+    @isTest
+    static void shouldAceptar_WhenRelojDelSimuladorVaPorDelanteDeLaOrg() {
+        IngestaValidador.Catalogo catalogo = IngestaValidador.cargarCatalogo();
+        Map<String, Object> mensaje = TestDataFactory.mensajePresion();
+        String dentroDeDosDias = Datetime.now().addDays(2).formatGmt('yyyy-MM-dd\'T\'HH:mm:ss.SSS\'Z\'');
+        mensaje.put('occurredAt', dentroDeDosDias);
+        mensaje.put('publishedAt', dentroDeDosDias);
+        Test.startTest();
+        IngestaValidador.Dictamen dictamen = IngestaValidador.validar(
+            mensaje,
+            catalogo
+        );
+        Test.stopTest();
+        Assert.isTrue(dictamen.esValido(), 'Publicado y ocurrido a la vez: no es futuro aunque la org vaya detras');
     }
 
     @isTest
@@ -84,8 +96,7 @@ private class IngestaValidadorTest {
         Test.startTest();
         IngestaValidador.Dictamen dictamen = IngestaValidador.validar(
             TestDataFactory.mensajeCamara(),
-            catalogo,
-            Datetime.newInstanceGmt(2026, 9, 22, 22, 0, 0)
+            catalogo
         );
         Test.stopTest();
         Assert.isTrue(dictamen.esValido(), 'Corte de camara de 180 s debe pasar');

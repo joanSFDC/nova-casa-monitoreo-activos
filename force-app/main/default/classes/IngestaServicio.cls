@@ -394,7 +394,7 @@ public without sharing class IngestaServicio {
         String clave
     ) {
         Senal__c senal = nuevaSenal(mensaje, ahora, hash, clave);
-        IngestaValidador.Dictamen dictamen = IngestaValidador.validar(mensaje, catalogo, ahora);
+        IngestaValidador.Dictamen dictamen = IngestaValidador.validar(mensaje, catalogo);
         senal.Edificio__c = dictamen.edificio == null ? null : dictamen.edificio.Id;
         senal.Activo__c = dictamen.activo == null ? null : dictamen.activo.Id;
         senal.Fecha_Origen__c = dictamen.origen;

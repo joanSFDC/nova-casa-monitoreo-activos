@@ -100,6 +100,11 @@ private class MonitorControladorTest {
       'hace 3 h',
       MonitorControlador.antiguedadDe(ahora.addHours(-3), ahora)
     );
+    Assert.areEqual(
+      'hace un momento',
+      MonitorControlador.antiguedadDe(ahora.addHours(2), ahora),
+      'Una lectura con el reloj del simulador por delante no se pinta en el futuro'
+    );
   }
 
   @isTest

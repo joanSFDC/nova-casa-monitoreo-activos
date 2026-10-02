@@ -24,7 +24,7 @@ La especificación sigue en los módulos [01](01-contrato-del-mensaje.md) a
 | Conectividad US-206 (issue #9) | En `main` | [PR #25](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/25) |
 | Estado actual US-203 (issue #6) | En `main` | [PR #23](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/23) |
 | Monitor US-207 (issue #10) | En `main` | [PR #26](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/26) |
-| Autorización US-208 (issue #11) | En revisión | [PR #27](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/27) |
+| Autorización US-208 (issue #11) | En `main` | [PR #27](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/27) |
 | El resto de historias | Pendiente | Issue #13 |
 | Identidad visual | Pendiente | Issue #15 |
 
@@ -269,8 +269,11 @@ un recálculo de compartición: hasta que termina, las pruebas de
 
 ## Qué se está haciendo ahora
 
-US-208, issue #11: autorización más allá de la pantalla. Queda US-210
-(issue #13) y la identidad visual (issue #15).
+Arreglos encontrados al cerrar US-208: la fecha futura contra `publishedAt`
+(issue #28), la sesión dentro de la clave de la señal (issue #31), la nota al
+abrir una intervención (issue #29) y `Caso_Registro` como detalle del
+incidente (issue #30). Después, la identidad visual (issue #15). US-210
+(issue #13) espera sus criterios.
 
 ## Decisiones que aparecieron al implementar
 
@@ -379,6 +382,15 @@ No estaban en la especificación y conviene no redescubrirlas.
     que el administrador veía Nombre y Divisa y no podía cambiar el escenario
     ni reactivar la ingesta. `Control_Registro` muestra la configuración
     editable y el progreso (cursor, sesión, último error) en solo lectura.
+30. **El reloj del simulador no es el de la org.** Arranca al abrir la sesión
+    y avanza un minuto por mensaje. Medida contra la hora de la org, la
+    «Fecha futura» rechazó 471 lecturas buenas en la primera ingesta, que
+    bajó 450 mensajes en diez minutos; hoy, consultado poco, va cinco días
+    atrás. Se mide contra el `publishedAt` del mismo mensaje
+    ([módulo 01](01-contrato-del-mensaje.md)). Una lectura por delante de la
+    org se pinta «hace un momento». Las 471 rechazadas se quedan como están:
+    esos activos ya tienen lecturas más nuevas y reprocesarlas no cambiaría
+    ningún estado.
 
 ## Historial breve
 
@@ -395,4 +407,5 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-09-29 | Conectividad US-206: silencio, episodios y resumen del activo. PR #25 fusionado. Cierra #9 |
 | 2026-09-30 | Estado actual US-203: vigencia, empate y perdedoras de tanda. PR #23 fusionado. Cierra #6 |
 | 2026-10-01 | Monitor US-207: panel del operador, contadores y aviso de ingesta. PR #26 fusionado. Cierra #10 |
-| 2026-10-01 | Autorización US-208: casos por ciudad, acciones comprobadas, suscriptor como integración. PR #27. Cierra #11 |
+| 2026-10-01 | Autorización US-208: casos por ciudad, acciones comprobadas, suscriptor como integración. PR #27 fusionado. Cierra #11 |
+| 2026-10-01 | Fecha futura contra `publishedAt`: el reloj del simulador no es el de la org. Cierra #28 |
