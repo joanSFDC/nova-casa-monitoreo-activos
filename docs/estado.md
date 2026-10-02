@@ -224,7 +224,7 @@ cambió para que lo fuera:
 - **Aplicar límites** exige poder editar `Umbral__c` y escribe en una clase
   interna `without sharing`. Antes fallaba para el coordinador.
 - **Operador, coordinador y gerente** recibieron FLS sobre los campos estándar
-  de `Case` y `Task` que lee el monitor. Sin eso, el panel del incidente
+  de `Case` y `Task` que leen el monitor y la página del caso. Sin eso, el panel del incidente
   fallaba con "No such column 'Subject'".
 - **Administración** lee la bitácora entera sin editarla ni borrarla.
 - **El procesamiento corre como integración**, configurado por
@@ -269,11 +269,11 @@ un recálculo de compartición: hasta que termina, las pruebas de
 
 ## Qué se está haciendo ahora
 
-Arreglos encontrados al cerrar US-208: la fecha futura contra `publishedAt`
-(issue #28), la sesión dentro de la clave de la señal (issue #31), la nota al
-abrir una intervención (issue #29) y `Caso_Registro` como detalle del
-incidente (issue #30). Después, la identidad visual (issue #15). US-210
-(issue #13) espera sus criterios.
+Los arreglos encontrados al cerrar US-208 están hechos: la fecha futura
+contra `publishedAt` (issue #28), la sesión dentro de la clave de la señal
+(issue #31), la nota al abrir una intervención (issue #29) y `Caso_Registro`
+como detalle del incidente (issue #30). Sigue la identidad visual (issue #15).
+US-210 (issue #13) espera sus criterios.
 
 ## Decisiones que aparecieron al implementar
 
@@ -405,6 +405,11 @@ No estaban en la especificación y conviene no redescubrirlas.
     `allOrNone` en falso. Los dos conjuntos lo llevan ahora. Salesforce no
     separa crear de editar tareas, así que el operador edita sus notas,
     no las ajenas ([módulo 10](10-seguridad-y-accesos.md)).
+33. **El detalle del incidente es `Caso_Registro`, no un método propio.**
+    `obtenerIncidente` leía el caso para un panel que no se construyó: el
+    monitor lleva a la página del caso, que ya aplica la compartición y trae
+    la actividad. Se quitó con sus objetos de transferencia. La prueba de
+    seguridad que lo usaba ahora consulta el caso en modo usuario.
 
 ## Historial breve
 
@@ -424,4 +429,5 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-01 | Autorización US-208: casos por ciudad, acciones comprobadas, suscriptor como integración. PR #27 fusionado. Cierra #11 |
 | 2026-10-01 | Fecha futura contra `publishedAt`: el reloj del simulador no es el de la org. PR #32 fusionado. Cierra #28 |
 | 2026-10-01 | La sesión del simulador entra en la clave de la señal. PR #33 fusionado. Cierra #31 |
-| 2026-10-01 | Nota opcional al abrir una intervención y «Edit Tasks» para operador y coordinador. Cierra #29 |
+| 2026-10-01 | Nota opcional al abrir una intervención y «Edit Tasks» para operador y coordinador. PR #34 fusionado. Cierra #29 |
+| 2026-10-01 | El detalle del incidente es `Caso_Registro`: fuera `obtenerIncidente`. Cierra #30 |

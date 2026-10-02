@@ -108,12 +108,20 @@ abrirse, lo mantiene dentro mientras está abierto y lo devuelve al botón al ce
 
 ### Detalle del incidente
 
-Una sola página. Muestra el caso con su prioridad, su estado, su propietario si lo tiene,
-el activo y la medición implicados, y la línea de actividad con las intervenciones.
+Es la página de registro del caso, `Caso_Registro`, a la que lleva el monitor al abrir una
+intervención o al ir a la que ya existe. Arriba, el asunto, el estado, la prioridad, el
+número y la ciudad, con Editar solo para quien puede editar el caso. Debajo, dos secciones:
+Incidente, con la descripción y el propietario, y Equipo, con el activo, la medición, la
+ciudad y lo que ata el caso a su señal (clave, episodio y origen). Al lado, la actividad
+con las intervenciones.
 
 Se resolvió en una sola página, sin pestañas ni navegación intermedia, porque el operador
 llega aquí desde una alarma: quiere saber qué pasa y qué se está haciendo, y cada clic
 intermedio es tiempo entre el aviso y la acción.
+
+No hay componente propio para el detalle. La página de Lightning ya aplica la compartición
+por ciudad y los permisos de campo, y trae la actividad sin código. Por eso el servidor no
+expone una lectura del caso.
 
 ### Los tres estados de la pantalla
 
@@ -169,12 +177,12 @@ cuando el operador navega a otra parte.
 
 ## El contrato con el servidor
 
-Una sola clase Apex con dos métodos de lectura y uno de acción.
+Una sola clase Apex con un método de lectura y uno de acción. El detalle del incidente no
+pasa por ella: es `Caso_Registro`.
 
 | Método | Qué devuelve | Anotación |
 | --- | --- | --- |
 | `obtenerPanel(String edificioId)` | Contadores, filas y estado de la ingesta | `@AuraEnabled(cacheable=true)` |
-| `obtenerIncidente(Id casoId)` | El caso con sus intervenciones | `@AuraEnabled(cacheable=true)` |
 | `abrirIntervencion(Id estadoId, String nota)` | El identificador del caso creado | `@AuraEnabled` |
 
 `cacheable=true` habilita el servicio de datos de Lightning, que cachea la respuesta en el
