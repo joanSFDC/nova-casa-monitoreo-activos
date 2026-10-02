@@ -232,6 +232,9 @@ cambió para que lo fuera:
 - **Página `Caso_Registro`** para ver un caso: incidente, equipo y
   actividades. La estándar dejaba el panel de detalles en error para todos
   los usuarios de la demo (punto 28).
+- **Página `Control_Registro`** para el control de ingesta: escenario, tanda
+  y reactivarla, más lo que deja cada ciclo. El formato del objeto solo
+  traía los campos estándar (punto 29).
 
 Comprobado en la org con `UserRecordAccess`, sobre los cuatro casos de Caribe
 y el control:
@@ -371,6 +374,11 @@ No estaban en la especificación y conviene no redescubrirlas.
     remedio que el punto 15: `Caso_Registro`, con secciones de campos que no
     dependen del formato, en `actionOverrides` de View. El botón Editar solo
     aparece a quien puede editar el caso.
+29. **El formato de `Control_de_Ingesta__c` solo trae los campos estándar.**
+    Los campos llegaron después por metadato y ningún formato los suma, así
+    que el administrador veía Nombre y Divisa y no podía cambiar el escenario
+    ni reactivar la ingesta. `Control_Registro` muestra la configuración
+    editable y el progreso (cursor, sesión, último error) en solo lectura.
 
 ## Historial breve
 
