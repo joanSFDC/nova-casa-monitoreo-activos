@@ -458,11 +458,11 @@ private class IncidentesServicioTest {
 
   private static String estadoCerrado() {
     return [
-      SELECT MasterLabel
+      SELECT ApiName
       FROM CaseStatus
       WHERE IsClosed = TRUE
       LIMIT 1
     ]
-    .MasterLabel;
+    .ApiName;
   }
 }

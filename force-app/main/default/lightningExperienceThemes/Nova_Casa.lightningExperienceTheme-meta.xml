@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningExperienceTheme xmlns="http://soap.sforce.com/2006/04/metadata">
+    <defaultBrandingSet>Nova_Casa</defaultBrandingSet>
+    <description>Tema de la org con el logo y el azul de Nova Casa.</description>
+    <designSystemVersion>SLDS_v1</designSystemVersion>
+    <masterLabel>Nova Casa</masterLabel>
+    <shouldOverrideLoadingImage>true</shouldOverrideLoadingImage>
+</LightningExperienceTheme>

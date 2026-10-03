@@ -25,8 +25,8 @@ La especificación sigue en los módulos [01](01-contrato-del-mensaje.md) a
 | Estado actual US-203 (issue #6) | En `main` | [PR #23](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/23) |
 | Monitor US-207 (issue #10) | En `main` | [PR #26](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/26) |
 | Autorización US-208 (issue #11) | En `main` | [PR #27](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/27) |
+| Identidad visual (issue #15) | En `main` | [PR #36](https://github.com/joanSFDC/nova-casa-monitoreo-activos/pull/36) |
 | El resto de historias | Pendiente | Issue #13 |
-| Identidad visual | Pendiente | Issue #15 |
 
 Org de trabajo: alias `novacasa2`, dominio
 `trailsignup-95b2e3a11aa777`. Caduca el 23 de octubre de 2026. Lo que no esté
@@ -159,8 +159,8 @@ los dos grupos. El edificio sigue siendo la unidad de autorización; activo y
 estado actual heredan. Los casos se comparten igual, por `Case.Ciudad__c`
 (US-208).
 
-La aplicación `Nova_Casa` abre en la pestaña **Monitor**. Logo y tema son el
-issue #15.
+La aplicación `Nova_Casa` abre en la pestaña **Monitor**. Logo y tema están en
+la sección de identidad visual, más abajo.
 
 ### US-204 · Límites administrables
 
@@ -224,8 +224,8 @@ cambió para que lo fuera:
 - **Aplicar límites** exige poder editar `Umbral__c` y escribe en una clase
   interna `without sharing`. Antes fallaba para el coordinador.
 - **Operador, coordinador y gerente** recibieron FLS sobre los campos estándar
-  de `Case` y `Task` que leen el monitor y la página del caso. Sin eso, el panel del incidente
-  fallaba con "No such column 'Subject'".
+  de `Case` y `Task` que leen el monitor y la página del caso. Sin eso, el
+  panel del incidente fallaba con "No such column 'Subject'".
 - **Administración** lee la bitácora entera sin editarla ni borrarla.
 - **El procesamiento corre como integración**, configurado por
   `./scripts/configurar-suscriptor.sh`.
@@ -251,6 +251,26 @@ Tras suspender y reanudar la suscripción, un ciclo de MIXED dejó 234 señales
 procesadas por Usuario Integración. Las 5 rechazadas o en conflicto quedan a
 nombre de quien lanzó la ingesta, porque se deciden al llegar.
 
+### Identidad visual
+
+El detalle está en el [módulo 09](09-experiencia-del-operador.md#la-identidad-visual).
+Lo desplegado:
+
+- **Tema `Nova_Casa` sobre SLDS 1**, activo para toda la org: cabecera blanca
+  con el logo horizontal, fondo de encabezado con la línea cobre y enlaces y
+  botones en `#122d4f` (`OVERRIDE_A11Y_COLOR`).
+- **Aplicación** con la casa como logo, descripción nueva y pestañas en el orden
+  del operador: Monitor, Casos, Activos, Edificios, Estados actuales, Umbrales,
+  Señales, Control de ingesta e Inicio.
+- **Iconos** con sentido en las siete pestañas propias.
+- **Severidad fija** en el CSS del monitor: `#ba0517`, `#a15c00`, `#2e844a`.
+- **Páginas** `Activo_Registro`, `Edificio_Registro` y `Estado_Registro`.
+- **Etiquetas**: campos reescritos, Estado y Prioridad del caso en español
+  (`CaseStatus`, `CasePriority`) y dos decimales en `Valor__c` y en los límites.
+
+Medido en la org: las parejas de texto y fondo que introduce el tema van de
+4,65:1 (normal) a 17,76:1 (pestañas). El cobre, 4,32:1, solo está en imágenes.
+
 ## Cómo reconstruir el entorno
 
 ```bash
@@ -267,13 +287,17 @@ reanudar la suscripción (el script dice dónde). Pasar `Case` a privado lanza
 un recálculo de compartición: hasta que termina, las pruebas de
 `SeguridadAccesosTest` pueden ver los casos como públicos.
 
+El despliegue deja activo el tema `Nova_Casa`
+(`settings/LightningExperience.settings`). Una sesión abierta tarda unos
+minutos en ver el tema, el logo y las páginas nuevas.
+
 ## Qué se está haciendo ahora
 
 Los arreglos encontrados al cerrar US-208 están hechos: la fecha futura
 contra `publishedAt` (issue #28), la sesión dentro de la clave de la señal
 (issue #31), la nota al abrir una intervención (issue #29) y `Caso_Registro`
-como detalle del incidente (issue #30). Sigue la identidad visual (issue #15).
-US-210 (issue #13) espera sus criterios.
+como detalle del incidente (issue #30). La identidad visual (issue #15) está
+hecha. US-210 (issue #13) espera sus criterios.
 
 ## Decisiones que aparecieron al implementar
 
@@ -410,6 +434,41 @@ No estaban en la especificación y conviene no redescubrirlas.
     monitor lleva a la página del caso, que ya aplica la compartición y trae
     la actividad. Se quitó con sus objetos de transferencia. La prueba de
     seguridad que lo usaba ahora consulta el caso en modo usuario.
+34. **El color de la barra va en el tema, no en la aplicación.** Con
+    `shouldOverrideOrgTheme`, la marca de la aplicación solo cambia el logo al
+    rato de cargar; la barra de navegación sigue con el color del tema. La
+    aplicación lleva su logo y deja el color al tema.
+35. **El tema es SLDS 1.** Cosmos (SLDS 2) cambia los colores de severidad del
+    sistema de diseño: crítico `#b60554`, advertencia `#8c4b02`, normal
+    `#056764`. Con SLDS 1 y los tres valores fijos en el CSS del monitor, la
+    severidad no depende del tema.
+36. **Sin `OVERRIDE_A11Y_COLOR`, enlaces y botones salen `#415c8a`.** Salesforce
+    deriva su propio azul del color de marca. La propiedad lo fija en `#122d4f`.
+37. **De un motivo de pestaña solo cuenta el número.** `Custom67: Building`
+    pinta engranajes, porque el 67 son engranajes. Cuatro pestañas tenían un
+    nombre que no correspondía a su número.
+38. **Un despliegue fallido no deja nada.** Al crear las páginas de Activo,
+    Edificio y Estado, un lote falló por un byte mal codificado en la de
+    Activo. Las otras dos parecían desplegadas pero no lo estaban: la org deshace
+    el lote entero. Hay que mirar el estado del despliegue, no solo sus errores.
+39. **Las etiquetas de `CaseStatus` y `CasePriority` se traducen sin tocar el
+    valor de API.** La org es `en_US` y el caso decía New y High. El código
+    escribe `New`, `High` y `Low`, que siguen siendo los mismos. La prueba
+    `shouldAbrirNuevo_WhenCierreLiberaClave` cerraba el caso con el
+    `MasterLabel` del estado cerrado, que ahora es «Cerrado» y no un valor de
+    `Status`; falló con «Quedo cerrado». Ahora usa `ApiName`. El disparador
+    `CaseLiberarClave` ya aceptaba los dos.
+40. **Un campo de solo lectura en la página no frena al administrador del
+    sistema.** Su perfil tiene «Edit Read Only Fields», que pasa por encima de la
+    página y no se le puede quitar. `Estado_Registro` va con la lista de acciones
+    vacía, que deja la cabecera sin botones, y Operador, Coordinador y Gerencia
+    solo leen el estado. El administrador sigue viendo el lápiz en cada campo.
+41. **La cabecera es blanca.** Sobre `#122d4f`, el logo necesitaba una placa
+    blanca y parecía pegado encima. El azul marino queda en el logo, los enlaces
+    y los botones. La línea de la pestaña activa sale `#6e94d5`, un tono que
+    Salesforce genera desde `BRAND_COLOR`; `OVERRIDE_A11Y_COLOR` solo fija el de
+    enlaces y botones. Cambia la lectura del punto 2 del issue #15: la barra ya
+    no es el azul de Salesforce, pero tampoco es el token exacto.
 
 ## Historial breve
 
@@ -430,4 +489,5 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-01 | Fecha futura contra `publishedAt`: el reloj del simulador no es el de la org. PR #32 fusionado. Cierra #28 |
 | 2026-10-01 | La sesión del simulador entra en la clave de la señal. PR #33 fusionado. Cierra #31 |
 | 2026-10-01 | Nota opcional al abrir una intervención y «Edit Tasks» para operador y coordinador. PR #34 fusionado. Cierra #29 |
-| 2026-10-01 | El detalle del incidente es `Caso_Registro`: fuera `obtenerIncidente`. Cierra #30 |
+| 2026-10-01 | El detalle del incidente es `Caso_Registro`: fuera `obtenerIncidente`. PR #35 fusionado. Cierra #30 |
+| 2026-10-03 | Identidad visual: tema SLDS 1 con cabecera blanca, logo, iconos, etiquetas y páginas de activo, edificio y estado. PR #36. Cierra #15 |
