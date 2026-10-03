@@ -458,6 +458,11 @@ No estaban en la especificación y conviene no redescubrirlas.
     `MasterLabel` del estado cerrado, que ahora es «Cerrado» y no un valor de
     `Status`; falló con «Quedo cerrado». Ahora usa `ApiName`. El disparador
     `CaseLiberarClave` ya aceptaba los dos.
+40. **Un campo de solo lectura en la página no frena al administrador del
+    sistema.** Su perfil tiene «Edit Read Only Fields», que pasa por encima de la
+    página y no se le puede quitar. `Estado_Registro` va con la lista de acciones
+    vacía, que deja la cabecera sin botones, y Operador, Coordinador y Gerencia
+    solo leen el estado. El administrador sigue viendo el lápiz en cada campo.
 
 ## Historial breve
 

@@ -321,7 +321,9 @@ estándar mostraban «0,4000». El simulador manda como mucho dos, en la presió
 Activo, Edificio y Estado actual tienen página de registro propia, por el mismo motivo
 que Caso y Control ([estado.md](estado.md), puntos 15, 28 y 29): la estándar traía solo
 los campos estándar, la divisa y el panel de actividad. En el estado todo es de solo
-lectura, porque lo escribe el procesamiento.
+lectura y la cabecera no tiene Editar, porque lo escribe el procesamiento. El
+administrador del sistema todavía ve el lápiz en cada campo: su permiso «Edit Read Only
+Fields» pasa por encima de la página, y ese perfil no deja quitarlo.
 
 Las pestañas siguen el recorrido del operador: Monitor, Casos, Activos, Edificios,
 Estados actuales, Umbrales, Señales, Control de ingesta e Inicio. Cada usuario ve solo
