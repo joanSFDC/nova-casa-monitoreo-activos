@@ -256,9 +256,9 @@ nombre de quien lanzó la ingesta, porque se deciden al llegar.
 El detalle está en el [módulo 09](09-experiencia-del-operador.md#la-identidad-visual).
 Lo desplegado:
 
-- **Tema `Nova_Casa` sobre SLDS 1**, activo para toda la org: barra `#122d4f`,
-  logo horizontal sobre placa blanca, fondo de encabezado con la línea cobre y
-  enlaces y botones en el mismo azul (`OVERRIDE_A11Y_COLOR`).
+- **Tema `Nova_Casa` sobre SLDS 1**, activo para toda la org: cabecera blanca
+  con el logo horizontal, fondo de encabezado con la línea cobre y enlaces y
+  botones en `#122d4f` (`OVERRIDE_A11Y_COLOR`).
 - **Aplicación** con la casa como logo, descripción nueva y pestañas en el orden
   del operador: Monitor, Casos, Activos, Edificios, Estados actuales, Umbrales,
   Señales, Control de ingesta e Inicio.
@@ -463,6 +463,12 @@ No estaban en la especificación y conviene no redescubrirlas.
     página y no se le puede quitar. `Estado_Registro` va con la lista de acciones
     vacía, que deja la cabecera sin botones, y Operador, Coordinador y Gerencia
     solo leen el estado. El administrador sigue viendo el lápiz en cada campo.
+41. **La cabecera es blanca.** Sobre `#122d4f`, el logo necesitaba una placa
+    blanca y parecía pegado encima. El azul marino queda en el logo, los enlaces
+    y los botones. La línea de la pestaña activa sale `#6e94d5`, un tono que
+    Salesforce genera desde `BRAND_COLOR`; `OVERRIDE_A11Y_COLOR` solo fija el de
+    enlaces y botones. Cambia la lectura del punto 2 del issue #15: la barra ya
+    no es el azul de Salesforce, pero tampoco es el token exacto.
 
 ## Historial breve
 
@@ -484,4 +490,4 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-01 | La sesión del simulador entra en la clave de la señal. PR #33 fusionado. Cierra #31 |
 | 2026-10-01 | Nota opcional al abrir una intervención y «Edit Tasks» para operador y coordinador. PR #34 fusionado. Cierra #29 |
 | 2026-10-01 | El detalle del incidente es `Caso_Registro`: fuera `obtenerIncidente`. PR #35 fusionado. Cierra #30 |
-| 2026-10-03 | Identidad visual: tema SLDS 1, logo, iconos, etiquetas y páginas de activo, edificio y estado. PR #36. Cierra #15 |
+| 2026-10-03 | Identidad visual: tema SLDS 1 con cabecera blanca, logo, iconos, etiquetas y páginas de activo, edificio y estado. PR #36. Cierra #15 |

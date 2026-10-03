@@ -269,7 +269,7 @@ Las imágenes salen de `recursos/logos/logo-novacasa.png` y el tema las referenc
 
 | Token del prototipo | Valor | Propiedad del tema |
 | --- | --- | --- |
-| `--nc-navy` | `#122d4f` | `BRAND_COLOR`, `HEADER_BACKGROUND_COLOR`, `OVERRIDE_A11Y_COLOR` |
+| `--nc-navy` | `#122d4f` | `BRAND_COLOR`, `OVERRIDE_A11Y_COLOR` |
 | `--nc-page` | `#f3f2f2` | `PAGE_BACKGROUND_COLOR` |
 | `--nc-navy-light` | `#e8eef4` | Degradado del fondo del encabezado |
 | `--nc-copper` | `#ae6930` | Línea de 4 px en el fondo del encabezado y el logo |
@@ -277,8 +277,14 @@ Las imágenes salen de `recursos/logos/logo-novacasa.png` y el tema las referenc
 `OVERRIDE_A11Y_COLOR` es necesario. Sin él, Salesforce deriva del color de marca un azul
 propio, `#415c8a`, para enlaces y botones, y la aplicación tiene dos azules.
 
-**El logo va sobre una placa blanca.** El nombre «NOVACASA» y la casa son azul marino: sobre
-la barra azul desaparecerían.
+**La cabecera es blanca** (`HEADER_BACKGROUND_COLOR` `#ffffff`). Sobre la barra azul
+marino, el logo necesitaba una placa blanca y se veía como una imagen pegada encima. Sobre
+blanco la placa no se nota. El azul marino queda en el logo, los enlaces y los botones.
+
+La línea bajo las pestañas y la marca de la pestaña activa salen `#6e94d5`. Es un tono de
+la paleta que Salesforce genera a partir de `BRAND_COLOR`. `OVERRIDE_A11Y_COLOR` solo
+fija el primer tono de esa paleta, el de enlaces y botones, así que esa línea no se puede
+fijar desde el tema.
 
 **El cobre solo aparece en imágenes.** Sobre blanco da 4,32:1, por debajo del 4,5:1 que
 pide el texto pequeño. Si algún día hiciera falta texto en cobre, el tono es
@@ -341,8 +347,10 @@ las de los objetos que tiene. Quien ya hubiera personalizado su barra conserva s
 | Título `#181818` | Página `#f3f2f2` | 15,89 |
 | Aviso de ingesta `#181818` | `#dd7a01` | 5,80 |
 | Cabecera de tabla `#444444` | `#f3f3f3` | 8,78 |
+| Línea de la pestaña activa `#6e94d5` | Blanco | 3,06 |
 
-Todas pasan 4,5:1. Los colores se leyeron en la org con el estilo calculado de cada
+Todo el texto pasa 4,5:1. La línea de la pestaña no es texto: es un indicador, y para
+eso basta 3:1. Los colores se leyeron en la org con el estilo calculado de cada
 elemento, no del archivo.
 
 ### Al desplegar
