@@ -2,10 +2,11 @@
 <CustomApplication xmlns="http://soap.sforce.com/2006/04/metadata">
     <brand>
         <headerColor>#122D4F</headerColor>
+        <logo>NovaCasaLogoApp</logo>
+        <logoVersion>1</logoVersion>
         <shouldOverrideOrgTheme>false</shouldOverrideOrgTheme>
     </brand>
-    <description
-  >Monitoreo de activos de Nova Casa. El logotipo y el tema de la org van en el issue 15.</description>
+    <description>Monitoreo de activos de Nova Casa: el operador ve sus equipos, abre intervenciones y sigue los casos.</description>
     <formFactors>Small</formFactors>
     <formFactors>Large</formFactors>
     <isNavAutoTempTabsDisabled>false</isNavAutoTempTabsDisabled>
@@ -14,13 +15,13 @@
     <label>Nova Casa</label>
     <navType>Standard</navType>
     <tabs>Monitor</tabs>
-    <tabs>standard-home</tabs>
-    <tabs>Edificio__c</tabs>
+    <tabs>standard-Case</tabs>
     <tabs>Activo__c</tabs>
+    <tabs>Edificio__c</tabs>
     <tabs>Estado_Actual__c</tabs>
     <tabs>Umbral__c</tabs>
-    <tabs>standard-Case</tabs>
     <tabs>Senal__c</tabs>
     <tabs>Control_de_Ingesta__c</tabs>
+    <tabs>standard-home</tabs>
     <uiType>Lightning</uiType>
 </CustomApplication>

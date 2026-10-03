@@ -220,3 +220,131 @@ excluye a una parte real de los operadores.
 - Los cambios de estado —cargando, error, actualizado— se anuncian en una región activa,
   de modo que un lector de pantalla informe de que la tabla se refrescó.
 - El contraste cumple el mínimo de la norma para texto y para los indicadores de severidad.
+
+## La identidad visual
+
+Cubre el **issue #15**. El componente del operador ya usaba la paleta del prototipo; lo
+que faltaba era que la aplicación que lo contiene también la usara, para que no pareciera
+pegado encima de algo ajeno.
+
+### Tema de la org y marca de la aplicación
+
+Salesforce separa dos cosas. El **tema** es de la org entera: barra superior, logo,
+fondo y color de enlaces y botones. La **marca de la aplicación** es el logo y el color
+de una aplicación concreta, y solo se ve si la aplicación pide sobrescribir el tema.
+
+En esta org la marca de la aplicación no pinta la barra de navegación, ni en Cosmos ni en
+SLDS 1: solo cambia el logo al rato de cargar. Por eso **el color y el logo van en el
+tema**, y la aplicación conserva `shouldOverrideOrgTheme` en falso. Su logo propio, la
+casa sobre blanco, es el que se ve en el iniciador de aplicaciones.
+
+### Por qué SLDS 1 y no Cosmos
+
+La org venía con **Salesforce Cosmos**, que es SLDS 2. Ahí los colores de severidad del
+sistema de diseño no son los documentados: crítico pasa a `#b60554`, advertencia a
+`#8c4b02` y normal a `#056764`. Y la propia página de temas avisa de que SLDS 2 puede
+tener efectos inesperados sobre un tema propio.
+
+**Decisión: un tema propio sobre SLDS 1** (`designSystemVersion` `SLDS_v1`). Es el
+sistema contra el que se escribió el componente y el que da los valores que el issue pide
+conservar.
+
+### Los archivos
+
+| Archivo | Qué es |
+| --- | --- |
+| `lightningExperienceThemes/Nova_Casa` | El tema, sobre SLDS 1, con su conjunto de marca por defecto |
+| `brandingSets/Nova_Casa` | Colores e imágenes del tema |
+| `settings/LightningExperience.settings` | Deja `Nova_Casa` como tema activo |
+| `contentassets/NovaCasaLogoHorizontal` | Logo de la barra, 438 × 120 |
+| `contentassets/NovaCasaFondoEncabezado` | Fondo del encabezado, 1800 × 360 |
+| `contentassets/NovaCasaLogoApp` | La casa sola, 128 × 128, para la aplicación |
+| `applications/Nova_Casa` | Descripción, logo y orden de pestañas |
+
+Las imágenes salen de `recursos/logos/logo-novacasa.png` y el tema las referencia como
+`/file-asset/<Nombre>?v=N`. Si se cambia una imagen hay que subir su versión en el
+`.asset-meta.xml` y en la referencia, o la org sigue sirviendo la anterior.
+
+### Los colores
+
+| Token del prototipo | Valor | Propiedad del tema |
+| --- | --- | --- |
+| `--nc-navy` | `#122d4f` | `BRAND_COLOR`, `HEADER_BACKGROUND_COLOR`, `OVERRIDE_A11Y_COLOR` |
+| `--nc-page` | `#f3f2f2` | `PAGE_BACKGROUND_COLOR` |
+| `--nc-navy-light` | `#e8eef4` | Degradado del fondo del encabezado |
+| `--nc-copper` | `#ae6930` | Línea de 4 px en el fondo del encabezado y el logo |
+
+`OVERRIDE_A11Y_COLOR` es necesario. Sin él, Salesforce deriva del color de marca un azul
+propio, `#415c8a`, para enlaces y botones, y la aplicación tiene dos azules.
+
+**El logo va sobre una placa blanca.** El nombre «NOVACASA» y la casa son azul marino: sobre
+la barra azul desaparecerían.
+
+**El cobre solo aparece en imágenes.** Sobre blanco da 4,32:1, por debajo del 4,5:1 que
+pide el texto pequeño. Si algún día hiciera falta texto en cobre, el tono es
+`--nc-copper-700`, `#8c5224`, que da 6,27:1.
+
+### La severidad no cambia con el tema
+
+Los tres colores se fijan en `monitorDeActivos.css` en lugar de tomarse de los ganchos
+del sistema de diseño: crítico `#ba0517`, advertencia `#a15c00` y normal `#2e844a`. Así un
+cambio de tema, o volver a Cosmos, no los mueve.
+
+### Los iconos
+
+Salesforce **solo lee el número** del motivo de una pestaña; el nombre que lo acompaña es
+decorativo. Los archivos decían, por ejemplo, `Custom67: Building` para el edificio, pero
+el 67 son engranajes, y eso es lo que mostraba. Lo mismo pasaba con el activo, el estado
+y el monitor.
+
+| Objeto | Motivo | Icono |
+| --- | --- | --- |
+| Edificio | `Custom24` | Edificio |
+| Activo | `Custom19` | Llave inglesa |
+| Estado actual | `Custom97` | Termómetro |
+| Umbral | `Custom79` | Cinta métrica |
+| Señal | `Custom30` | Antena de radar |
+| Control de ingesta | `Custom67` | Engranajes |
+| Monitor | `Custom21` | Computador |
+
+### Las etiquetas y las páginas
+
+Los campos que todavía hablaban como su nombre de API se reescribieron como los leerá un
+operador: «Último id de mensaje», «Visto por última vez», «Límite alto crítico»,
+«Ingesta activa», «Inicio de la sesión». Estado y Prioridad del caso tenían etiquetas en
+inglés, porque la org es `en_US`. Ahora dicen «Nuevo», «Escalado», «En espera», «Cerrado»
+y «Alta», «Media», «Baja». **El valor de API no cambia**, que es lo que escribe el código.
+
+`Valor__c` y los cuatro límites del umbral pasaron de cuatro decimales a dos: las páginas
+estándar mostraban «0,4000». El simulador manda como mucho dos, en la presión.
+
+Activo, Edificio y Estado actual tienen página de registro propia, por el mismo motivo
+que Caso y Control ([estado.md](estado.md), puntos 15, 28 y 29): la estándar traía solo
+los campos estándar, la divisa y el panel de actividad. En el estado todo es de solo
+lectura, porque lo escribe el procesamiento.
+
+Las pestañas siguen el recorrido del operador: Monitor, Casos, Activos, Edificios,
+Estados actuales, Umbrales, Señales, Control de ingesta e Inicio. Cada usuario ve solo
+las de los objetos que tiene. Quien ya hubiera personalizado su barra conserva su orden.
+
+### El contraste medido
+
+| Texto | Fondo | Contraste |
+| --- | --- | --- |
+| Crítico `#ba0517` | Blanco | 6,73 |
+| Advertencia `#a15c00` | Blanco | 5,19 |
+| Normal `#2e844a` | Blanco | 4,65 |
+| Enlaces y botones `#122d4f` | Blanco | 13,87 |
+| Pestañas `#181818` | Blanco | 17,76 |
+| Título `#181818` | Página `#f3f2f2` | 15,89 |
+| Aviso de ingesta `#181818` | `#dd7a01` | 5,80 |
+| Cabecera de tabla `#444444` | `#f3f3f3` | 8,78 |
+
+Todas pasan 4,5:1. Los colores se leyeron en la org con el estilo calculado de cada
+elemento, no del archivo.
+
+### Al desplegar
+
+El tema, la marca y las páginas tardan unos minutos en llegar a una sesión abierta, por
+la caché de Lightning. Si un despliegue falla, no se aplica nada de ese lote: una página
+que parece no haber entrado puede ser de un despliegue fallido anterior.

@@ -3,7 +3,7 @@
     <fullName>Activo__c</fullName>
     <defaultValue>true</defaultValue>
     <inlineHelpText>Permite detener la ingesta sin desplegar.</inlineHelpText>
-    <label>Activo</label>
+    <label>Ingesta activa</label>
     <trackTrending>false</trackTrending>
     <type>Checkbox</type>
 </CustomField>

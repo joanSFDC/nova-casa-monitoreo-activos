@@ -2,7 +2,7 @@
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Ultimo_Delivery_Id__c</fullName>
     <externalId>false</externalId>
-    <label>Último delivery id</label>
+    <label>Último id de entrega</label>
     <length>60</length>
     <required>false</required>
     <trackTrending>false</trackTrending>

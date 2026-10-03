@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Advertencia_Bajo__c</fullName>
-    <label>Advertencia bajo</label>
+    <label>Límite bajo de advertencia</label>
     <precision>16</precision>
     <required>false</required>
-    <scale>4</scale>
+    <scale>2</scale>
     <trackHistory>true</trackHistory>
     <trackTrending>false</trackTrending>
     <type>Number</type>

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Critico_Alto__c</fullName>
-    <label>Crítico alto</label>
+    <label>Límite alto crítico</label>
     <precision>16</precision>
     <required>false</required>
-    <scale>4</scale>
+    <scale>2</scale>
     <trackHistory>true</trackHistory>
     <trackTrending>false</trackTrending>
     <type>Number</type>

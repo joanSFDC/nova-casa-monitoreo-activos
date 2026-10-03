@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Sesion_Expira__c</fullName>
-    <label>Sesión expira</label>
+    <label>Vencimiento de la sesión</label>
     <required>false</required>
     <trackTrending>false</trackTrending>
     <type>DateTime</type>

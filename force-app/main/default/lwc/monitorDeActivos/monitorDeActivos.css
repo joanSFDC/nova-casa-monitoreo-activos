@@ -2,16 +2,17 @@
   font-weight: 700;
 }
 
+/* Fijos a proposito: la severidad no cambia con el tema de la org. */
 .sev_critico {
-  color: var(--slds-g-color-error-1, #ba0517);
+  color: #ba0517;
 }
 
 .sev_advertencia {
-  color: var(--slds-g-color-warning-1, #a15c00);
+  color: #a15c00;
 }
 
 .sev_normal {
-  color: var(--slds-g-color-success-1, #2e844a);
+  color: #2e844a;
 }
 
 .slds-skeleton {

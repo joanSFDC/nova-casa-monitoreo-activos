@@ -3,7 +3,7 @@
     <fullName>Ultimo_Message_Id__c</fullName>
     <externalId>false</externalId>
     <inlineHelpText>Desempate y trazabilidad.</inlineHelpText>
-    <label>Último message id</label>
+    <label>Último id de mensaje</label>
     <length>60</length>
     <required>false</required>
     <trackTrending>false</trackTrending>

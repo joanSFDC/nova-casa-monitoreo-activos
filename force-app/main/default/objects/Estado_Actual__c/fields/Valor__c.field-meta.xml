@@ -4,7 +4,7 @@
     <label>Valor</label>
     <precision>16</precision>
     <required>false</required>
-    <scale>4</scale>
+    <scale>2</scale>
     <trackTrending>false</trackTrending>
     <type>Number</type>
     <unique>false</unique>

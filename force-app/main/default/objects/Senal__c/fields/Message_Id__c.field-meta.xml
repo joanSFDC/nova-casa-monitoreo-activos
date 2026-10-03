@@ -3,7 +3,7 @@
     <fullName>Message_Id__c</fullName>
     <externalId>true</externalId>
     <inlineHelpText>El identificador desnudo. External ID para encontrarlo en la busqueda global, sin ser unico: la unicidad vive en Clave__c.</inlineHelpText>
-    <label>Message id</label>
+    <label>Id del mensaje</label>
     <length>60</length>
     <required>false</required>
     <trackTrending>false</trackTrending>
