@@ -191,9 +191,15 @@ public with sharing class MonitorControlador {
 }
 ```
 
-La única excepción son las clases de ingesta y procesamiento, que van `without sharing`
-**con un comentario que lo explique**: no actúan en nombre de ninguna persona. Está acotada
-a clases que ningún componente de interfaz puede invocar.
+Las excepciones son dos, y las dos van `without sharing` **con un comentario que lo
+explique**. La primera son las clases de ingesta y procesamiento: no actúan en nombre de
+ninguna persona, y ningún componente de interfaz puede invocarlas.
+
+La segunda es una clase interna, `UmbralAplicacionServicio.Escritura`. La
+clase de fuera es `with sharing`, la llama la acción Aplicar límites y rechaza a quien no
+puede editar `Umbral__c`. Solo después de ese filtro, la interna escribe la severidad de
+los estados que la persona ya ve: en principal-detalle, editar el estado exige editar el
+edificio, y el coordinador no lo edita. Es privada, así que nada fuera de la clase la alcanza.
 
 **Los permisos se conceden por conjunto de permisos, nunca por perfil.** Los perfiles están
 en `.forceignore` a propósito, para que una recuperación de metadatos no los arrastre y
@@ -285,7 +291,7 @@ Las claves compuestas se arman siempre con barra vertical y sin espacios:
 ```
 Estado_Actual__c.Clave__c   AST-BOG-PUMP-001|WATER_PRESSURE
 Umbral__c.Clave__c          WATER_PUMP|WATER_PRESSURE
-Senal__c.Clave__c           nova-casa-simulator|msg_000002
+Senal__c.Clave__c           nova-casa-simulator|2026-09-24T21:44:55Z|msg_000002
 ```
 
 ---

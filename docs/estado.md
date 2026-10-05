@@ -332,7 +332,8 @@ rangos contradictorios del umbral (issue #43), la cola del coordinador
 corrida (issue #47), el monitor que no se recalculaba con la ingesta parada
 (issue #49), la aplicación de entrada de los humanos (issue #51), la pestaña
 Inicio de ventas (issue #53), el panel de gerencia que el módulo 09 daba por
-hecho (issue #55) y las vistas de la bitácora que no medían horas (issue #57).
+hecho (issue #55), las vistas de la bitácora que no medían horas (issue #57) y
+la documentación que había quedado atrás del código (issue #59).
 
 ## Decisiones que aparecieron al implementar
 
@@ -594,3 +595,4 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-05 | La aplicación deja de llevar la pestaña Inicio de ventas. Cierra #53 |
 | 2026-10-05 | Panel de gerencia: dos informes, filtro por ciudad y carpetas para gerente y coordinador. Cierra #55 |
 | 2026-10-05 | Atascadas y Últimas 24 horas filtran por horas con un campo fórmula; los módulos dejan de prometer orden y agrupación. Cierra #57 |
+| 2026-10-05 | Documentación al día: tipos numéricos, clave de la señal con sesión, Duplicado que no se escribe y la clase interna `without sharing`. Cierra #59 |

@@ -117,7 +117,7 @@ La foto de ahora. Es la única tabla que consulta la pantalla del operador.
 | `Activo__c` | Master-Detail(Activo__c) | |
 | `Tipo_Medicion__c` | Picklist global | |
 | `Clave__c` | Text(80), External ID, Unique | `AST-BOG-PUMP-001\|WATER_PRESSURE` |
-| `Valor__c` | Number(12,4) | |
+| `Valor__c` | Number(14,2) | |
 | `Unidad__c` | Picklist global | |
 | `Severidad__c` | Picklist | Normal, Advertencia, Crítico, Sin datos |
 | `Severidad_Nivel__c` | Number(1,0) | 0, 1, 2. Alimenta el resumen del activo |
@@ -176,10 +176,10 @@ el negocio edita, no código.
 | `Tipo_Medicion__c` | Picklist global | |
 | `Clave__c` | Text(80), External ID, Unique | `WATER_PUMP\|WATER_PRESSURE` |
 | `Unidad__c` | Picklist global | La unidad en la que se expresan los valores |
-| `Critico_Bajo__c` | Number(12,4) | Por debajo de aquí, crítico |
-| `Advertencia_Bajo__c` | Number(12,4) | Por debajo de aquí, advertencia |
-| `Advertencia_Alto__c` | Number(12,4) | Por encima de aquí, advertencia |
-| `Critico_Alto__c` | Number(12,4) | Por encima de aquí, crítico |
+| `Critico_Bajo__c` | Number(14,2) | Por debajo de aquí, crítico |
+| `Advertencia_Bajo__c` | Number(14,2) | Por debajo de aquí, advertencia |
+| `Advertencia_Alto__c` | Number(14,2) | Por encima de aquí, advertencia |
+| `Critico_Alto__c` | Number(14,2) | Por encima de aquí, crítico |
 | `Minutos_Advertencia__c` | Number(5,0) | Silencio tolerado antes de advertir |
 | `Minutos_Critico__c` | Number(5,0) | Silencio tolerado antes de alarmar |
 | `Vigente__c` | Checkbox | Permite desactivar sin borrar |
