@@ -281,6 +281,10 @@ sf org assign permset -o novacasa2 -n Nova_Casa_Administracion
 ./scripts/configurar-suscriptor.sh novacasa2
 ```
 
+`crear-usuarios-demo.sh` se puede volver a correr: solo manda el correo de
+clave a los usuarios que crea en esa corrida, así que no invalida las claves
+de quienes ya existían.
+
 `configurar-suscriptor.sh` va después de los usuarios porque busca al de
 integración. Si el disparador ya estaba suscrito, hay que suspender y
 reanudar la suscripción (el script dice dónde). Pasar `Case` a privado lanza
@@ -302,8 +306,9 @@ hecha. US-210 (issue #13) espera sus criterios.
 La revisión previa a la entrega encontró faltas que se cierran una por issue:
 el formato y la codificación (issue #37), la evidencia de la bitácora en la
 ingesta (issue #39), el crítico superado dentro de una tanda (issue #41), los
-rangos contradictorios del umbral (issue #43) y la cola del coordinador
-(issue #45).
+rangos contradictorios del umbral (issue #43), la cola del coordinador
+(issue #45) y las claves que el script de usuarios restablecía en cada
+corrida (issue #47).
 
 ## Decisiones que aparecieron al implementar
 
@@ -538,4 +543,5 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-05 | La bitácora conserva la evidencia: reenvío, conflicto, tipo desconocido, guardado fallido y 409. PR #40 fusionado. Cierra #39 |
 | 2026-10-05 | Un crítico superado en la misma tanda no abre ni escala el caso. PR #42 fusionado. Cierra #41 |
 | 2026-10-05 | Umbral: crítico bajo cruzado y medición sin bandas. PR #44 fusionado. Cierra #43 |
-| 2026-10-05 | Cola Coordinación para los casos críticos y vista de lista. Cierra #45 |
+| 2026-10-05 | Cola Coordinación para los casos críticos y vista de lista. PR #46 fusionado. Cierra #45 |
+| 2026-10-05 | El script de usuarios solo manda clave a los usuarios que crea. Cierra #47 |
