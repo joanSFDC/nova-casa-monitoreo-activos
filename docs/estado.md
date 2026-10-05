@@ -383,6 +383,10 @@ No estaban en la especificación y conviene no redescubrirlas.
 15. **Un `.layout` desplegado no llega al usuario.** Los perfiles están en
     `.forceignore`, así que la página de registro por defecto ignora el layout.
     El patrón es un FlexiPage con `actionOverrides` de View, como `Senal_Registro`.
+    Las listas relacionadas sí dependen del formato: la lista individual solo
+    ofrece las que están en el formato asignado. Por eso el formato de
+    `Umbral__c` se llama `Umbral Layout`, el nombre del de fábrica, y lo
+    reemplaza; con otro nombre quedaba sin asignar y el historial no salía.
 16. **Aplicar límites en cámara no usa `clasificarMedicion`.** Aunque
     `Valor__c` quede vacío, sin bandas de valor un `Gap_Segundos__c` copiado
     ahí caería en Normal. Se llama a `clasificarConectividad` con estado y gap.
@@ -596,3 +600,4 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-05 | Panel de gerencia: dos informes, filtro por ciudad y carpetas para gerente y coordinador. Cierra #55 |
 | 2026-10-05 | Atascadas y Últimas 24 horas filtran por horas con un campo fórmula; los módulos dejan de prometer orden y agrupación. Cierra #57 |
 | 2026-10-05 | Documentación al día: tipos numéricos, clave de la señal con sesión, Duplicado que no se escribe y la clase interna `without sharing`. Cierra #59 |
+| 2026-10-05 | El historial de umbrales sale en la página: el formato toma el nombre del de fábrica. Cierra #61 |
