@@ -249,6 +249,10 @@ caso elegiría qué grupo lo ve. Un caso sin activo no tiene ciudad y solo lo ve
 quien tiene «ver todo». La regla concede edición, que es lo que deja al coordinador editar
 casos de las dos ciudades. El operador no los edita porque su conjunto no lo concede.
 
+Que un caso crítico sea de la cola **Coordinación** no cambia quién lo ve: la regla por
+ciudad no mira el propietario, así que el operador de esa ciudad lo sigue viendo. Ser
+miembro de la cola es lo que le permite al coordinador aceptarlo y tomarlo.
+
 ## Las acciones
 
 Ver no basta: cada acción comprueba también quién la pide, en el servidor.

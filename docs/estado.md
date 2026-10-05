@@ -157,7 +157,7 @@ Q-10 quedó en **por ciudad**: regla sobre `Edificio__c.Ciudad__c` hacia los gru
 `Operadores_Bogota` y `Operadores_Barranquilla`. Coordinador y gerente están en
 los dos grupos. El edificio sigue siendo la unidad de autorización; activo y
 estado actual heredan. Los casos se comparten igual, por `Case.Ciudad__c`
-(US-208).
+(US-208). El coordinador es además miembro de la cola de casos **Coordinación**.
 
 La aplicación `Nova_Casa` abre en la pestaña **Monitor**. Logo y tema están en
 la sección de identidad visual, más abajo.
@@ -301,8 +301,9 @@ hecha. US-210 (issue #13) espera sus criterios.
 
 La revisión previa a la entrega encontró faltas que se cierran una por issue:
 el formato y la codificación (issue #37), la evidencia de la bitácora en la
-ingesta (issue #39), el crítico superado dentro de una tanda (issue #41) y los
-rangos contradictorios del umbral (issue #43).
+ingesta (issue #39), el crítico superado dentro de una tanda (issue #41), los
+rangos contradictorios del umbral (issue #43) y la cola del coordinador
+(issue #45).
 
 ## Decisiones que aparecieron al implementar
 
@@ -506,6 +507,11 @@ No estaban en la especificación y conviene no redescubrirlas.
     20 / 10 / 15 pasaba y todo salía crítico. «Medición sin bandas» impide un
     umbral de medición con solo minutos, que clasificaba todo como normal. El
     catálogo sembrado cumple las dos.
+49. **La cola del coordinador es una cola de Case real.** «Coordinación» recibe
+    el caso que nace en alta y el que escala mientras sigue siendo del sistema.
+    Un caso que ya tomó una persona escala sin cambiar de propietario. El
+    miembro lo pone el script de usuarios, porque el Username cambia en cada
+    org; la vista «Cola de coordinación» lista los abiertos de la cola.
 
 ## Historial breve
 
@@ -531,4 +537,5 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-05 | Formato de Prettier en 22 archivos, XML de metadatos fuera de Prettier y dos XML de la señal en UTF-8. PR #38 fusionado. Cierra #37 |
 | 2026-10-05 | La bitácora conserva la evidencia: reenvío, conflicto, tipo desconocido, guardado fallido y 409. PR #40 fusionado. Cierra #39 |
 | 2026-10-05 | Un crítico superado en la misma tanda no abre ni escala el caso. PR #42 fusionado. Cierra #41 |
-| 2026-10-05 | Umbral: crítico bajo cruzado y medición sin bandas. Cierra #43 |
+| 2026-10-05 | Umbral: crítico bajo cruzado y medición sin bandas. PR #44 fusionado. Cierra #43 |
+| 2026-10-05 | Cola Coordinación para los casos críticos y vista de lista. Cierra #45 |

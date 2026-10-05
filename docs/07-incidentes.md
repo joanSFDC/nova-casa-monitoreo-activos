@@ -116,6 +116,23 @@ alguien tiene que cerrar a mano.
 La prioridad baja y la ausencia de propietario son deliberadas: el caso existe y es
 consultable, pero no entra en la cola de nadie ni exige acción hasta que escale.
 
+### La cola del coordinador
+
+La cola es una cola estándar de Case, **Coordinación**, sin correo a los miembros. El
+coordinador es su miembro y la revisa con la vista de lista «Cola de coordinación», que
+filtra los casos abiertos de la cola. Los miembros de usuario cambian en cada org, así que
+no van en el metadato de la cola: los añade `scripts/crear-usuarios-demo.sh`.
+
+`IncidentesServicio` deja a nombre de la cola el caso que nace en alta, y el que escala de
+baja a alta mientras sigue siendo de quien corre el procesamiento. Si una persona ya lo
+tomó, escala pero conserva su propietario: quitárselo para meterlo en una cola sería
+deshacer una asignación que alguien hizo a propósito. «Sin propietario» significa, en la
+práctica, que el caso es del usuario de integración que corre el procesamiento. No hay
+un caso sin `OwnerId` en Salesforce.
+
+La intervención que el operador abre a mano desde el monitor es suya desde el principio,
+aunque el equipo esté en crítico, y no pasa por la cola.
+
 ### Por qué el caso no se cierra solo
 
 Que un valor vuelva a la normalidad no significa que el problema se haya resuelto: puede

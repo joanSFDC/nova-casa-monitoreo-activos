@@ -1,6 +1,7 @@
 /**
  * Una sola intervencion por problema: unicidad por Clave_Abierta__c, escalada
- * de prioridad y evidencia de recuperacion. No cierra el caso.
+ * de prioridad y evidencia de recuperacion. No cierra el caso. Lo critico va a
+ * la cola Coordinacion; lo bajo no es de nadie.
  *
  * without sharing: proceso de sistema. Lo invoca el procesamiento, no una persona.
  */
@@ -8,9 +9,13 @@ public without sharing class IncidentesServicio {
   public static final String PREFIJO_CONN = 'CONN|';
   public static final String PRIORIDAD_BAJA = 'Low';
   public static final String PRIORIDAD_ALTA = 'High';
+  public static final String COLA_COORDINACION = 'Coordinacion';
 
   @TestVisible
   static Boolean inyectarFalloDeCaso = false;
+
+  private static Id colaCoordinacionId;
+  private static Boolean colaBuscada = false;
 
   public class Decision {
     public String clave;
@@ -53,7 +58,14 @@ public without sharing class IncidentesServicio {
       return mapa;
     }
     for (Case incidente : [
-      SELECT Id, Clave_Abierta__c, Priority, Description, IsClosed, Status
+      SELECT
+        Id,
+        Clave_Abierta__c,
+        Priority,
+        OwnerId,
+        Description,
+        IsClosed,
+        Status
       FROM Case
       WHERE Clave_Abierta__c IN :claves
       WITH SYSTEM_MODE
@@ -219,7 +231,7 @@ public without sharing class IncidentesServicio {
         continue;
       }
       if (debeEscalar(abierto, decision.nivel)) {
-        abierto.Priority = PRIORIDAD_ALTA;
+        escalar(abierto);
         aActualizar.put(abierto.Id, abierto);
         senalPorCaso.put(abierto.Id, decision.claveSenal);
       } else {
@@ -306,7 +318,7 @@ public without sharing class IncidentesServicio {
       }
       ligar(decision, senales, ganador.Id);
       if (debeEscalar(ganador, decision.nivel)) {
-        ganador.Priority = PRIORIDAD_ALTA;
+        escalar(ganador);
         aEscalar.add(ganador);
       }
     }
@@ -401,6 +413,9 @@ public without sharing class IncidentesServicio {
     incidente.Status = 'New';
     incidente.Origin = 'Web';
     incidente.Priority = decision.nivel >= 2 ? PRIORIDAD_ALTA : PRIORIDAD_BAJA;
+    if (incidente.Priority == PRIORIDAD_ALTA && colaCoordinacion() != null) {
+      incidente.OwnerId = colaCoordinacion();
+    }
     incidente.Subject = asuntoDe(decision);
     if (inyectarFalloDeCaso) {
       incidente.Tipo_Medicion__c = 'TIPO_INEXISTENTE';
@@ -420,6 +435,34 @@ public without sharing class IncidentesServicio {
       return false;
     }
     return abierto.Priority != PRIORIDAD_ALTA;
+  }
+
+  /**
+   * Sube a alta y pasa a la cola del coordinador. Si una persona ya tomo el
+   * caso, lo conserva: solo se mueve mientras es de quien corre el proceso.
+   */
+  private static void escalar(Case abierto) {
+    abierto.Priority = PRIORIDAD_ALTA;
+    if (colaCoordinacion() != null && abierto.OwnerId == UserInfo.getUserId()) {
+      abierto.OwnerId = colaCoordinacion();
+    }
+  }
+
+  @TestVisible
+  static Id colaCoordinacion() {
+    if (!colaBuscada) {
+      colaBuscada = true;
+      for (Group cola : [
+        SELECT Id
+        FROM Group
+        WHERE Type = 'Queue' AND DeveloperName = :COLA_COORDINACION
+        WITH SYSTEM_MODE
+        LIMIT 1
+      ]) {
+        colaCoordinacionId = cola.Id;
+      }
+    }
+    return colaCoordinacionId;
   }
 
   private static String lineaRecuperado(

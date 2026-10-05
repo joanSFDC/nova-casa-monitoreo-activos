@@ -17,6 +17,6 @@ echo "==> Conjuntos de permisos asignados"
 sf data query -o "$ORG" -r human -q \
   "SELECT Assignee.Username, PermissionSet.Name FROM PermissionSetAssignment WHERE PermissionSet.Name LIKE 'Nova_Casa_%' AND Assignee.Username LIKE '%novacasa.95b2e3a11aa777%' ORDER BY PermissionSet.Name, Assignee.Username"
 
-echo "==> Miembros de los grupos"
+echo "==> Miembros de los grupos y de la cola"
 sf data query -o "$ORG" -r human -q \
-  "SELECT Group.DeveloperName, UserOrGroup.Name FROM GroupMember WHERE Group.DeveloperName IN ('Operadores_Bogota','Operadores_Barranquilla') ORDER BY Group.DeveloperName, UserOrGroup.Name"
+  "SELECT Group.DeveloperName, UserOrGroup.Name FROM GroupMember WHERE Group.DeveloperName IN ('Operadores_Bogota','Operadores_Barranquilla','Coordinacion') ORDER BY Group.DeveloperName, UserOrGroup.Name"

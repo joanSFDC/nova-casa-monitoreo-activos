@@ -150,6 +150,8 @@ inventados.
 | Concurrencia | Un error de duplicado se trata como éxito y se reintenta la escalada |
 | **Cierre y reapertura** | Cerrar, volver a poner en crítico, y se abre uno nuevo |
 | Fallo al crear el caso | La señal queda fallida y el estado actual **sí** se actualizó |
+| Cola del coordinador | El crítico nace en la cola Coordinación; la advertencia no; la escalada y su reintento pasan el caso a la cola |
+| Caso ya tomado | Escala a alta y conserva a la persona que lo tomó |
 
 La séptima es la que protege contra el riesgo R-18 y **no es negociable**. Si el cierre
 dejara de vaciar `Clave_Abierta__c`, ese activo no podría volver a abrir un incidente nunca
