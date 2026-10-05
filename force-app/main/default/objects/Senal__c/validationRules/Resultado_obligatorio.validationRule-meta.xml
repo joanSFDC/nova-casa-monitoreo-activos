@@ -4,5 +4,5 @@
     <active>true</active>
     <errorConditionFormula>ISBLANK(TEXT(Resultado__c))</errorConditionFormula>
     <errorDisplayField>Resultado__c</errorDisplayField>
-    <errorMessage>Toda señal debe tener un resultado. No hay señales sin resultado.</errorMessage>
+    <errorMessage>Toda seÃ±al debe tener un resultado. No hay seÃ±ales sin resultado.</errorMessage>
 </ValidationRule>

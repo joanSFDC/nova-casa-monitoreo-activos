@@ -5,3 +5,6 @@
 .vscode
 coverage/
 docs/
+
+# Los XML de metadatos quedan como los escribe y recupera Salesforce
+**/*-meta.xml

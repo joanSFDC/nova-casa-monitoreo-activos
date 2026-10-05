@@ -9,12 +9,12 @@ deshacer un enredo.
 
 ## 1. Qué hay aquí
 
-| Carpeta | Qué contiene |
-| --- | --- |
-| `docs/` | **La especificación técnica.** Trece documentos, uno por módulo |
-| `docs/estado.md` | **Qué ya está construido.** Se actualiza en cada Pull Request |
-| `force-app/` | El código de Salesforce |
-| `scripts/` | Scripts para sembrar datos y reconstruir la org |
+| Carpeta          | Qué contiene                                                    |
+| ---------------- | --------------------------------------------------------------- |
+| `docs/`          | **La especificación técnica.** Trece documentos, uno por módulo |
+| `docs/estado.md` | **Qué ya está construido.** Se actualiza en cada Pull Request   |
+| `force-app/`     | El código de Salesforce                                         |
+| `scripts/`       | Scripts para sembrar datos y reconstruir la org                 |
 
 **Antes de escribir una sola línea de código, lee el documento del módulo que te toca.**
 No es burocracia: ahí están las decisiones ya tomadas, con el porqué. Si implementas algo
@@ -84,12 +84,12 @@ gh auth login
 Te va a hacer cuatro preguntas. Responde así, moviéndote con las flechas y confirmando con
 Enter:
 
-| Pregunta | Respuesta |
-| --- | --- |
-| *What account do you want to log into?* | `GitHub.com` |
-| *What is your preferred protocol...?* | `HTTPS` |
-| *Authenticate Git with your GitHub credentials?* | `Yes` |
-| *How would you like to authenticate?* | `Login with a web browser` |
+| Pregunta                                         | Respuesta                  |
+| ------------------------------------------------ | -------------------------- |
+| _What account do you want to log into?_          | `GitHub.com`               |
+| _What is your preferred protocol...?_            | `HTTPS`                    |
+| _Authenticate Git with your GitHub credentials?_ | `Yes`                      |
+| _How would you like to authenticate?_            | `Login with a web browser` |
 
 Te va a mostrar un código de ocho caracteres, tipo `A1B2-C3D4`. **Cópialo.** Presiona Enter
 y se abre el navegador; pega el código, autoriza, y vuelve a la terminal.
@@ -146,12 +146,12 @@ git checkout -b us-203-estado-actual
 El nombre se arma así: **el número de la historia, y un resumen corto en minúsculas y con
 guiones.**
 
-| Historia | Nombre de la rama |
-| --- | --- |
-| US-203 | `us-203-estado-actual` |
-| US-204 | `us-204-limites-administrables` |
-| US-205 | `us-205-una-sola-intervencion` |
-| US-206 | `us-206-severidad` |
+| Historia | Nombre de la rama               |
+| -------- | ------------------------------- |
+| US-203   | `us-203-estado-actual`          |
+| US-204   | `us-204-limites-administrables` |
+| US-205   | `us-205-una-sola-intervencion`  |
+| US-206   | `us-206-severidad`              |
 
 Sin tildes, sin eñes, sin espacios y sin mayúsculas.
 
@@ -237,35 +237,35 @@ Tres piezas. La **etiqueta** dice qué clase de cambio es. El **módulo** dice d
 
 ### Las etiquetas
 
-| Etiqueta | Cuándo se usa |
-| --- | --- |
-| `feat` | Código nuevo que añade una capacidad |
-| `fix` | Arreglar algo que estaba mal |
-| `test` | Añadir o cambiar pruebas |
-| `docs` | Cambios en la documentación o en comentarios |
-| `refactor` | Reorganizar código sin cambiar lo que hace |
-| `chore` | Configuración, metadatos, permisos, datos de ejemplo |
+| Etiqueta   | Cuándo se usa                                        |
+| ---------- | ---------------------------------------------------- |
+| `feat`     | Código nuevo que añade una capacidad                 |
+| `fix`      | Arreglar algo que estaba mal                         |
+| `test`     | Añadir o cambiar pruebas                             |
+| `docs`     | Cambios en la documentación o en comentarios         |
+| `refactor` | Reorganizar código sin cambiar lo que hace           |
+| `chore`    | Configuración, metadatos, permisos, datos de ejemplo |
 
 ### Los módulos
 
 Son los mismos nombres que la carpeta `docs/`, para que exista un solo vocabulario en todo
 el proyecto.
 
-| Módulo | Qué abarca | Documento |
-| --- | --- | --- |
-| `contrato` | La forma del mensaje y sus validaciones | [01](docs/01-contrato-del-mensaje.md) |
-| `ingesta` | Llamada al simulador, sesión, cursor, publicación | [02](docs/02-ingesta.md) |
-| `modelo` | Objetos, campos y relaciones | [03](docs/03-modelo-de-datos.md) |
-| `procesamiento` | El suscriptor y el trabajo en lote | [04](docs/04-procesamiento.md) |
-| `limites` | Umbrales y clasificación de severidad | [05](docs/05-clasificacion-y-limites.md) |
-| `estado` | El estado actual por activo y medición | [06](docs/06-estado-actual.md) |
-| `incidentes` | Casos, escalada y duplicados | [07](docs/07-incidentes.md) |
-| `conectividad` | Latidos, cortes y episodios | [08](docs/08-conectividad.md) |
-| `monitor` | El componente del operador | [09](docs/09-experiencia-del-operador.md) |
-| `seguridad` | Permisos, compartición y matriz de acceso | [10](docs/10-seguridad-y-accesos.md) |
-| `trazabilidad` | La bitácora de señales | [11](docs/11-trazabilidad.md) |
-| `pruebas` | Pruebas y datos de prueba | [12](docs/12-plan-de-pruebas.md) |
-| `repo` | Configuración del proyecto, nada de negocio |  |
+| Módulo          | Qué abarca                                        | Documento                                 |
+| --------------- | ------------------------------------------------- | ----------------------------------------- |
+| `contrato`      | La forma del mensaje y sus validaciones           | [01](docs/01-contrato-del-mensaje.md)     |
+| `ingesta`       | Llamada al simulador, sesión, cursor, publicación | [02](docs/02-ingesta.md)                  |
+| `modelo`        | Objetos, campos y relaciones                      | [03](docs/03-modelo-de-datos.md)          |
+| `procesamiento` | El suscriptor y el trabajo en lote                | [04](docs/04-procesamiento.md)            |
+| `limites`       | Umbrales y clasificación de severidad             | [05](docs/05-clasificacion-y-limites.md)  |
+| `estado`        | El estado actual por activo y medición            | [06](docs/06-estado-actual.md)            |
+| `incidentes`    | Casos, escalada y duplicados                      | [07](docs/07-incidentes.md)               |
+| `conectividad`  | Latidos, cortes y episodios                       | [08](docs/08-conectividad.md)             |
+| `monitor`       | El componente del operador                        | [09](docs/09-experiencia-del-operador.md) |
+| `seguridad`     | Permisos, compartición y matriz de acceso         | [10](docs/10-seguridad-y-accesos.md)      |
+| `trazabilidad`  | La bitácora de señales                            | [11](docs/11-trazabilidad.md)             |
+| `pruebas`       | Pruebas y datos de prueba                         | [12](docs/12-plan-de-pruebas.md)          |
+| `repo`          | Configuración del proyecto, nada de negocio       |                                           |
 
 ### Cómo se escribe el mensaje
 
@@ -291,13 +291,13 @@ chore(repo): anadir conjunto de permisos del usuario de integracion
 
 Así no, y por qué:
 
-| Mensaje | Problema |
-| --- | --- |
-| `cambios` | No dice nada |
-| `Arreglado el bug` | Falta etiqueta y módulo, y no dice qué bug |
-| `feat: nueva funcionalidad` | Falta el módulo, y «funcionalidad» no informa |
-| `feat(estado): Arreglé el problema.` | Empieza en mayúscula, tiene punto y es vago |
-| `WIP` | No se suben trabajos a medias a `main` |
+| Mensaje                              | Problema                                      |
+| ------------------------------------ | --------------------------------------------- |
+| `cambios`                            | No dice nada                                  |
+| `Arreglado el bug`                   | Falta etiqueta y módulo, y no dice qué bug    |
+| `feat: nueva funcionalidad`          | Falta el módulo, y «funcionalidad» no informa |
+| `feat(estado): Arreglé el problema.` | Empieza en mayúscula, tiene punto y es vago   |
+| `WIP`                                | No se suben trabajos a medias a `main`        |
 
 > **Si no sabes qué módulo poner**, mira en qué carpeta está el archivo que tocaste y busca
 > su documento en la tabla de arriba. Si tocaste varios módulos, es señal de que el commit
