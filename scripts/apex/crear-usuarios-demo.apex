@@ -7,8 +7,9 @@
 //   ./scripts/crear-usuarios-demo.sh
 //
 // Es idempotente: si el Username ya existe, no duplica. Las asignaciones se
-// saltan si ya estan. No guarda contrasenas. A los humanos les manda el
-// correo de restablecer clave; al usuario de integracion no.
+// saltan si ya estan. No guarda contrasenas. A los humanos que crea en esa
+// corrida les manda el correo de restablecer clave; a los que ya existian no,
+// para no invalidar sus claves. Al usuario de integracion nunca.
 //
 // El correo de los humanos apunta a Juan para que llegue la invitacion.
 // El Username es lo que se escribe en el login.
@@ -123,10 +124,12 @@ for (String fila : filas) {
     paraInsertar.add(u);
 }
 
+Set<String> creadosAhora = new Set<String>();
 if (!paraInsertar.isEmpty()) {
     insert paraInsertar;
     for (User u : paraInsertar) {
         existentes.put(u.Username, u);
+        creadosAhora.add(u.Username);
     }
 }
 if (!paraActivar.isEmpty()) {
@@ -206,7 +209,7 @@ for (String fila : filas) {
         ));
     }
 
-    if (esHumano) {
+    if (esHumano && creadosAhora.contains(username)) {
         humanosParaClave.add(u.Id);
     }
 }
