@@ -105,11 +105,11 @@ bitácora responde directamente:
 | Pregunta | Cómo se responde |
 | --- | --- |
 | ¿Qué pasó con este mensaje? | Buscar por `Clave__c` o `Message_Id__c` |
-| ¿Qué se rechazó hoy y por qué? | Filtrar por resultado y fecha, agrupar por motivo |
+| ¿Qué se rechazó hoy y por qué? | Filtrar por resultado y fecha, ordenar por motivo |
 | ¿Cuáles puedo reintentar? | Filtrar por `Reintentable__c` |
 | ¿Qué llegó duplicado? | Filtrar `Entregas__c` mayor que uno |
 | ¿Hay conflictos sin resolver? | Filtrar por resultado conflicto |
-| ¿Algo se quedó atascado? | Filtrar pendientes con recepción antigua |
+| ¿Algo se quedó atascado? | Filtrar pendientes con más de una hora desde la recepción |
 | ¿Qué mensaje abrió este caso? | Desde el caso, `Origen_Senal__c` |
 | ¿Este mensaje generó un caso? | Desde la señal, `Incidente__c` |
 | ¿Dónde está la demora? | Comparar las cuatro fechas |
@@ -130,12 +130,24 @@ Las vistas que se entregan:
 | Reintentables | Reintentable marcado, resultado rechazado o fallido |
 | Conflictos | Resultado conflicto |
 | Duplicadas | `Entregas__c` mayor que uno |
-| Atascadas | Resultado pendiente, recepción hace más de una hora |
-| Últimas 24 horas | Recepción en el último día, ordenada descendente |
+| Atascadas | Resultado pendiente, más de una hora desde la recepción |
+| Últimas 24 horas | Menos de 24 horas desde la recepción |
 
 Una vista de lista estándar trae de fábrica búsqueda, filtros, ordenación, exportación,
 gráficos y acceso desde el móvil. Construir un componente a medida sería reemplazar todo
 eso por menos.
+
+Las dos últimas filtran por **`Horas_Desde_Recepcion__c`**, una fórmula
+`(NOW() - Fecha_Recepcion__c) * 24`. Sobre una fecha, una vista de lista solo filtra por
+días: no admite `LAST_N_HOURS`, y `LAST_N_DAYS:1` son hoy y ayer enteros, hasta 48 horas.
+Sobre un número calculado al leer, «más de 1» y «menos de 24» son horas exactas. La
+fórmula no se puede indexar, así que cada vista lleva además un filtro sobre un campo
+indexado que acota la búsqueda antes de mirar las horas: el resultado Pendiente en
+Atascadas, y `LAST_N_DAYS:1` sobre la recepción en Últimas 24 horas.
+
+El metadato de una vista **no fija orden ni agrupación**. Salesforce la abre ordenada por
+nombre; quien la usa pulsa otra columna, por ejemplo la fecha de recepción o el motivo, y
+la vista recuerda su elección.
 
 La página de registro agrupa los campos en tres secciones que corresponden a las tres
 preguntas que se hacen al abrir una señal: **identidad** (clave, mensaje, entregas, tipo),

@@ -6,6 +6,7 @@
     <columns>Clave__c</columns>
     <columns>Message_Id__c</columns>
     <columns>Fecha_Recepcion__c</columns>
+    <columns>Horas_Desde_Recepcion__c</columns>
     <columns>Fecha_Publicacion__c</columns>
     <filterScope>Everything</filterScope>
     <filters>
@@ -14,9 +15,9 @@
         <value>Pendiente</value>
     </filters>
     <filters>
-        <field>Fecha_Recepcion__c</field>
-        <operation>lessThan</operation>
-        <value>TODAY</value>
+        <field>Horas_Desde_Recepcion__c</field>
+        <operation>greaterThan</operation>
+        <value>1</value>
     </filters>
     <label>Atascadas</label>
 </ListView>

@@ -238,6 +238,7 @@ La bitácora. Cada mensaje recibido queda aquí con su resultado.
 | `Ultima_Fecha_Publicacion__c` | Datetime | `publishedAt` del último intento |
 | `Fecha_Recepcion__c` | Datetime | Cuándo la insertamos |
 | `Fecha_Procesamiento__c` | Datetime | Cuándo terminó el procesamiento |
+| `Horas_Desde_Recepcion__c` | Fórmula, Number(17,1) | `(NOW() - Fecha_Recepcion__c) * 24`. Lo usan las vistas que filtran por horas |
 | `Edificio__c` | Lookup(Edificio__c) | Vacío si el edificio no se resolvió |
 | `Activo__c` | Lookup(Activo__c) | Vacío si el activo no se resolvió |
 | `Incidente__c` | Lookup(Case) | El caso que abrió o escaló, si hubo |
