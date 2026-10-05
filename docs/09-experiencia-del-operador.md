@@ -11,9 +11,9 @@ está razonado.
 El coordinador necesita revisar una cola de casos y asignar trabajo: eso es exactamente
 para lo que sirven las colas y las vistas de lista estándar, con filtros, ordenación
 masiva y asignación en bloque que ya funcionan. Su cola es **Coordinación** y la ve en la
-vista «Cola de coordinación» de Casos ([módulo 07](07-incidentes.md)). La gerencia necesita ver qué edificios
-concentran situaciones graves: eso es un tablero, que además el propio gerente puede
-filtrar, suscribir y recibir por correo sin pedirnos nada. El administrador necesita
+vista «Cola de coordinación» de Casos ([módulo 07](07-incidentes.md)). La gerencia
+necesita ver qué edificios concentran situaciones graves: eso es un tablero, que además el
+propio gerente puede filtrar, suscribir y recibir por correo sin pedirnos nada. El administrador necesita
 investigar señales: eso es una vista de lista sobre la bitácora, con búsqueda y filtros.
 
 El operador es el único cuyo trabajo no encaja en una pantalla estándar, por dos razones.

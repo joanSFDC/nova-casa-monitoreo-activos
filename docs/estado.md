@@ -308,8 +308,8 @@ el formato y la codificación (issue #37), la evidencia de la bitácora en la
 ingesta (issue #39), el crítico superado dentro de una tanda (issue #41), los
 rangos contradictorios del umbral (issue #43), la cola del coordinador
 (issue #45), las claves que el script de usuarios restablecía en cada
-corrida (issue #47) y el monitor que no se recalculaba con la ingesta parada
-(issue #49).
+corrida (issue #47), el monitor que no se recalculaba con la ingesta parada
+(issue #49) y la aplicación de entrada de los humanos (issue #51).
 
 ## Decisiones que aparecieron al implementar
 
@@ -523,6 +523,10 @@ No estaban en la especificación y conviene no redescubrirlas.
     un minuto sin consultar, el componente vuelve a pedir el panel. La región
     activa lleva la hora para que cada actualización se vuelva a anunciar, y la
     vigilancia solo habla si cambia el aviso de atraso.
+51. **La aplicación de entrada es un `UserAppInfo`.** Un conjunto de permisos
+    no puede marcar la aplicación por defecto y el perfil mínimo deja ver un
+    centenar. El script de usuarios deja Nova Casa como entrada de los cinco
+    humanos en escritorio, sin tocar el perfil.
 
 ## Historial breve
 
@@ -551,4 +555,5 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-05 | Umbral: crítico bajo cruzado y medición sin bandas. PR #44 fusionado. Cierra #43 |
 | 2026-10-05 | Cola Coordinación para los casos críticos y vista de lista. PR #46 fusionado. Cierra #45 |
 | 2026-10-05 | El script de usuarios solo manda clave a los usuarios que crea. PR #48 fusionado. Cierra #47 |
-| 2026-10-05 | Monitor: vigilancia de un minuto y región activa que anuncia cada cambio. Cierra #49 |
+| 2026-10-05 | Monitor: vigilancia de un minuto y región activa que anuncia cada cambio. PR #50 fusionado. Cierra #49 |
+| 2026-10-05 | Nova Casa como aplicación de entrada de los humanos. Cierra #51 |

@@ -1,6 +1,7 @@
 // Crea o actualiza los seis usuarios de la demostracion, les asigna conjuntos
 // de permisos y los mete en los grupos publicos de cada ciudad. El coordinador
-// entra ademas en la cola Coordinacion de los casos criticos.
+// entra ademas en la cola Coordinacion de los casos criticos. Los humanos
+// quedan con Nova Casa como aplicacion de entrada en escritorio.
 //
 // Uso, desde la raiz del repositorio:
 //   sf apex run -f scripts/apex/crear-usuarios-demo.apex
@@ -173,6 +174,7 @@ List<PermissionSetAssignment> nuevasAsignaciones = new List<PermissionSetAssignm
 List<GroupMember> nuevosMiembros = new List<GroupMember>();
 List<PermissionSetLicenseAssign> nuevasLicencias = new List<PermissionSetLicenseAssign>();
 List<Id> humanosParaClave = new List<Id>();
+Set<Id> humanos = new Set<Id>();
 
 for (String fila : filas) {
     List<String> c = fila.split('\\|');
@@ -209,6 +211,9 @@ for (String fila : filas) {
         ));
     }
 
+    if (esHumano) {
+        humanos.add(u.Id);
+    }
     if (esHumano && creadosAhora.contains(username)) {
         humanosParaClave.add(u.Id);
     }
@@ -222,6 +227,31 @@ if (!nuevasAsignaciones.isEmpty()) {
 }
 if (!nuevosMiembros.isEmpty()) {
     insert nuevosMiembros;
+}
+
+// Un conjunto de permisos no puede marcar la aplicacion por defecto, solo el
+// perfil. La aplicacion de entrada de cada usuario es su UserAppInfo.
+Id novaCasa = [SELECT DurableId FROM AppDefinition WHERE DeveloperName = 'Nova_Casa' LIMIT 1].DurableId;
+Map<Id, UserAppInfo> entradaPorUsuario = new Map<Id, UserAppInfo>();
+for (UserAppInfo entrada : [
+    SELECT Id, UserId, AppDefinitionId
+    FROM UserAppInfo
+    WHERE UserId IN :humanos AND FormFactor = 'Large'
+]) {
+    entradaPorUsuario.put(entrada.UserId, entrada);
+}
+List<UserAppInfo> entradas = new List<UserAppInfo>();
+for (Id humanoId : humanos) {
+    UserAppInfo entrada = entradaPorUsuario.get(humanoId);
+    if (entrada == null) {
+        entradas.add(new UserAppInfo(UserId = humanoId, AppDefinitionId = novaCasa, FormFactor = 'Large'));
+    } else if (entrada.AppDefinitionId != novaCasa) {
+        entrada.AppDefinitionId = novaCasa;
+        entradas.add(entrada);
+    }
+}
+if (!entradas.isEmpty()) {
+    upsert entradas;
 }
 
 Integer clavesEnviadas = 0;
@@ -238,4 +268,5 @@ System.debug('USUARIOS_DEMO existentes=' + existentes.size()
     + ' insertados=' + paraInsertar.size()
     + ' asignaciones=' + nuevasAsignaciones.size()
     + ' grupos=' + nuevosMiembros.size()
+    + ' entrada=' + entradas.size()
     + ' claves=' + clavesEnviadas);
