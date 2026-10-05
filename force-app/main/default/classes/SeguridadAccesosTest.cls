@@ -430,9 +430,9 @@ private class SeguridadAccesosTest {
       WHERE Clave_Abierta__c = :CLAVE_BOMBA
     ];
     Assert.areEqual(
-      integracion.Id,
+      IncidentesServicio.colaCoordinacion(),
       incidente.OwnerId,
-      'El caso no es de ninguna persona'
+      'El caso critico es de la cola, no de una persona'
     );
     Assert.areEqual(
       'Bogota',

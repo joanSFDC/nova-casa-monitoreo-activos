@@ -40,13 +40,18 @@ private class IncidentesServicioTest {
 
     Assert.areEqual(1, [SELECT COUNT() FROM Case], 'Un caso bajo rafaga');
     Case incidente = [
-      SELECT Priority, Clave_Abierta__c, Origen_Senal__c, Activo__c
+      SELECT Priority, Clave_Abierta__c, Origen_Senal__c, Activo__c, OwnerId
       FROM Case
     ];
     Assert.areEqual(
       IncidentesServicio.PRIORIDAD_ALTA,
       incidente.Priority,
       'Critico abre en alta'
+    );
+    Assert.areEqual(
+      IncidentesServicio.colaCoordinacion(),
+      incidente.OwnerId,
+      'Y entra en la cola del coordinador'
     );
     Assert.areEqual(CLAVE_PRESION, incidente.Clave_Abierta__c);
     Assert.areEqual(bomba.Id, incidente.Activo__c);
@@ -107,6 +112,11 @@ private class IncidentesServicioTest {
       despuesDeAdv.Priority,
       'Advertencia en baja'
     );
+    Assert.areEqual(
+      UserInfo.getUserId(),
+      despuesDeAdv.OwnerId,
+      'La advertencia no entra en ninguna cola'
+    );
     ProcesamientoServicio.procesar(
       new List<Aviso_de_Senal__e>{ TestDataFactory.avisoDe(critico) }
     );
@@ -118,7 +128,7 @@ private class IncidentesServicioTest {
       'Sigue siendo el mismo caso'
     );
     Case incidente = [
-      SELECT Priority, Clave_Abierta__c
+      SELECT Priority, Clave_Abierta__c, OwnerId
       FROM Case
       WHERE Clave_Abierta__c = :CLAVE_PRESION
     ];
@@ -126,6 +136,11 @@ private class IncidentesServicioTest {
       IncidentesServicio.PRIORIDAD_ALTA,
       incidente.Priority,
       'Sube a alta'
+    );
+    Assert.areEqual(
+      IncidentesServicio.colaCoordinacion(),
+      incidente.OwnerId,
+      'Y pasa a la cola del coordinador'
     );
     Senal__c senalCritica = [
       SELECT Incidente__c
@@ -136,6 +151,54 @@ private class IncidentesServicioTest {
       incidente.Id,
       senalCritica.Incidente__c,
       'La senal critica apunta al caso'
+    );
+  }
+
+  @isTest
+  static void shouldConservarPropietario_WhenUnaPersonaYaTomoElCaso() {
+    Activo__c bomba = bomba();
+    User operador;
+    System.runAs(new User(Id = UserInfo.getUserId())) {
+      operador = TestDataFactory.usuarioConConjunto('Nova_Casa_Operador');
+    }
+    insert new Case(
+      Subject = 'Tomado por el operador',
+      Status = 'New',
+      Origin = 'Web',
+      Priority = IncidentesServicio.PRIORIDAD_BAJA,
+      Clave_Abierta__c = CLAVE_PRESION,
+      Activo__c = bomba.Id,
+      Tipo_Medicion__c = 'WATER_PRESSURE',
+      OwnerId = operador.Id
+    );
+    Map<String, Object> critico = TestDataFactory.mensajePresion(
+      'msg_cri',
+      'dlv_cri',
+      5.5,
+      'BAR'
+    );
+    insert TestDataFactory.senalPendiente(critico, bomba.Id, bomba.Edificio__c);
+
+    Test.startTest();
+    ProcesamientoServicio.procesar(
+      new List<Aviso_de_Senal__e>{ TestDataFactory.avisoDe(critico) }
+    );
+    Test.stopTest();
+
+    Case incidente = [
+      SELECT Priority, OwnerId
+      FROM Case
+      WHERE Clave_Abierta__c = :CLAVE_PRESION
+    ];
+    Assert.areEqual(
+      IncidentesServicio.PRIORIDAD_ALTA,
+      incidente.Priority,
+      'Escala igual'
+    );
+    Assert.areEqual(
+      operador.Id,
+      incidente.OwnerId,
+      'Quien ya lo tomo lo conserva'
     );
   }
 
@@ -297,7 +360,7 @@ private class IncidentesServicioTest {
 
     Assert.areEqual(1, [SELECT COUNT() FROM Case], 'El duplicado no crea otro');
     Case ganador = [
-      SELECT Priority
+      SELECT Priority, OwnerId
       FROM Case
       WHERE Clave_Abierta__c = :CLAVE_PRESION
     ];
@@ -305,6 +368,11 @@ private class IncidentesServicioTest {
       IncidentesServicio.PRIORIDAD_ALTA,
       ganador.Priority,
       'Reintenta la escalada'
+    );
+    Assert.areEqual(
+      IncidentesServicio.colaCoordinacion(),
+      ganador.OwnerId,
+      'La escalada reintentada tambien va a la cola'
     );
     Assert.areEqual(
       ganador.Id,
