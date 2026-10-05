@@ -351,8 +351,8 @@ administrador del sistema todavía ve el lápiz en cada campo: su permiso «Edit
 Fields» pasa por encima de la página, y ese perfil no deja quitarlo.
 
 Las pestañas siguen el recorrido del operador: Monitor, Casos, Activos, Edificios,
-Estados actuales, Umbrales, Señales, Control de ingesta e Inicio. Cada usuario ve solo
-las de los objetos que tiene. Quien ya hubiera personalizado su barra conserva su orden.
+Estados actuales, Umbrales, Señales y Control de ingesta. No lleva Inicio: la de fábrica
+es la página de ventas. Cada usuario ve solo las de los objetos que tiene. Quien ya hubiera personalizado su barra conserva su orden.
 
 ### El contraste medido
 

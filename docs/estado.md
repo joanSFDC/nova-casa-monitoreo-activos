@@ -262,7 +262,7 @@ Lo desplegado:
   botones en `#122d4f` (`OVERRIDE_A11Y_COLOR`).
 - **Aplicación** con la casa como logo, descripción nueva y pestañas en el orden
   del operador: Monitor, Casos, Activos, Edificios, Estados actuales, Umbrales,
-  Señales, Control de ingesta e Inicio.
+  Señales y Control de ingesta.
 - **Iconos** con sentido en las siete pestañas propias.
 - **Severidad fija** en el CSS del monitor: `#ba0517`, `#a15c00`, `#2e844a`.
 - **Páginas** `Activo_Registro`, `Edificio_Registro` y `Estado_Registro`.
