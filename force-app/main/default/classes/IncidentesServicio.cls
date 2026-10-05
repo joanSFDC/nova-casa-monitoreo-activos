@@ -425,7 +425,7 @@ public without sharing class IncidentesServicio {
 
   private static String asuntoDe(Decision decision) {
     if (String.isNotBlank(decision.episodioId)) {
-      return 'Corte de comunicacion ' + decision.episodioId;
+      return 'Corte de comunicaci\u00f3n ' + decision.episodioId;
     }
     return 'Lectura fuera de rango ' + decision.clave;
   }
@@ -473,7 +473,7 @@ public without sharing class IncidentesServicio {
     String linea =
       'Recuperado ' +
       String.valueOf(ahora) +
-      ' senal ' +
+      ' se\u00f1al ' +
       claveSenal;
     if (String.isBlank(actual)) {
       return linea;

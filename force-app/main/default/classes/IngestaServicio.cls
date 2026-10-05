@@ -334,7 +334,7 @@ public without sharing class IngestaServicio {
     }
     if (!sinGuardar.isEmpty()) {
       resultado.errorGuardado = recortar(
-        sinGuardar.size() + ' senales sin guardar. ' + sinGuardar[0]
+        sinGuardar.size() + ' se\u00f1ales sin guardar. ' + sinGuardar[0]
       );
     }
 
@@ -589,7 +589,7 @@ public without sharing class IngestaServicio {
     return recortar(
       'La entrega ' +
         nvl(deliveryId) +
-        ' trajo otro contenido. Se conserva la primera afirmacion.'
+        ' trajo otro contenido. Se conserva la primera afirmaci\u00f3n.'
     );
   }
 
