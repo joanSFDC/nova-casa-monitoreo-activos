@@ -202,6 +202,20 @@ administrador la lee entera, con carga y detalle, y no la edita: corregir una se
 borraría la prueba de lo que pasó. El control de ingesta sí lo edita (escenario, tanda,
 reactivarlo), pero no lo crea ni lo borra: es un registro único.
 
+### Acceso a la aplicación
+
+Los cuatro conjuntos humanos hacen **visible** la aplicación Nova Casa. Lo que un conjunto
+de permisos no puede hacer es marcarla como aplicación por defecto: eso solo lo admite el
+perfil, y el perfil de los humanos es `Minimum Access - Salesforce`, de fábrica, que deja
+ver un centenar de aplicaciones. Cambiar de perfil para eso contradiría la regla de que el
+acceso va en los conjuntos.
+
+La aplicación de entrada de cada persona es un registro `UserAppInfo`, el mismo que
+Salesforce guarda cuando alguien cambia de aplicación. `scripts/crear-usuarios-demo.sh` lo
+deja en Nova Casa para los cinco humanos, en escritorio. Si alguien se pasa a otra
+aplicación, la siguiente sesión empieza en esa, como en cualquier org; volver a correr el
+script la devuelve a Nova Casa.
+
 ### Acceso a registros
 
 | Objeto | Valor por defecto | Cómo se amplía |
