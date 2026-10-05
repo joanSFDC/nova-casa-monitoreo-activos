@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://soap.sforce.com/2006/04/metadata">
+    <columns>
+        <field>CHILD_NAME</field>
+    </columns>
+    <columns>
+        <field>Activo__c.Tipo__c</field>
+    </columns>
+    <columns>
+        <field>Edificio__c.Ciudad__c</field>
+    </columns>
+    <columns>
+        <field>Edificio__c.Region__c</field>
+    </columns>
+    <description>Equipos en advertencia o crítico, agrupados por edificio y severidad.</description>
+    <filter>
+        <criteriaItems>
+            <column>Activo__c.Severidad_Nivel__c</column>
+            <columnToColumn>false</columnToColumn>
+            <isUnlocked>true</isUnlocked>
+            <operator>greaterThan</operator>
+            <value>0</value>
+        </criteriaItems>
+    </filter>
+    <format>Summary</format>
+    <groupingsDown>
+        <dateGranularity>Day</dateGranularity>
+        <field>CUST_NAME</field>
+        <sortOrder>Asc</sortOrder>
+    </groupingsDown>
+    <groupingsDown>
+        <dateGranularity>Day</dateGranularity>
+        <field>Activo__c.Severidad__c</field>
+        <sortOrder>Asc</sortOrder>
+    </groupingsDown>
+    <name>Equipos fuera de rango por edificio</name>
+    <params>
+        <name>co</name>
+        <value>1</value>
+    </params>
+    <reportType>CustomEntityCustomEntity$Edificio__c$Activo__c</reportType>
+    <scope>organization</scope>
+    <showDetails>true</showDetails>
+    <showGrandTotal>true</showGrandTotal>
+    <showSubTotals>true</showSubTotals>
+    <timeFrameFilter>
+        <dateColumn>CUST_CREATED_DATE</dateColumn>
+        <interval>INTERVAL_CUSTOM</interval>
+    </timeFrameFilter>
+</Report>

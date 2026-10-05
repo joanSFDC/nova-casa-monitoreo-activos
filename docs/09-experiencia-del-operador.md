@@ -12,8 +12,9 @@ El coordinador necesita revisar una cola de casos y asignar trabajo: eso es exac
 para lo que sirven las colas y las vistas de lista estándar, con filtros, ordenación
 masiva y asignación en bloque que ya funcionan. Su cola es **Coordinación** y la ve en la
 vista «Cola de coordinación» de Casos ([módulo 07](07-incidentes.md)). La gerencia
-necesita ver qué edificios concentran situaciones graves: eso es un tablero, que además el
-propio gerente puede filtrar, suscribir y recibir por correo sin pedirnos nada. El administrador necesita
+necesita ver qué edificios concentran situaciones graves: eso es un tablero, que el propio
+gerente filtra por ciudad y cuyos informes recibe por correo sin pedirnos nada
+([más abajo](#el-tablero-de-la-gerencia)). El administrador necesita
 investigar señales: eso es una vista de lista sobre la bitácora, con búsqueda y filtros.
 
 El operador es el único cuyo trabajo no encaja en una pantalla estándar, por dos razones.
@@ -25,6 +26,34 @@ intervención.
 Esa segunda propiedad es la que hace que su recorrido sea el que mejor demuestra que el
 sistema completo funciona, desde que el sensor reporta hasta que alguien tiene trabajo
 asignado.
+
+### El tablero de la gerencia
+
+Es el panel **Gerencia · Nova Casa**, en la pestaña Paneles, con dos gráficos:
+
+| Gráfico | Informe | Qué cuenta |
+| --- | --- | --- |
+| Equipos fuera de rango por edificio | `Equipos_fuera_de_rango` | Activos en advertencia o crítico, por edificio y severidad |
+| Casos abiertos por ciudad y prioridad | `Casos_abiertos_por_ciudad` | Casos sin cerrar, por ciudad y prioridad |
+
+El panel es **dinámico**: cada persona lo ve con sus propios permisos y su compartición, no
+con los de quien lo creó. Un panel con usuario fijo enseñaría a quien lo abre lo que ve ese
+usuario, y es la misma fuga que la de calcular en el navegador. Hoy gerente y coordinador
+ven las dos ciudades, así que los números coinciden, pero si mañana hay un gerente por
+región el panel no cambia.
+
+El filtro **Ciudad** usa `Edificio__c.Ciudad__c` en el gráfico de equipos y
+`Case.Ciudad__c` en el de casos. Los dos son el mismo texto, así que «Bogotá» filtra igual
+en ambos.
+
+Salesforce no admite suscripciones a un panel dinámico: sin un usuario fijo no sabe con
+qué permisos armar el correo. Por eso la suscripción va por los **informes**, que se
+ejecutan con los permisos de quien se suscribe. Gerente y coordinador tienen «Suscribirse
+a informes»; «Suscribirse a paneles» no se concede porque no tendría dónde usarse.
+
+Los dos informes están en la carpeta **Nova Casa**, y el panel en otra carpeta con el mismo
+nombre. Las dos se comparten en lectura con el grupo `Gerencia_y_Coordinacion`
+([módulo 10](10-seguridad-y-accesos.md#acceso-a-los-informes)).
 
 ## El concepto de base: dónde se calcula qué
 
@@ -351,8 +380,11 @@ administrador del sistema todavía ve el lápiz en cada campo: su permiso «Edit
 Fields» pasa por encima de la página, y ese perfil no deja quitarlo.
 
 Las pestañas siguen el recorrido del operador: Monitor, Casos, Activos, Edificios,
-Estados actuales, Umbrales, Señales y Control de ingesta. No lleva Inicio: la de fábrica
-es la página de ventas. Cada usuario ve solo las de los objetos que tiene. Quien ya hubiera personalizado su barra conserva su orden.
+Estados actuales, Umbrales, Señales, Control de ingesta y Paneles. No lleva Inicio: la de
+fábrica es la página de ventas. Cada usuario ve solo las de los objetos que tiene, y
+Paneles solo gerente y coordinador. Informes no está en la barra: el perfil mínimo la
+muestra a todos, y el operador vería una pestaña que no puede usar. Al informe se llega
+desde «Ver informe», en cada gráfico del panel. Quien ya hubiera personalizado su barra conserva su orden.
 
 ### El contraste medido
 

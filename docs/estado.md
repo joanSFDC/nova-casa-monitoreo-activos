@@ -158,10 +158,12 @@ Q-10 quedó en **por ciudad**: regla sobre `Edificio__c.Ciudad__c` hacia los gru
 los dos grupos. El edificio sigue siendo la unidad de autorización; activo y
 estado actual heredan. Los casos se comparten igual, por `Case.Ciudad__c`
 (US-208). El coordinador es además miembro de la cola de casos **Coordinación**.
+Coordinador y gerente están en el grupo `Gerencia_y_Coordinacion`, que es con quien
+se comparten las carpetas de informes y paneles.
 
 La aplicación `Nova_Casa` abre en la pestaña **Monitor** y no lleva la pestaña
-Inicio de fábrica, que es la página de ventas. Logo y tema están en
-la sección de identidad visual, más abajo.
+Inicio de fábrica, que es la página de ventas. Gerente y coordinador ven además
+**Paneles**. Logo y tema están en la sección de identidad visual, más abajo.
 
 ### US-204 · Límites administrables
 
@@ -252,6 +254,24 @@ Tras suspender y reanudar la suscripción, un ciclo de MIXED dejó 234 señales
 procesadas por Usuario Integración. Las 5 rechazadas o en conflicto quedan a
 nombre de quien lanzó la ingesta, porque se deciden al llegar.
 
+### Panel de gerencia
+
+El panel dinámico **Gerencia · Nova Casa** (carpeta `Nova_Casa`) tiene dos
+gráficos y un filtro por ciudad. Los informes están en la carpeta de informes
+del mismo nombre:
+
+| Informe | Tipo | Agrupa | Filtra |
+| --- | --- | --- | --- |
+| `Equipos_fuera_de_rango` | Edificios con activos | Edificio, severidad | `Severidad_Nivel__c` mayor que 0 |
+| `Casos_abiertos_por_ciudad` | Casos | `Case.Ciudad__c`, prioridad | Sin cerrar |
+
+Las dos carpetas se comparten en lectura con `Gerencia_y_Coordinacion`.
+Gerencia y Coordinador llevan «Ejecutar informes» y «Suscribirse a
+informes». Comprobado como gerente: con Barranquilla salen 2 equipos en
+advertencia en Nova Caribe y 5 casos; con Bogotá, los dos gráficos vacíos.
+El detalle está en los módulos [09](09-experiencia-del-operador.md#el-tablero-de-la-gerencia)
+y [10](10-seguridad-y-accesos.md#acceso-a-los-informes).
+
 ### Identidad visual
 
 El detalle está en el [módulo 09](09-experiencia-del-operador.md#la-identidad-visual).
@@ -262,7 +282,7 @@ Lo desplegado:
   botones en `#122d4f` (`OVERRIDE_A11Y_COLOR`).
 - **Aplicación** con la casa como logo, descripción nueva y pestañas en el orden
   del operador: Monitor, Casos, Activos, Edificios, Estados actuales, Umbrales,
-  Señales y Control de ingesta.
+  Señales, Control de ingesta y Paneles.
 - **Iconos** con sentido en las siete pestañas propias.
 - **Severidad fija** en el CSS del monitor: `#ba0517`, `#a15c00`, `#2e844a`.
 - **Páginas** `Activo_Registro`, `Edificio_Registro` y `Estado_Registro`.
@@ -310,7 +330,9 @@ ingesta (issue #39), el crítico superado dentro de una tanda (issue #41), los
 rangos contradictorios del umbral (issue #43), la cola del coordinador
 (issue #45), las claves que el script de usuarios restablecía en cada
 corrida (issue #47), el monitor que no se recalculaba con la ingesta parada
-(issue #49) y la aplicación de entrada de los humanos (issue #51).
+(issue #49), la aplicación de entrada de los humanos (issue #51), la pestaña
+Inicio de ventas (issue #53) y el panel de gerencia que el módulo 09 daba por
+hecho (issue #55).
 
 ## Decisiones que aparecieron al implementar
 
@@ -528,6 +550,13 @@ No estaban en la especificación y conviene no redescubrirlas.
     no puede marcar la aplicación por defecto y el perfil mínimo deja ver un
     centenar. El script de usuarios deja Nova Casa como entrada de los cinco
     humanos en escritorio, sin tocar el perfil.
+52. **Un panel dinámico no admite suscripción.** Sin usuario fijo, Salesforce
+    no sabe con qué permisos armar el correo; el menú del panel solo ofrece
+    Descargar. Gerente y coordinador se suscriben a los informes, que corren
+    con los permisos de quien se suscribe. El filtro por ciudad sí funciona en
+    el panel dinámico, sobre un campo distinto en cada gráfico. Informes queda
+    fuera de la barra porque el perfil mínimo la muestra a todos, también al
+    operador, que no puede ejecutar informes.
 
 ## Historial breve
 
@@ -559,3 +588,4 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-05 | Monitor: vigilancia de un minuto y región activa que anuncia cada cambio. PR #50 fusionado. Cierra #49 |
 | 2026-10-05 | Nova Casa como aplicación de entrada de los humanos. PR #52 fusionado. Cierra #51 |
 | 2026-10-05 | La aplicación deja de llevar la pestaña Inicio de ventas. Cierra #53 |
+| 2026-10-05 | Panel de gerencia: dos informes, filtro por ciudad y carpetas para gerente y coordinador. Cierra #55 |

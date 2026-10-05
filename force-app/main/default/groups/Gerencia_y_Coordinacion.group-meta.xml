@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Group xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Quienes ven los informes y el tablero de Nova Casa. El gerente y el coordinador.</description>
+    <doesIncludeBosses>false</doesIncludeBosses>
+    <name>Gerencia y coordinación</name>
+</Group>

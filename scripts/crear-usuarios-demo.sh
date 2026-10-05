@@ -23,4 +23,4 @@ sf data query -o "$ORG" -r human -q \
 
 echo "==> Miembros de los grupos y de la cola"
 sf data query -o "$ORG" -r human -q \
-  "SELECT Group.DeveloperName, UserOrGroup.Name FROM GroupMember WHERE Group.DeveloperName IN ('Operadores_Bogota','Operadores_Barranquilla','Coordinacion') ORDER BY Group.DeveloperName, UserOrGroup.Name"
+  "SELECT Group.DeveloperName, UserOrGroup.Name FROM GroupMember WHERE Group.DeveloperName IN ('Operadores_Bogota','Operadores_Barranquilla','Coordinacion','Gerencia_y_Coordinacion') ORDER BY Group.DeveloperName, UserOrGroup.Name"
