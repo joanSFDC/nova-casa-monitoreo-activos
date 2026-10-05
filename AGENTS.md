@@ -37,27 +37,27 @@ US-210.
 
 ## 2. La estructura del repositorio
 
-| Ruta | Qué es |
-| --- | --- |
-| `docs/` | **La especificación.** Trece documentos. Es la fuente de verdad del diseño |
-| `docs/estado.md` | **Qué ya existe y qué se está haciendo.** Se actualiza en cada PR |
-| `docs/data-model/` | El diagrama del modelo de datos |
-| `force-app/main/default/` | El código y los metadatos de Salesforce |
-| `scripts/` | Siembra y reconstrucción de la org. No es metadato |
-| `CONTRIBUTING.md` | El manual de git y del flujo de equipo |
-| `AGENTS.md` | Este archivo |
+| Ruta                      | Qué es                                                                     |
+| ------------------------- | -------------------------------------------------------------------------- |
+| `docs/`                   | **La especificación.** Trece documentos. Es la fuente de verdad del diseño |
+| `docs/estado.md`          | **Qué ya existe y qué se está haciendo.** Se actualiza en cada PR          |
+| `docs/data-model/`        | El diagrama del modelo de datos                                            |
+| `force-app/main/default/` | El código y los metadatos de Salesforce                                    |
+| `scripts/`                | Siembra y reconstrucción de la org. No es metadato                         |
+| `CONTRIBUTING.md`         | El manual de git y del flujo de equipo                                     |
+| `AGENTS.md`               | Este archivo                                                               |
 
 Dentro de `force-app/main/default/`:
 
-| Carpeta | Contenido |
-| --- | --- |
-| `objects/` | Objetos personalizados, sus campos y el evento de plataforma |
-| `globalValueSets/` | Los cuatro catálogos compartidos |
-| `permissionsets/` | Conjuntos de permisos. **Todo el acceso se concede aquí** |
-| `classes/` | Apex |
-| `triggers/` | Disparadores |
-| `lwc/` | Componentes Lightning |
-| `applications/`, `tabs/`, `flexipages/` | La aplicación y su navegación |
+| Carpeta                                 | Contenido                                                    |
+| --------------------------------------- | ------------------------------------------------------------ |
+| `objects/`                              | Objetos personalizados, sus campos y el evento de plataforma |
+| `globalValueSets/`                      | Los cuatro catálogos compartidos                             |
+| `permissionsets/`                       | Conjuntos de permisos. **Todo el acceso se concede aquí**    |
+| `classes/`                              | Apex                                                         |
+| `triggers/`                             | Disparadores                                                 |
+| `lwc/`                                  | Componentes Lightning                                        |
+| `applications/`, `tabs/`, `flexipages/` | La aplicación y su navegación                                |
 
 ---
 
@@ -71,20 +71,20 @@ con el de la otra persona y uno de los dos va a tener que rehacerlo.
 
 Los trece, en orden:
 
-| # | Documento | Cubre |
-| --- | --- | --- |
-| 01 | Contrato del mensaje | La forma del mensaje, la identidad, las validaciones |
-| 02 | Ingesta | La llamada al simulador, la sesión, el cursor |
-| 03 | Modelo de datos | Objetos, campos y relaciones |
-| 04 | Procesamiento | El suscriptor y el trabajo en lote |
-| 05 | Clasificación y límites | Umbrales y severidad |
-| 06 | Estado actual | La foto de ahora y su vigencia |
-| 07 | Incidentes | Casos, unicidad y escalada |
-| 08 | Conectividad | Cortes de comunicación y episodios |
-| 09 | Experiencia del operador | El componente Lightning |
-| 10 | Seguridad y accesos | Permisos, compartición, la matriz |
-| 11 | Trazabilidad | La bitácora, resultados y motivos |
-| 12 | Plan de pruebas | Qué se prueba y cómo |
+| #   | Documento                | Cubre                                                |
+| --- | ------------------------ | ---------------------------------------------------- |
+| 01  | Contrato del mensaje     | La forma del mensaje, la identidad, las validaciones |
+| 02  | Ingesta                  | La llamada al simulador, la sesión, el cursor        |
+| 03  | Modelo de datos          | Objetos, campos y relaciones                         |
+| 04  | Procesamiento            | El suscriptor y el trabajo en lote                   |
+| 05  | Clasificación y límites  | Umbrales y severidad                                 |
+| 06  | Estado actual            | La foto de ahora y su vigencia                       |
+| 07  | Incidentes               | Casos, unicidad y escalada                           |
+| 08  | Conectividad             | Cortes de comunicación y episodios                   |
+| 09  | Experiencia del operador | El componente Lightning                              |
+| 10  | Seguridad y accesos      | Permisos, compartición, la matriz                    |
+| 11  | Trazabilidad             | La bitácora, resultados y motivos                    |
+| 12  | Plan de pruebas          | Qué se prueba y cómo                                 |
 
 ---
 
@@ -179,15 +179,15 @@ pero no suficiente, y es el error de seguridad más común de la plataforma.
 
 ```apex
 public with sharing class MonitorControlador {
-    @AuraEnabled(cacheable=true)
-    public static PanelDTO obtenerPanel(String edificioId) {
-        List<Estado_Actual__c> estados = [
-            SELECT Id, Tipo_Medicion__c, Valor__c, Severidad__c, Fecha_Origen__c
-            FROM Estado_Actual__c
-            WHERE Activo__r.Edificio__c = :edificioId
-            WITH USER_MODE
-        ];
-    }
+  @AuraEnabled(cacheable=true)
+  public static PanelDTO obtenerPanel(String edificioId) {
+    List<Estado_Actual__c> estados = [
+      SELECT Id, Tipo_Medicion__c, Valor__c, Severidad__c, Fecha_Origen__c
+      FROM Estado_Actual__c
+      WHERE Activo__r.Edificio__c = :edificioId
+      WITH USER_MODE
+    ];
+  }
 }
 ```
 
@@ -270,15 +270,15 @@ conviértelo a UTF-8 antes de confirmar.
 
 ## 8. Convenciones de nombres
 
-| Qué | Cómo | Ejemplo |
-| --- | --- | --- |
-| Objetos y campos | Español sin tildes ni eñes, con guion bajo | `Estado_Actual__c`, `Codigo_Externo__c` |
-| Etiquetas visibles | Español **con** tildes | "Estado actual", "Código externo" |
-| Valores de catálogo del proveedor | Tal cual los manda él, en mayúsculas | `WATER_PRESSURE`, `TECHNICAL_ROOM` |
-| Valores de catálogo nuestros | En español legible | `Aplicado`, `Rechazado`, `Pendiente` |
-| Clases Apex | Sustantivo en español, sin tildes | `MonitorControlador`, `IngestaServicio` |
-| Componentes Lightning | camelCase | `monitorDeActivos` |
-| Ramas y commits | Ver `CONTRIBUTING.md` | `us-203-estado-actual` |
+| Qué                               | Cómo                                       | Ejemplo                                 |
+| --------------------------------- | ------------------------------------------ | --------------------------------------- |
+| Objetos y campos                  | Español sin tildes ni eñes, con guion bajo | `Estado_Actual__c`, `Codigo_Externo__c` |
+| Etiquetas visibles                | Español **con** tildes                     | "Estado actual", "Código externo"       |
+| Valores de catálogo del proveedor | Tal cual los manda él, en mayúsculas       | `WATER_PRESSURE`, `TECHNICAL_ROOM`      |
+| Valores de catálogo nuestros      | En español legible                         | `Aplicado`, `Rechazado`, `Pendiente`    |
+| Clases Apex                       | Sustantivo en español, sin tildes          | `MonitorControlador`, `IngestaServicio` |
+| Componentes Lightning             | camelCase                                  | `monitorDeActivos`                      |
+| Ramas y commits                   | Ver `CONTRIBUTING.md`                      | `us-203-estado-actual`                  |
 
 Las claves compuestas se arman siempre con barra vertical y sin espacios:
 
@@ -292,10 +292,10 @@ Senal__c.Clave__c           nova-casa-simulator|msg_000002
 
 ## 9. Quién hace qué
 
-| Persona | GitHub | Historias |
-| --- | --- | --- |
-| Joan Orduz | `joanSFDC` | US-201, US-202, US-207, US-208, US-209 |
-| Juan José Palma (Cali) | `juanSFDC` | US-203, US-204, US-205, US-206 |
+| Persona                | GitHub     | Historias                              |
+| ---------------------- | ---------- | -------------------------------------- |
+| Joan Orduz             | `joanSFDC` | US-201, US-202, US-207, US-208, US-209 |
+| Juan José Palma (Cali) | `juanSFDC` | US-203, US-204, US-205, US-206         |
 
 US-210 es la validación integrada y se reparte al final.
 
@@ -321,11 +321,11 @@ módulo: se comenta si quien lo implemente necesita saber algo nuevo.
 
 Criterio para decidir si toca comentar:
 
-| Sí, comenta | No hace falta |
-| --- | --- |
-| Aparece un código, un registro o un permiso que esa historia va a usar | El issue solo comparte carpeta o etiqueta |
+| Sí, comenta                                                              | No hace falta                                                |
+| ------------------------------------------------------------------------ | ------------------------------------------------------------ |
+| Aparece un código, un registro o un permiso que esa historia va a usar   | El issue solo comparte carpeta o etiqueta                    |
 | Una decisión de implementación cambia lo que esa historia daba por hecho | El efecto es transitivo y ya está en un bloqueante comentado |
-| Desbloqueas trabajo que alguien más tiene asignado | El issue está cerrado y el dato no le aporta nada a nadie |
+| Desbloqueas trabajo que alguien más tiene asignado                       | El issue está cerrado y el dato no le aporta nada a nadie    |
 
 **Actualiza [`docs/estado.md`](docs/estado.md)** en el mismo Pull Request. Qué
 entró, qué se está haciendo, cómo se reconstruye. Si no lo actualizas, el

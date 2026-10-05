@@ -299,6 +299,9 @@ contra `publishedAt` (issue #28), la sesión dentro de la clave de la señal
 como detalle del incidente (issue #30). La identidad visual (issue #15) está
 hecha. US-210 (issue #13) espera sus criterios.
 
+La revisión previa a la entrega encontró faltas que se cierran una por issue,
+empezando por el formato y la codificación (issue #37).
+
 ## Decisiones que aparecieron al implementar
 
 No estaban en la especificación y conviene no redescubrirlas.
@@ -469,6 +472,11 @@ No estaban en la especificación y conviene no redescubrirlas.
     Salesforce genera desde `BRAND_COLOR`; `OVERRIDE_A11Y_COLOR` solo fija el de
     enlaces y botones. Cambia la lectura del punto 2 del issue #15: la barra ya
     no es el azul de Salesforce, pero tampoco es el token exacto.
+42. **Prettier no toca los XML de metadatos.** Sobre ellos parte cada texto
+    largo en `<etiqueta\n  >texto</etiqueta>` y los deja distintos de como los
+    recupera Salesforce. `.prettierignore` excluye `**/*-meta.xml`; Apex, LWC,
+    JavaScript y Markdown siguen pasando por `npm run prettier`. Dos XML de
+    `Senal__c` estaban en ISO-8859-1 y la org guardó «se�al»: ya son UTF-8.
 
 ## Historial breve
 
@@ -491,3 +499,4 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-01 | Nota opcional al abrir una intervención y «Edit Tasks» para operador y coordinador. PR #34 fusionado. Cierra #29 |
 | 2026-10-01 | El detalle del incidente es `Caso_Registro`: fuera `obtenerIncidente`. PR #35 fusionado. Cierra #30 |
 | 2026-10-03 | Identidad visual: tema SLDS 1 con cabecera blanca, logo, iconos, etiquetas y páginas de activo, edificio y estado. PR #36. Cierra #15 |
+| 2026-10-05 | Formato de Prettier en 22 archivos, XML de metadatos fuera de Prettier y dos XML de la señal en UTF-8. Cierra #37 |

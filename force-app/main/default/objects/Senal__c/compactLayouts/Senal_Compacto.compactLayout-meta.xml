@@ -6,5 +6,5 @@
     <fields>Motivo__c</fields>
     <fields>Reintentable__c</fields>
     <fields>Fecha_Recepcion__c</fields>
-    <label>Señal compacto</label>
+    <label>SeÃ±al compacto</label>
 </CompactLayout>

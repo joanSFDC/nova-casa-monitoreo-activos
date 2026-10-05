@@ -8,12 +8,12 @@ Sprint 2 · fase Development.
 
 ## Por dónde empezar
 
-| Si vas a… | Lee |
-| --- | --- |
-| **Escribir código** | [`CONTRIBUTING.md`](CONTRIBUTING.md) primero, siempre |
-| Entender el sistema | [`docs/README.md`](docs/README.md), que es el índice |
-| Construir los objetos | [`docs/data-model/`](docs/data-model/README.md) |
-| Saber qué te toca | Los [issues](../../issues), con tu nombre en el asignado |
+| Si vas a…             | Lee                                                      |
+| --------------------- | -------------------------------------------------------- |
+| **Escribir código**   | [`CONTRIBUTING.md`](CONTRIBUTING.md) primero, siempre    |
+| Entender el sistema   | [`docs/README.md`](docs/README.md), que es el índice     |
+| Construir los objetos | [`docs/data-model/`](docs/data-model/README.md)          |
+| Saber qué te toca     | Los [issues](../../issues), con tu nombre en el asignado |
 
 ## Cómo está organizado
 
