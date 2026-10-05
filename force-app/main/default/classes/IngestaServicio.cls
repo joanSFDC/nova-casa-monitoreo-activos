@@ -28,6 +28,7 @@ public without sharing class IngestaServicio {
     public String siguienteCursor;
     public Boolean hasMore;
     public Boolean versionRechazada;
+    public String errorGuardado;
   }
 
   /**
@@ -107,9 +108,11 @@ public without sharing class IngestaServicio {
       control.Cursor__c = pagina.siguienteCursor;
     }
     control.Ultima_Consulta_Exitosa__c = Datetime.now();
-    control.Ultimo_Error__c = pagina.versionRechazada
-      ? recortar('schemaVersion no soportada')
-      : null;
+    if (pagina.versionRechazada) {
+      control.Ultimo_Error__c = recortar('schemaVersion no soportada');
+    } else if (String.isNotBlank(pagina.errorGuardado)) {
+      control.Ultimo_Error__c = pagina.errorGuardado;
+    }
     control.Fallos_Consecutivos__c = 0;
     control.Paginas_Procesadas__c = nvlNum(control.Paginas_Procesadas__c) + 1;
     Database.update(control, AccessLevel.SYSTEM_MODE);
@@ -191,6 +194,7 @@ public without sharing class IngestaServicio {
             IngestaConstantes.RESULTADO_CONFLICTO,
             null
           );
+          primera.Detalle__c = detalleConflicto(primera.Ultimo_Delivery_Id__c);
         }
         continue;
       }
@@ -234,7 +238,8 @@ public without sharing class IngestaServicio {
           Reintentable__c,
           Fecha_Publicacion__c,
           Fecha_Recepcion__c,
-          Fecha_Origen__c
+          Fecha_Origen__c,
+          Fecha_Procesamiento__c
         FROM Senal__c
         WHERE Clave__c IN :clavesReales
         WITH SYSTEM_MODE
@@ -249,27 +254,36 @@ public without sharing class IngestaServicio {
       Senal__c senal = porClave.get(clave);
       Senal__c previa = existentes.get(clave);
       if (previa != null) {
+        Boolean distinta = previa.Hash_Contenido__c != senal.Hash_Contenido__c;
+        if (
+          distinta ||
+          senal.Resultado__c == IngestaConstantes.RESULTADO_CONFLICTO
+        ) {
+          senal = conflictoSobre(
+            previa,
+            senal,
+            distinta
+              ? detalleConflicto(senal.Ultimo_Delivery_Id__c)
+              : senal.Detalle__c
+          );
+          aGuardar.add(senal);
+          continue;
+        }
         senal.Id = previa.Id;
         senal.Fecha_Recepcion__c = previa.Fecha_Recepcion__c;
-        senal.Entregas__c = nvlNum(previa.Entregas__c) + 1;
-        if (previa.Hash_Contenido__c == senal.Hash_Contenido__c) {
-          if (previa.Reintentable__c == true) {
-            if (senal.Resultado__c == IngestaConstantes.RESULTADO_PENDIENTE) {
-              publicar.add(clave);
-            }
-          } else {
-            senal.Resultado__c = previa.Resultado__c;
-            senal.Motivo__c = previa.Motivo__c;
-            senal.Reintentable__c = previa.Reintentable__c;
-            senal.Fecha_Origen__c = previa.Fecha_Origen__c;
-            senal.Fecha_Publicacion__c = previa.Fecha_Publicacion__c;
+        senal.Entregas__c =
+          nvlNum(previa.Entregas__c) + nvlNum(senal.Entregas__c);
+        if (previa.Reintentable__c == true) {
+          if (senal.Resultado__c == IngestaConstantes.RESULTADO_PENDIENTE) {
+            publicar.add(clave);
           }
         } else {
-          IngestaConstantes.aplicar(
-            senal,
-            IngestaConstantes.RESULTADO_CONFLICTO,
-            null
-          );
+          senal.Resultado__c = previa.Resultado__c;
+          senal.Motivo__c = previa.Motivo__c;
+          senal.Reintentable__c = previa.Reintentable__c;
+          senal.Fecha_Origen__c = previa.Fecha_Origen__c;
+          senal.Fecha_Publicacion__c = previa.Fecha_Publicacion__c;
+          senal.Fecha_Procesamiento__c = previa.Fecha_Procesamiento__c;
         }
       } else if (senal.Resultado__c == IngestaConstantes.RESULTADO_PENDIENTE) {
         publicar.add(clave);
@@ -287,23 +301,45 @@ public without sharing class IngestaServicio {
 
     List<Aviso_de_Senal__e> avisos = new List<Aviso_de_Senal__e>();
     List<Integer> indicesAviso = new List<Integer>();
+    List<Senal__c> rastros = new List<Senal__c>();
+    List<String> sinGuardar = new List<String>();
     for (Integer i = 0; i < aGuardar.size(); i++) {
       if (!resultados[i].isSuccess()) {
-        IngestaConstantes.aplicar(
-          aGuardar[i],
-          IngestaConstantes.RESULTADO_RECHAZADO,
-          IngestaConstantes.MOTIVO_SISTEMA
-        );
-        aGuardar[i].Detalle__c = recortar(
-          resultados[i].getErrors()[0].getMessage()
-        );
         publicar.remove(aGuardar[i].Clave__c);
+        String error =
+          aGuardar[i].Clave__c +
+          ': ' +
+          resultados[i].getErrors()[0].getMessage();
+        if (aGuardar[i].Id == null) {
+          rastros.add(rastroDe(aGuardar[i], error));
+        } else {
+          sinGuardar.add(error);
+        }
         continue;
       }
       if (publicar.contains(aGuardar[i].Clave__c)) {
         avisos.add(avisoDe(aGuardar[i], originales.get(aGuardar[i].Clave__c)));
         indicesAviso.add(i);
       }
+    }
+
+    if (!rastros.isEmpty()) {
+      Database.UpsertResult[] guardados = Database.upsert(
+        rastros,
+        Senal__c.Clave__c,
+        false,
+        AccessLevel.SYSTEM_MODE
+      );
+      for (Integer i = 0; i < guardados.size(); i++) {
+        if (!guardados[i].isSuccess()) {
+          sinGuardar.add(rastros[i].Detalle__c);
+        }
+      }
+    }
+    if (!sinGuardar.isEmpty()) {
+      resultado.errorGuardado = recortar(
+        sinGuardar.size() + ' senales sin guardar. ' + sinGuardar[0]
+      );
     }
 
     if (!avisos.isEmpty()) {
@@ -313,8 +349,9 @@ public without sharing class IngestaServicio {
           resultado.publicadas++;
         } else {
           Integer idx = indicesAviso[i];
-          aGuardar[idx].Motivo__c = IngestaConstantes.MOTIVO_SISTEMA;
-          aGuardar[idx].Reintentable__c = IngestaConstantes.esReintentable(
+          IngestaConstantes.aplicar(
+            aGuardar[idx],
+            IngestaConstantes.RESULTADO_FALLIDO,
             IngestaConstantes.MOTIVO_SISTEMA
           );
           aGuardar[idx].Detalle__c = recortar(
@@ -499,7 +536,11 @@ public without sharing class IngestaServicio {
     Senal__c senal = new Senal__c();
     senal.Clave__c = clave;
     senal.Message_Id__c = IngestaValidador.texto(mensaje, 'messageId');
-    senal.Tipo_Mensaje__c = IngestaValidador.texto(mensaje, 'messageType');
+    String tipo = IngestaValidador.texto(mensaje, 'messageType');
+    senal.Tipo_Mensaje__c = tipo == IngestaConstantes.TIPO_MEDICION ||
+      tipo == IngestaConstantes.TIPO_CONECTIVIDAD
+      ? tipo
+      : null;
     senal.Hash_Contenido__c = hash;
     senal.Carga__c = JSON.serialize(mensaje);
     senal.Fecha_Recepcion__c = ahora;
@@ -514,6 +555,71 @@ public without sharing class IngestaServicio {
     );
     senal.Fecha_Publicacion__c = senal.Ultima_Fecha_Publicacion__c;
     return senal;
+  }
+
+  /**
+   * La fila guardada conserva la primera afirmacion: carga, resumen, fechas y procesamiento.
+   * De la entrega nueva solo se anota que existio.
+   */
+  private static Senal__c conflictoSobre(
+    Senal__c previa,
+    Senal__c entrega,
+    String detalle
+  ) {
+    Senal__c conflicto = new Senal__c(
+      Id = previa.Id,
+      Clave__c = previa.Clave__c,
+      Entregas__c = nvlNum(previa.Entregas__c) + nvlNum(entrega.Entregas__c),
+      Ultimo_Delivery_Id__c = entrega.Ultimo_Delivery_Id__c,
+      Ultima_Fecha_Publicacion__c = entrega.Ultima_Fecha_Publicacion__c,
+      Detalle__c = detalle
+    );
+    IngestaConstantes.aplicar(
+      conflicto,
+      IngestaConstantes.RESULTADO_CONFLICTO,
+      null
+    );
+    return conflicto;
+  }
+
+  private static String detalleConflicto(String deliveryId) {
+    return recortar(
+      'La entrega ' +
+        nvl(deliveryId) +
+        ' trajo otro contenido. Se conserva la primera afirmacion.'
+    );
+  }
+
+  /**
+   * Lo minimo para que la senal no desaparezca: identidad, fechas y el error.
+   * Sin la carga, que puede ser lo que no cupo.
+   */
+  private static Senal__c rastroDe(Senal__c senal, String error) {
+    Senal__c rastro = new Senal__c(
+      Clave__c = senal.Clave__c,
+      Message_Id__c = senal.Message_Id__c == null
+        ? null
+        : senal.Message_Id__c.left(60),
+      Tipo_Mensaje__c = senal.Tipo_Mensaje__c,
+      Hash_Contenido__c = senal.Hash_Contenido__c,
+      Edificio__c = senal.Edificio__c,
+      Activo__c = senal.Activo__c,
+      Fecha_Recepcion__c = senal.Fecha_Recepcion__c,
+      Fecha_Origen__c = senal.Fecha_Origen__c,
+      Fecha_Publicacion__c = senal.Fecha_Publicacion__c,
+      Ultima_Fecha_Publicacion__c = senal.Ultima_Fecha_Publicacion__c,
+      Ultimo_Delivery_Id__c = senal.Ultimo_Delivery_Id__c == null
+        ? null
+        : senal.Ultimo_Delivery_Id__c.left(60),
+      Entregas__c = senal.Entregas__c,
+      Detalle__c = recortar(error)
+    );
+    IngestaConstantes.aplicar(
+      rastro,
+      IngestaConstantes.RESULTADO_FALLIDO,
+      IngestaConstantes.MOTIVO_SISTEMA
+    );
+    return rastro;
   }
 
   private static Senal__c senalRechazadaSinClave(

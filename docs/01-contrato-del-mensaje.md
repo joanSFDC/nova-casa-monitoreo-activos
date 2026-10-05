@@ -196,6 +196,14 @@ La regla queda así: misma clave y mismo resumen es **duplicado**; misma clave c
 distinto es **conflicto**, y un conflicto no se resuelve solo, requiere que una persona
 lo mire.
 
+**El conflicto conserva la primera afirmación.** La fila guarda la carga, el resumen, las
+fechas y, si ya se aplicó, la fecha de procesamiento de la primera entrega. De la segunda
+solo quedan el contador, el último `deliveryId` y un `Detalle__c` que dice qué entrega
+trajo el otro contenido. Sobrescribir la fila con la segunda borraría la evidencia de lo
+que llegó al estado, y quien revisa el conflicto necesita las dos versiones: la primera en
+la carga y la segunda en el simulador, por su `deliveryId`. Vale igual dentro de una misma
+página y entre páginas.
+
 ### Cómo se registra el reenvío
 
 Hay una tensión que conviene nombrar. La clave es única en base de datos, así que la
@@ -266,6 +274,10 @@ explícito, porque es lo que responde la pregunta que hace el administrador en U
 el mensaje está bien y lo que falta es configuración nuestra, reintentar va a funcionar en
 cuanto la configuración exista. Si el mensaje está mal, reintentar da exactamente el
 mismo resultado y no tiene sentido.
+
+Un `messageType` desconocido se guarda con `Tipo_Mensaje__c` vacío. La lista solo admite
+`MEASUREMENT` y `CONNECTIVITY`, y escribir otro valor hacía fallar el guardado: la señal
+se perdía sin rechazo. El tipo recibido queda en `Detalle__c` y en la carga.
 
 ### Sobre la tolerancia de futuro
 

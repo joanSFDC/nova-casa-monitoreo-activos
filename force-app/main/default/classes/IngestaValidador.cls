@@ -101,6 +101,7 @@ public inherited sharing class IngestaValidador {
       messageType != IngestaConstantes.TIPO_CONECTIVIDAD
     ) {
       dictamen.motivo = IngestaConstantes.MOTIVO_TIPO_MENSAJE;
+      dictamen.detalle = 'messageType ' + messageType;
       return dictamen;
     }
 
