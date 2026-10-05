@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Critico_bajo_cruzado</fullName>
+    <active>true</active>
+    <errorConditionFormula>AND(
+  NOT(ISBLANK(Critico_Bajo__c)),
+  NOT(ISBLANK(Advertencia_Alto__c)),
+  Critico_Bajo__c &gt;= Advertencia_Alto__c
+)</errorConditionFormula>
+    <errorDisplayField>Critico_Bajo__c</errorDisplayField>
+    <errorMessage>El crítico bajo debe ser menor que la advertencia alta.</errorMessage>
+</ValidationRule>
