@@ -4,6 +4,7 @@ import obtenerPanel from "@salesforce/apex/MonitorControlador.obtenerPanel";
 import abrirIntervencion from "@salesforce/apex/MonitorControlador.abrirIntervencion";
 import NotaIntervencion from "c/notaIntervencion";
 import { subscribe } from "lightning/empApi";
+import { refreshApex } from "@salesforce/apex";
 
 jest.mock(
   "@salesforce/apex/MonitorControlador.obtenerPanel",
@@ -203,5 +204,132 @@ describe("c-monitor-de-activos", () => {
 
     expect(NotaIntervencion.open).toHaveBeenCalled();
     expect(abrirIntervencion).not.toHaveBeenCalled();
+  });
+
+  describe("vigilancia y anuncios", () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.clearAllTimers();
+      jest.useRealTimers();
+      refreshApex.mockReset();
+      refreshApex.mockImplementation(() => Promise.resolve());
+    });
+
+    async function microtareas() {
+      for (let i = 0; i < 5; i++) {
+        // eslint-disable-next-line no-await-in-loop -- una vuelta por promesa encadenada
+        await Promise.resolve();
+      }
+    }
+
+    function region(el) {
+      return el.shadowRoot.querySelector('[aria-live="polite"]').textContent;
+    }
+
+    function botonActualizar(el) {
+      return Array.from(
+        el.shadowRoot.querySelectorAll("lightning-button")
+      ).find((boton) => boton.label === "Actualizar");
+    }
+
+    async function montado() {
+      const el = elemento();
+      obtenerPanel.emit(PANEL);
+      await microtareas();
+      return el;
+    }
+
+    it("vuelve a consultar sola si pasa un minuto sin consultas", async () => {
+      await montado();
+      expect(refreshApex).not.toHaveBeenCalled();
+
+      jest.advanceTimersByTime(60000);
+      await microtareas();
+      expect(refreshApex).toHaveBeenCalledTimes(1);
+
+      jest.advanceTimersByTime(60000);
+      await microtareas();
+      expect(refreshApex).toHaveBeenCalledTimes(2);
+    });
+
+    it("una consulta por aviso reinicia la vigilancia", async () => {
+      await montado();
+      jest.advanceTimersByTime(50000);
+      subscribe.mock.calls[0][2]({ data: { payload: {} } });
+      jest.advanceTimersByTime(2000);
+      await microtareas();
+      expect(refreshApex).toHaveBeenCalledTimes(1);
+
+      jest.advanceTimersByTime(50000);
+      await microtareas();
+      expect(refreshApex).toHaveBeenCalledTimes(1);
+
+      jest.advanceTimersByTime(10000);
+      await microtareas();
+      expect(refreshApex).toHaveBeenCalledTimes(2);
+    });
+
+    it("la vigilancia solo anuncia si cambia el aviso de atraso", async () => {
+      const el = await montado();
+      const inicial = region(el);
+      expect(inicial).toContain("Monitor actualizado a las");
+
+      jest.advanceTimersByTime(60000);
+      await microtareas();
+      expect(region(el)).toBe(inicial);
+
+      refreshApex.mockImplementationOnce(() => {
+        obtenerPanel.emit({ ...PANEL, consultaAtrasada: true });
+        return Promise.resolve();
+      });
+      jest.advanceTimersByTime(60000);
+      await microtareas();
+      expect(region(el)).toContain("se atrasó");
+      expect(el.shadowRoot.querySelector(".slds-alert_warning")).not.toBeNull();
+    });
+
+    it("anuncia cada actualización por botón", async () => {
+      const el = await montado();
+      let terminar;
+      refreshApex.mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            terminar = resolve;
+          })
+      );
+
+      botonActualizar(el).click();
+      await microtareas();
+      expect(region(el)).toBe("Actualizando el monitor");
+
+      terminar();
+      await microtareas();
+      expect(region(el)).toContain("Monitor actualizado a las");
+    });
+
+    it("anuncia el error de una actualización", async () => {
+      const el = await montado();
+      refreshApex.mockImplementationOnce(() =>
+        Promise.reject({ body: { message: "Servidor caído" } })
+      );
+
+      botonActualizar(el).click();
+      await microtareas();
+      expect(region(el)).toBe(
+        "No se pudo actualizar el monitor. Servidor caído"
+      );
+    });
+
+    it("deja de vigilar al desmontar", async () => {
+      const el = await montado();
+      document.body.removeChild(el);
+
+      jest.advanceTimersByTime(120000);
+      await microtareas();
+      expect(refreshApex).not.toHaveBeenCalled();
+    });
   });
 });

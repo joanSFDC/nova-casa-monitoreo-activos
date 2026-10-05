@@ -307,8 +307,9 @@ La revisión previa a la entrega encontró faltas que se cierran una por issue:
 el formato y la codificación (issue #37), la evidencia de la bitácora en la
 ingesta (issue #39), el crítico superado dentro de una tanda (issue #41), los
 rangos contradictorios del umbral (issue #43), la cola del coordinador
-(issue #45) y las claves que el script de usuarios restablecía en cada
-corrida (issue #47).
+(issue #45), las claves que el script de usuarios restablecía en cada
+corrida (issue #47) y el monitor que no se recalculaba con la ingesta parada
+(issue #49).
 
 ## Decisiones que aparecieron al implementar
 
@@ -517,6 +518,11 @@ No estaban en la especificación y conviene no redescubrirlas.
     Un caso que ya tomó una persona escala sin cambiar de propietario. El
     miembro lo pone el script de usuarios, porque el Username cambia en cada
     org; la vista «Cola de coordinación» lista los abiertos de la cola.
+50. **El monitor se vigila a sí mismo cada minuto.** Sin avisos no había
+    consultas y el aviso de atraso nunca aparecía con la ingesta parada. Si pasa
+    un minuto sin consultar, el componente vuelve a pedir el panel. La región
+    activa lleva la hora para que cada actualización se vuelva a anunciar, y la
+    vigilancia solo habla si cambia el aviso de atraso.
 
 ## Historial breve
 
@@ -544,4 +550,5 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-05 | Un crítico superado en la misma tanda no abre ni escala el caso. PR #42 fusionado. Cierra #41 |
 | 2026-10-05 | Umbral: crítico bajo cruzado y medición sin bandas. PR #44 fusionado. Cierra #43 |
 | 2026-10-05 | Cola Coordinación para los casos críticos y vista de lista. PR #46 fusionado. Cierra #45 |
-| 2026-10-05 | El script de usuarios solo manda clave a los usuarios que crea. Cierra #47 |
+| 2026-10-05 | El script de usuarios solo manda clave a los usuarios que crea. PR #48 fusionado. Cierra #47 |
+| 2026-10-05 | Monitor: vigilancia de un minuto y región activa que anuncia cada cambio. Cierra #49 |

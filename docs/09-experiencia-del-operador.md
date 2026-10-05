@@ -176,6 +176,20 @@ lugar de doscientas.
 La suscripción se cancela al desmontar el componente, para no dejar conexiones abiertas
 cuando el operador navega a otra parte.
 
+### La vigilancia de un minuto
+
+Los avisos solo llegan mientras la ingesta trae señales. Si la cadena se para, no hay
+avisos, no hay consultas y la pantalla abierta se congela: la antigüedad seguiría diciendo
+«hace 3 min» y el aviso de consulta atrasada no aparecería nunca, porque los dos los
+calcula el servidor al consultar.
+
+Por eso el componente tiene una **vigilancia**: si pasa un minuto sin ninguna consulta, por
+botón, por aviso o por la propia vigilancia, vuelve a pedir el panel. Cada consulta
+reinicia el minuto, así que con la ingesta al día la vigilancia casi nunca llega a
+dispararse. Con la ingesta parada, a los cinco minutos de la última consulta exitosa el
+servidor marca el panel como atrasado y la franja aparece sola. La regla de que nada se
+calcula en el navegador se mantiene: la vigilancia solo decide cuándo preguntar.
+
 ## El contrato con el servidor
 
 Una sola clase Apex con un método de lectura y uno de acción. El detalle del incidente no
@@ -219,7 +233,11 @@ excluye a una parte real de los operadores.
 - Los contadores son botones alcanzables con teclado, con su estado de selección anunciado.
 - La tabla tiene encabezados asociados y es navegable con teclado.
 - Los cambios de estado —cargando, error, actualizado— se anuncian en una región activa,
-  de modo que un lector de pantalla informe de que la tabla se refrescó.
+  de modo que un lector de pantalla informe de que la tabla se refrescó. Al pulsar
+  «Actualizar» o cambiar de edificio anuncia «Actualizando el monitor»; tras cada consulta
+  por botón o por aviso, «Monitor actualizado a las HH:MM», con la hora para que el texto
+  cambie y se vuelva a leer; si falla, el error. La vigilancia de un minuto consulta en
+  silencio y solo habla si el aviso de atraso aparece o desaparece.
 - El contraste cumple el mínimo de la norma para texto y para los indicadores de severidad.
 
 ## La identidad visual

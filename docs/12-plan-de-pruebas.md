@@ -182,6 +182,8 @@ más, y el fallo sería completamente invisible sin esta prueba.
 | Aviso de ingesta atrasada | Aparece cuando la última consulta exitosa es antigua |
 | Actualización manual | Vuelve a consultar el servidor |
 | Suscripción | El aviso dispara una consulta nueva, no pinta su contenido |
+| Vigilancia | Sin consultas en un minuto, vuelve a pedir el panel; una consulta por aviso reinicia el minuto; al desmontar se cancela |
+| Región activa | Anuncia «Actualizando», «Monitor actualizado a las HH:MM» y el error; la vigilancia solo anuncia si cambia el aviso de atraso |
 
 La última se verifica en el componente comprobando que la carga del evento no llega a
 ninguna propiedad del estado visual. Es la prueba del riesgo R-07.

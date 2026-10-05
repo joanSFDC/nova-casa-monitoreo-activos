@@ -2,12 +2,18 @@ import { LightningElement, wire } from "lwc";
 import { NavigationMixin } from "lightning/navigation";
 import { refreshApex } from "@salesforce/apex";
 import { subscribe, unsubscribe, onError } from "lightning/empApi";
+import LOCALE from "@salesforce/i18n/locale";
+import TIME_ZONE from "@salesforce/i18n/timeZone";
 import obtenerPanel from "@salesforce/apex/MonitorControlador.obtenerPanel";
 import abrirIntervencion from "@salesforce/apex/MonitorControlador.abrirIntervencion";
 import NotaIntervencion from "c/notaIntervencion";
 
 const CANAL_AVISO = "/event/Aviso_de_Senal__e";
 const ESPERA_MS = 2000;
+const VIGILANCIA_MS = 60000;
+const POR_BOTON = "boton";
+const POR_AVISO = "aviso";
+const POR_VIGILANCIA = "vigilancia";
 
 export default class MonitorDeActivos extends NavigationMixin(
   LightningElement
@@ -18,8 +24,10 @@ export default class MonitorDeActivos extends NavigationMixin(
   errorEsPermiso = false;
   actualizando = false;
   anuncio = "";
+  anunciarCarga = true;
   suscripcion;
   temporizador;
+  vigilancia;
   _wire;
 
   @wire(obtenerPanel, { edificioId: "$edificioId" })
@@ -28,25 +36,35 @@ export default class MonitorDeActivos extends NavigationMixin(
     if (resultado.data) {
       this.error = undefined;
       this.errorEsPermiso = false;
-      this.anuncio = "Monitor actualizado";
+      if (this.anunciarCarga) {
+        this.anunciarCarga = false;
+        this.anuncio = this.textoActualizado();
+      }
     } else if (resultado.error) {
       this.error = this.textoError(resultado.error);
       this.errorEsPermiso = this.esPermiso(resultado.error);
+      this.anuncio = "No se pudo cargar el monitor. " + this.error;
     }
   }
 
   connectedCallback() {
+    this.anuncio = "Cargando el monitor";
     onError(() => {});
     subscribe(CANAL_AVISO, -1, () => {
       this.programarConsulta();
     }).then((respuesta) => {
       this.suscripcion = respuesta;
     });
+    this.vigilar();
   }
 
   disconnectedCallback() {
     if (this.temporizador) {
       clearTimeout(this.temporizador);
+    }
+    if (this.vigilancia) {
+      clearTimeout(this.vigilancia);
+      this.vigilancia = undefined;
     }
     if (this.suscripcion) {
       unsubscribe(this.suscripcion);
@@ -194,28 +212,79 @@ export default class MonitorDeActivos extends NavigationMixin(
     // eslint-disable-next-line @lwc/lwc/no-async-operation -- una sola consulta por rafaga de avisos
     this.temporizador = setTimeout(() => {
       this.temporizador = undefined;
-      this.consultar();
+      this.consultar(POR_AVISO);
     }, ESPERA_MS);
   }
 
-  consultar() {
+  /**
+   * Sin avisos no hay consultas, y el aviso de atraso y las antiguedades solo
+   * los recalcula el servidor. Si pasa un minuto sin consultar, se consulta.
+   */
+  vigilar() {
+    if (this.vigilancia) {
+      clearTimeout(this.vigilancia);
+    }
+    // eslint-disable-next-line @lwc/lwc/no-async-operation -- la ingesta parada no manda avisos
+    this.vigilancia = setTimeout(() => {
+      this.vigilancia = undefined;
+      this.consultar(POR_VIGILANCIA);
+    }, VIGILANCIA_MS);
+  }
+
+  consultar(origen) {
     if (!this._wire) {
+      this.vigilar();
       return Promise.resolve();
     }
-    this.actualizando = true;
+    const enSilencio = origen === POR_VIGILANCIA;
+    const atrasadaAntes = this.consultaAtrasada;
+    if (!enSilencio) {
+      this.actualizando = true;
+    }
+    if (origen === POR_BOTON) {
+      this.anuncio = "Actualizando el monitor";
+    }
     return refreshApex(this._wire)
+      .then(() => {
+        this.error = undefined;
+        this.errorEsPermiso = false;
+        if (!enSilencio) {
+          this.anuncio = this.textoActualizado();
+        } else if (this.consultaAtrasada !== atrasadaAntes) {
+          this.anuncio = this.consultaAtrasada
+            ? "La última consulta al proveedor se atrasó. Los datos pueden no estar al día."
+            : "La consulta al proveedor volvió a estar al día.";
+        }
+      })
       .catch((error) => {
         this.error = this.textoError(error);
         this.errorEsPermiso = this.esPermiso(error);
+        this.anuncio = "No se pudo actualizar el monitor. " + this.error;
       })
       .finally(() => {
         this.actualizando = false;
+        this.vigilar();
       });
+  }
+
+  get consultaAtrasada() {
+    return Boolean(this.panel && this.panel.consultaAtrasada);
+  }
+
+  textoActualizado() {
+    const hora = new Intl.DateTimeFormat(LOCALE, {
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZone: TIME_ZONE
+    }).format(new Date());
+    return "Monitor actualizado a las " + hora;
   }
 
   handleEdificio(event) {
     this.edificioId = event.detail.value;
     this.filtroSeveridad = null;
+    this.anunciarCarga = true;
+    this.anuncio = "Actualizando el monitor";
   }
 
   handleFiltro(event) {
@@ -224,12 +293,12 @@ export default class MonitorDeActivos extends NavigationMixin(
   }
 
   handleActualizar() {
-    this.consultar();
+    this.consultar(POR_BOTON);
   }
 
   handleReintentar() {
     this.error = undefined;
-    this.consultar();
+    this.consultar(POR_BOTON);
   }
 
   handleActivo(event) {
