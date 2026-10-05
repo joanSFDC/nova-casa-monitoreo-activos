@@ -223,6 +223,10 @@ private class ConectividadTest {
       incidente.Description.contains('Recuperado'),
       'Deja evidencia de recuperacion'
     );
+    Assert.isTrue(
+      incidente.Description.contains(' se\u00f1al '),
+      'La linea nombra la senal con tilde'
+    );
   }
 
   @isTest

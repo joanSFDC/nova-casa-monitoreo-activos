@@ -224,7 +224,7 @@ public with sharing class MonitorControlador {
     incidente.Origin = 'Web';
     incidente.Priority = estado.Severidad_Nivel__c == 2 ? 'High' : 'Low';
     incidente.Subject = String.isNotBlank(estado.Episodio_Id__c)
-      ? 'Corte de comunicacion ' + estado.Episodio_Id__c
+      ? 'Corte de comunicaci\u00f3n ' + estado.Episodio_Id__c
       : 'Lectura fuera de rango ' + clave;
     incidente.Description = nota;
     Database.SaveResult resultado = Database.insert(
@@ -258,7 +258,7 @@ public with sharing class MonitorControlador {
       }
     }
     throw new AuraHandledException(
-      'No se pudo abrir la intervencion. Si no tienes permiso, habla con tu coordinador.'
+      'No se pudo abrir la intervenci\u00f3n. Si no tienes permiso, habla con tu coordinador.'
     );
   }
 

@@ -555,10 +555,14 @@ private class IncidentesServicioTest {
 
     Assert.areEqual(1, [SELECT COUNT() FROM Case], 'Un episodio, un caso');
     Case incidente = [
-      SELECT Clave_Abierta__c, Episodio_Id__c, Priority
+      SELECT Clave_Abierta__c, Episodio_Id__c, Priority, Subject
       FROM Case
     ];
     Assert.areEqual('CONN|EPI-BOG-out-0', incidente.Clave_Abierta__c);
+    Assert.areEqual(
+      'Corte de comunicaci\u00f3n EPI-BOG-out-0',
+      incidente.Subject
+    );
     Assert.areEqual('EPI-BOG-out-0', incidente.Episodio_Id__c);
     Assert.areEqual(
       IncidentesServicio.PRIORIDAD_BAJA,

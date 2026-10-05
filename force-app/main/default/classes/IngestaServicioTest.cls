@@ -219,6 +219,10 @@ private class IngestaServicioTest {
       senal.Detalle__c.contains('dlv_000016'),
       'El detalle senala la entrega que contradice'
     );
+    Assert.isTrue(
+      senal.Detalle__c.endsWith('la primera afirmaci\u00f3n.'),
+      'Con tilde'
+    );
   }
 
   @isTest

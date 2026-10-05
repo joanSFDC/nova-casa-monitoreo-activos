@@ -609,3 +609,4 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-05 | El historial de umbrales sale en la página: el formato toma el nombre del de fábrica. Cierra #61 |
 | 2026-10-05 | Fecha de procesamiento vacía en lo que se decide al recibir: ayuda del campo y módulos 03 y 11. Cierra #63 |
 | 2026-10-05 | Un reenvío ya no devuelve a Pendiente la señal que el suscriptor acaba de resolver. Cierra #65 |
+| 2026-10-05 | Tildes en los textos que escribe el Apex: asunto del caso de corte, línea «Recuperado», detalle de conflicto y errores; datos existentes corregidos. Cierra #67 |
