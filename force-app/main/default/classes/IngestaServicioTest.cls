@@ -498,6 +498,97 @@ private class IngestaServicioTest {
     );
   }
 
+  private static final Datetime PROCESADA_EN = Datetime.newInstanceGmt(
+    2026,
+    9,
+    22,
+    22,
+    1,
+    0
+  );
+
+  private class SuscriptorEntreLecturaYGuardado implements System.Callable {
+    public Object call(String accion, Map<String, Object> argumentos) {
+      Senal__c senal = [
+        SELECT Id
+        FROM Senal__c
+        WHERE Clave__c = 'nova-casa-simulator|msg_000002'
+      ];
+      senal.Resultado__c = IngestaConstantes.RESULTADO_APLICADO;
+      senal.Fecha_Procesamiento__c = PROCESADA_EN;
+      update senal;
+      return null;
+    }
+  }
+
+  @isTest
+  static void shouldConservarResultadoDelSuscriptor_WhenReenvioLlegaMientrasSeProcesa() {
+    Datetime ahora = Datetime.newInstanceGmt(2026, 9, 22, 22, 0, 0);
+    IngestaServicio.procesarPagina(
+      TestDataFactory.sobre(
+        new List<Map<String, Object>>{ TestDataFactory.mensajePresion() },
+        'c1',
+        true
+      ),
+      ahora
+    );
+    String cargaOriginal = [
+      SELECT Carga__c
+      FROM Senal__c
+      WHERE Clave__c = 'nova-casa-simulator|msg_000002'
+    ]
+    .Carga__c;
+
+    IngestaServicio.antesDeGuardar = new SuscriptorEntreLecturaYGuardado();
+    IngestaServicio.procesarPagina(
+      TestDataFactory.sobre(
+        new List<Map<String, Object>>{
+          TestDataFactory.mensajePresion(
+            'msg_000002',
+            'dlv_000099',
+            2.76,
+            'BAR'
+          )
+        },
+        'c2',
+        true
+      ),
+      ahora.addMinutes(2)
+    );
+
+    Senal__c despues = [
+      SELECT
+        Resultado__c,
+        Fecha_Procesamiento__c,
+        Entregas__c,
+        Ultimo_Delivery_Id__c,
+        Carga__c
+      FROM Senal__c
+      WHERE Clave__c = 'nova-casa-simulator|msg_000002'
+    ];
+    Assert.areEqual(
+      IngestaConstantes.RESULTADO_APLICADO,
+      despues.Resultado__c,
+      'El reenvio no pisa lo que escribio el suscriptor'
+    );
+    Assert.areEqual(
+      PROCESADA_EN,
+      despues.Fecha_Procesamiento__c,
+      'Ni su fecha de procesamiento'
+    );
+    Assert.areEqual(2, despues.Entregas__c.intValue(), 'Cuenta la entrega');
+    Assert.areEqual(
+      'dlv_000099',
+      despues.Ultimo_Delivery_Id__c,
+      'Ultima entrega'
+    );
+    Assert.areEqual(
+      cargaOriginal,
+      despues.Carga__c,
+      'La carga es la de la primera entrega'
+    );
+  }
+
   @isTest
   static void shouldCrearOtraSenal_WhenMismoMessageIdEnSesionNueva() {
     Datetime ahora = Datetime.newInstanceGmt(2026, 9, 22, 22, 0, 0);

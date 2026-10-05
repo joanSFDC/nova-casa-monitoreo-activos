@@ -566,6 +566,12 @@ No estaban en la especificación y conviene no redescubrirlas.
     el panel dinámico, sobre un campo distinto en cada gráfico. Informes queda
     fuera de la barra porque el perfil mínimo la muestra a todos, también al
     operador, que no puede ejecutar informes.
+53. **El reenvío no reescribe la señal.** Copiaba el resultado leído antes del
+    `upsert`; si el suscriptor la resolvía en ese segundo, la devolvía a
+    Pendiente con el aviso ya consumido: 6 de unos 1.250 reenvíos de MIXED,
+    todas en Atascadas. Ahora solo suma la entrega, igual que el conflicto.
+    `IngestaServicio.antesDeGuardar` es el gancho de prueba que simula al
+    suscriptor entre la lectura y el guardado.
 
 ## Historial breve
 
@@ -602,3 +608,4 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-05 | Documentación al día: tipos numéricos, clave de la señal con sesión, Duplicado que no se escribe y la clase interna `without sharing`. Cierra #59 |
 | 2026-10-05 | El historial de umbrales sale en la página: el formato toma el nombre del de fábrica. Cierra #61 |
 | 2026-10-05 | Fecha de procesamiento vacía en lo que se decide al recibir: ayuda del campo y módulos 03 y 11. Cierra #63 |
+| 2026-10-05 | Un reenvío ya no devuelve a Pendiente la señal que el suscriptor acaba de resolver. Cierra #65 |

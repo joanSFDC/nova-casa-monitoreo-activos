@@ -298,6 +298,11 @@ Un mensaje reconocido como duplicado tampoco se publica. Se incrementa el contad
 entregas de la señal existente y se acabó. Esta es la barrera más importante contra el
 reprocesamiento y está antes del bus, no después.
 
+El reenvío solo escribe lo de la entrega: el contador, el último `deliveryId` y la última
+fecha de publicación. Resultado, motivo, fechas, carga e incidente se quedan como están.
+El suscriptor puede estar resolviendo esa misma señal en ese segundo, y una copia de lo que
+se leyó antes del `upsert` la devolvería a Pendiente cuando su aviso ya se consumió.
+
 ### El orden de las operaciones
 
 El orden importa, y no es el intuitivo. En cada página:

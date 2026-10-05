@@ -5,6 +5,9 @@
  * Las consultas van en SYSTEM_MODE porque en API 67 without sharing no salta FLS.
  */
 public without sharing class IngestaServicio {
+  @TestVisible
+  static System.Callable antesDeGuardar;
+
   public class ResultadoCiclo {
     public Boolean encadenar;
     public Integer indiceSiguiente;
@@ -233,13 +236,8 @@ public without sharing class IngestaServicio {
           Clave__c,
           Hash_Contenido__c,
           Entregas__c,
-          Resultado__c,
-          Motivo__c,
           Reintentable__c,
-          Fecha_Publicacion__c,
-          Fecha_Recepcion__c,
-          Fecha_Origen__c,
-          Fecha_Procesamiento__c
+          Fecha_Recepcion__c
         FROM Senal__c
         WHERE Clave__c IN :clavesReales
         WITH SYSTEM_MODE
@@ -269,21 +267,16 @@ public without sharing class IngestaServicio {
           aGuardar.add(senal);
           continue;
         }
-        senal.Id = previa.Id;
-        senal.Fecha_Recepcion__c = previa.Fecha_Recepcion__c;
-        senal.Entregas__c =
-          nvlNum(previa.Entregas__c) + nvlNum(senal.Entregas__c);
         if (previa.Reintentable__c == true) {
+          senal.Id = previa.Id;
+          senal.Fecha_Recepcion__c = previa.Fecha_Recepcion__c;
+          senal.Entregas__c =
+            nvlNum(previa.Entregas__c) + nvlNum(senal.Entregas__c);
           if (senal.Resultado__c == IngestaConstantes.RESULTADO_PENDIENTE) {
             publicar.add(clave);
           }
         } else {
-          senal.Resultado__c = previa.Resultado__c;
-          senal.Motivo__c = previa.Motivo__c;
-          senal.Reintentable__c = previa.Reintentable__c;
-          senal.Fecha_Origen__c = previa.Fecha_Origen__c;
-          senal.Fecha_Publicacion__c = previa.Fecha_Publicacion__c;
-          senal.Fecha_Procesamiento__c = previa.Fecha_Procesamiento__c;
+          senal = entregaSobre(previa, senal);
         }
       } else if (senal.Resultado__c == IngestaConstantes.RESULTADO_PENDIENTE) {
         publicar.add(clave);
@@ -291,6 +284,9 @@ public without sharing class IngestaServicio {
       aGuardar.add(senal);
     }
 
+    if (antesDeGuardar != null) {
+      antesDeGuardar.call('antesDeGuardar', null);
+    }
     Database.UpsertResult[] resultados = Database.upsert(
       aGuardar,
       Senal__c.Clave__c,
@@ -558,22 +554,29 @@ public without sharing class IngestaServicio {
   }
 
   /**
+   * De la entrega nueva solo se anota que existio. Lo demas no se escribe: el suscriptor
+   * puede estar resolviendo la senal en este mismo segundo, y una copia de lo leido lo pisaria.
+   */
+  private static Senal__c entregaSobre(Senal__c previa, Senal__c entrega) {
+    return new Senal__c(
+      Id = previa.Id,
+      Clave__c = previa.Clave__c,
+      Entregas__c = nvlNum(previa.Entregas__c) + nvlNum(entrega.Entregas__c),
+      Ultimo_Delivery_Id__c = entrega.Ultimo_Delivery_Id__c,
+      Ultima_Fecha_Publicacion__c = entrega.Ultima_Fecha_Publicacion__c
+    );
+  }
+
+  /**
    * La fila guardada conserva la primera afirmacion: carga, resumen, fechas y procesamiento.
-   * De la entrega nueva solo se anota que existio.
    */
   private static Senal__c conflictoSobre(
     Senal__c previa,
     Senal__c entrega,
     String detalle
   ) {
-    Senal__c conflicto = new Senal__c(
-      Id = previa.Id,
-      Clave__c = previa.Clave__c,
-      Entregas__c = nvlNum(previa.Entregas__c) + nvlNum(entrega.Entregas__c),
-      Ultimo_Delivery_Id__c = entrega.Ultimo_Delivery_Id__c,
-      Ultima_Fecha_Publicacion__c = entrega.Ultima_Fecha_Publicacion__c,
-      Detalle__c = detalle
-    );
+    Senal__c conflicto = entregaSobre(previa, entrega);
+    conflicto.Detalle__c = detalle;
     IngestaConstantes.aplicar(
       conflicto,
       IngestaConstantes.RESULTADO_CONFLICTO,
