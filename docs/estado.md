@@ -159,7 +159,8 @@ los dos grupos. El edificio sigue siendo la unidad de autorización; activo y
 estado actual heredan. Los casos se comparten igual, por `Case.Ciudad__c`
 (US-208). El coordinador es además miembro de la cola de casos **Coordinación**.
 
-La aplicación `Nova_Casa` abre en la pestaña **Monitor**. Logo y tema están en
+La aplicación `Nova_Casa` abre en la pestaña **Monitor** y no lleva la pestaña
+Inicio de fábrica, que es la página de ventas. Logo y tema están en
 la sección de identidad visual, más abajo.
 
 ### US-204 · Límites administrables
@@ -556,4 +557,5 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-05 | Cola Coordinación para los casos críticos y vista de lista. PR #46 fusionado. Cierra #45 |
 | 2026-10-05 | El script de usuarios solo manda clave a los usuarios que crea. PR #48 fusionado. Cierra #47 |
 | 2026-10-05 | Monitor: vigilancia de un minuto y región activa que anuncia cada cambio. PR #50 fusionado. Cierra #49 |
-| 2026-10-05 | Nova Casa como aplicación de entrada de los humanos. Cierra #51 |
+| 2026-10-05 | Nova Casa como aplicación de entrada de los humanos. PR #52 fusionado. Cierra #51 |
+| 2026-10-05 | La aplicación deja de llevar la pestaña Inicio de ventas. Cierra #53 |
