@@ -22,5 +22,6 @@
     <tabs>Umbral__c</tabs>
     <tabs>Senal__c</tabs>
     <tabs>Control_de_Ingesta__c</tabs>
+    <tabs>standard-Dashboard</tabs>
     <uiType>Lightning</uiType>
 </CustomApplication>

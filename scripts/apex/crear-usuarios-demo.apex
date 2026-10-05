@@ -1,6 +1,7 @@
 // Crea o actualiza los seis usuarios de la demostracion, les asigna conjuntos
 // de permisos y los mete en los grupos publicos de cada ciudad. El coordinador
-// entra ademas en la cola Coordinacion de los casos criticos. Los humanos
+// entra ademas en la cola Coordinacion de los casos criticos, y con el gerente
+// en Gerencia_y_Coordinacion, que ve los informes y el tablero. Los humanos
 // quedan con Nova Casa como aplicacion de entrada en escritorio.
 //
 // Uso, desde la raiz del repositorio:
@@ -49,7 +50,7 @@ Map<String, Group> grupos = new Map<String, Group>();
 for (Group g : [
     SELECT Id, DeveloperName
     FROM Group
-    WHERE DeveloperName IN ('Operadores_Bogota', 'Operadores_Barranquilla', 'Coordinacion')
+    WHERE DeveloperName IN ('Operadores_Bogota', 'Operadores_Barranquilla', 'Coordinacion', 'Gerencia_y_Coordinacion')
 ]) {
     grupos.put(g.DeveloperName, g);
 }
@@ -65,8 +66,8 @@ PermissionSetLicense licenciaApi = [
 List<String> filas = new List<String>{
     'operador.bogota.novacasa.95b2e3a11aa777@salesforce.com|Operador|Bogotá|opbog|op-bogota|Operador de edificios|minimo|Nova_Casa_Operador|Operadores_Bogota|humano',
     'operador.baq.novacasa.95b2e3a11aa777@salesforce.com|Operador|Barranquilla|opbaq|op-barranquilla|Operador de edificios|minimo|Nova_Casa_Operador|Operadores_Barranquilla|humano',
-    'coordinador.novacasa.95b2e3a11aa777@salesforce.com|Coordinador|Mantenimiento|coordmt|coord-mto|Coordinador de mantenimiento|minimo|Nova_Casa_Coordinador|Operadores_Bogota,Operadores_Barranquilla,Coordinacion|humano',
-    'gerente.novacasa.95b2e3a11aa777@salesforce.com|Gerente|Regional|gerreg|gerente-reg|Gerente regional|minimo|Nova_Casa_Gerencia|Operadores_Bogota,Operadores_Barranquilla|humano',
+    'coordinador.novacasa.95b2e3a11aa777@salesforce.com|Coordinador|Mantenimiento|coordmt|coord-mto|Coordinador de mantenimiento|minimo|Nova_Casa_Coordinador|Operadores_Bogota,Operadores_Barranquilla,Coordinacion,Gerencia_y_Coordinacion|humano',
+    'gerente.novacasa.95b2e3a11aa777@salesforce.com|Gerente|Regional|gerreg|gerente-reg|Gerente regional|minimo|Nova_Casa_Gerencia|Operadores_Bogota,Operadores_Barranquilla,Gerencia_y_Coordinacion|humano',
     'admin.novacasa.95b2e3a11aa777@salesforce.com|Administrador|Plataforma|admplat|admin-plat|Administrador de la plataforma|minimo|Nova_Casa_Administracion||humano',
     'integracion.novacasa.95b2e3a11aa777@salesforce.com|Usuario|Integración|integnc|usr-integracion|Usuario de integración|api|Nova_Casa_Integracion||sistema'
 };

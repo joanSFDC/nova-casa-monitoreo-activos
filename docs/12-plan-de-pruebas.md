@@ -193,6 +193,16 @@ ninguna propiedad del estado visual. Es la prueba del riesgo R-07.
 Detallada en el [módulo 10](10-seguridad-y-accesos.md). Cuatro usuarios de prueba, todas
 las consultas dentro de `System.runAs`.
 
+El panel de gerencia es metadato y no tiene prueba de Apex. Se comprueba en la org con
+«Iniciar sesión como»:
+
+| Prueba | Afirma |
+| --- | --- |
+| Gerente, filtro Bogotá | Los dos gráficos quedan vacíos |
+| Gerente, filtro Barranquilla | Equipos fuera de rango y casos abiertos coinciden con los informes |
+| Gerente, informe | Ve «Suscribir» en el informe de casos |
+| Operador | La barra no muestra Paneles ni Informes |
+
 ### US-209 · Trazabilidad
 
 | Prueba | Afirma |

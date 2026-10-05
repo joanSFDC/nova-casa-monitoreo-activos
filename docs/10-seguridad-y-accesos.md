@@ -216,6 +216,31 @@ deja en Nova Casa para los cinco humanos, en escritorio. Si alguien se pasa a ot
 aplicación, la siguiente sesión empieza en esa, como en cualquier org; volver a correr el
 script la devuelve a Nova Casa.
 
+### Acceso a los informes
+
+| Persona | Ejecuta informes | Se suscribe a informes | Ve el panel de gerencia |
+| --- | --- | --- | --- |
+| Operador | No | No | No |
+| Coordinador | Sí | Sí | Sí |
+| Gerente | Sí | Sí | Sí |
+| Administrador funcional | No | No | No |
+
+Hay tres capas, y hacen falta todas:
+
+1. **El permiso de usuario.** «Ejecutar informes» y «Suscribirse a informes» van en
+   `Nova_Casa_Gerencia` y `Nova_Casa_Coordinador`. El perfil mínimo no los trae.
+2. **La carpeta.** Los informes y el panel viven en carpetas **Nova Casa** compartidas en
+   lectura con el grupo público `Gerencia_y_Coordinacion`. Nadie de fuera del grupo ve
+   que existen, aunque tenga el permiso. El script de usuarios mantiene la membresía.
+3. **Los registros.** El panel es dinámico y cada informe corre con la compartición de
+   quien lo abre. Una carpeta compartida no amplía lo que alguien ve: si mañana el operador
+   de Bogotá recibiera el permiso, el informe de casos solo le contaría los de Bogotá.
+
+La pestaña Paneles va en la aplicación y la hacen visible los dos conjuntos. Informes no
+va en la barra: el perfil mínimo la deja visible por defecto, así que el operador la vería
+sin poder ejecutar nada. Por qué el panel no admite suscripción está en el
+[módulo 09](09-experiencia-del-operador.md#el-tablero-de-la-gerencia).
+
 ### Acceso a registros
 
 | Objeto | Valor por defecto | Cómo se amplía |
