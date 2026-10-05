@@ -66,10 +66,14 @@ versionan en el repositorio.
 | Fecha de origen separada | `Fecha_Origen__c`, `Fecha_Publicacion__c` y `Fecha_Recepcion__c` tienen valores distintos |
 | Publicado no es procesado | Tras la ingesta, las señales están pendientes, no aplicadas |
 | Cursor persistido | Tras la ingesta, `Control_de_Ingesta__c.Cursor__c` cambió |
-| Respuesta 409 | Se abre sesión nueva y se registra en `Ultimo_Error__c` |
+| Respuesta 409 | Se abre sesión nueva y se registra en `Ultimo_Error__c`, que la página buena siguiente no borra |
 | Respuesta 429 | El ciclo se corta y el cursor **no** se pierde |
 | Respuesta 401 | La cadena se corta y queda registrado |
 | Claves repetidas en la misma página | Se deduplica en memoria y no falla la operación entera |
+| Reenvío idéntico de una señal aplicada | Conserva resultado y `Fecha_Procesamiento__c` |
+| Conflicto en otra página | La fila conserva la primera afirmación y el detalle nombra la entrega distinta |
+| Tipo de mensaje desconocido | La señal se guarda rechazada, con el tipo recibido en el detalle |
+| Señal que no se puede guardar | Queda un rastro Fallido con «Error del sistema» y el error |
 
 La penúltima es la que más vale y la que menos se escribe: verifica que un fallo de
 autenticación no deje el sistema girando en vacío.

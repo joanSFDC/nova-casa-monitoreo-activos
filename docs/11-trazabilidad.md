@@ -45,9 +45,17 @@ pasa cuando falla la creación del incidente. El estado actual sí se actualizó
 se pudo crear. Es el único resultado donde estado e incidente quedan desalineados, y por
 eso tiene nombre propio en lugar de confundirse con un rechazo.
 
+La ingesta también lo usa cuando la propia señal no se puede guardar, o cuando el aviso no
+se puede publicar. Si el guardado falla, se escribe un rastro mínimo: clave, identidad,
+fechas y el error en `Detalle__c`, sin la carga, que puede ser justo lo que no cupo. Es
+reintentable: un reenvío idéntico lo vuelve a intentar. Si tampoco entra el rastro, el
+error queda en `Control_de_Ingesta__c.Ultimo_Error__c`.
+
 **Conflicto** es el único que exige una persona. El sistema recibió dos afirmaciones
 contradictorias sobre el mismo hecho y no tiene forma de saber cuál es cierta. Reintentar
-no aporta nada: seguirían siendo contradictorias.
+no aporta nada: seguirían siendo contradictorias. Si la primera afirmación ya se había
+aplicado, el estado y la fila la conservan; el conflicto avisa de que hay que revisarla
+([módulo 01](01-contrato-del-mensaje.md)).
 
 ## Los motivos
 

@@ -173,7 +173,7 @@ completo del ciclo de ingesta:
 | `Sesion_Iniciada__c` | Datetime | `startedAt` devuelto por el simulador |
 | `Sesion_Expira__c` | Datetime | `expiresAt` devuelto por el simulador |
 | `Ultima_Consulta_Exitosa__c` | Datetime | Alimenta el aviso de consulta atrasada |
-| `Ultimo_Error__c` | Text (255) | El `detail` del último problema |
+| `Ultimo_Error__c` | Text (255) | El `detail` del último problema. Una consulta buena no lo borra; su historial dice cuándo ocurrió cada uno |
 | `Fallos_Consecutivos__c` | Number | Corta la cadena si algo va mal de forma persistente |
 | `Activo__c` | Checkbox | Permite detener la ingesta sin desplegar |
 | `Paginas_Procesadas__c` | Number | Diagnóstico y tope por ciclo |
@@ -254,7 +254,10 @@ vuelve a emitir `msg_000001`, con fechas que arrancan al abrir la sesión. No so
 de la sesión anterior, porque el mismo `messageId` trae otro hecho. Por eso la clave de la
 señal lleva el inicio de la sesión ([módulo 01](01-contrato-del-mensaje.md)); sin él, la
 sesión nueva entera quedaba en conflicto y no llegaba nunca al estado. El 409 se registra
-igualmente en `Ultimo_Error__c`, porque perder el cursor no es un caso rutinario.
+igualmente en `Ultimo_Error__c`, porque perder el cursor no es un caso rutinario, y sigue
+ahí aunque la página siguiente salga bien. El campo guarda el último problema, no el
+estado de ahora: el estado lo da `Ultima_Consulta_Exitosa__c`, y la página del control
+muestra el historial de `Ultimo_Error__c` con la hora de cada problema.
 
 El 429 no se reintenta dentro del mismo ciclo. Reintentar de inmediato ante una respuesta
 que dice «vas demasiado rápido» es exactamente lo que no hay que hacer. Cortar el ciclo y

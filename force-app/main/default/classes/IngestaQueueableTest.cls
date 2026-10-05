@@ -108,7 +108,7 @@ private class IngestaQueueableTest {
     Test.stopTest();
 
     Control_de_Ingesta__c despues = [
-      SELECT Cursor__c, Paginas_Procesadas__c
+      SELECT Cursor__c, Paginas_Procesadas__c, Ultimo_Error__c
       FROM Control_de_Ingesta__c
       WHERE Id = :control.Id
     ];
@@ -123,6 +123,42 @@ private class IngestaQueueableTest {
       'Procesa la pagina posterior al 409'
     );
     Assert.isTrue(mock.metodos.contains('POST'), 'Abre sesion nueva');
+    Assert.isTrue(
+      despues.Ultimo_Error__c.contains('409'),
+      'Perder el cursor queda registrado aunque la pagina siguiente salga bien'
+    );
+  }
+
+  @isTest
+  static void shouldConservarUltimoError_WhenConsultaSiguienteSaleBien() {
+    Control_de_Ingesta__c control = [
+      SELECT Id
+      FROM Control_de_Ingesta__c
+      LIMIT 1
+    ];
+    control.Cursor__c = 'cursor-actual';
+    control.Ultimo_Error__c = '429 rate-limited';
+    update control;
+
+    Test.setMock(HttpCalloutMock.class, new IngestaSimuladorMock());
+    Test.startTest();
+    System.enqueueJob(new IngestaQueueable(0));
+    Test.stopTest();
+
+    Control_de_Ingesta__c despues = [
+      SELECT Ultimo_Error__c, Ultima_Consulta_Exitosa__c
+      FROM Control_de_Ingesta__c
+      WHERE Id = :control.Id
+    ];
+    Assert.isNotNull(
+      despues.Ultima_Consulta_Exitosa__c,
+      'La consulta salio bien'
+    );
+    Assert.areEqual(
+      '429 rate-limited',
+      despues.Ultimo_Error__c,
+      'Es el ultimo problema, no el estado de ahora'
+    );
   }
 
   @isTest

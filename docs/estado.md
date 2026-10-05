@@ -299,8 +299,9 @@ contra `publishedAt` (issue #28), la sesión dentro de la clave de la señal
 como detalle del incidente (issue #30). La identidad visual (issue #15) está
 hecha. US-210 (issue #13) espera sus criterios.
 
-La revisión previa a la entrega encontró faltas que se cierran una por issue,
-empezando por el formato y la codificación (issue #37).
+La revisión previa a la entrega encontró faltas que se cierran una por issue:
+el formato y la codificación (issue #37) y la evidencia de la bitácora en la
+ingesta (issue #39).
 
 ## Decisiones que aparecieron al implementar
 
@@ -477,6 +478,23 @@ No estaban en la especificación y conviene no redescubrirlas.
     recupera Salesforce. `.prettierignore` excluye `**/*-meta.xml`; Apex, LWC,
     JavaScript y Markdown siguen pasando por `npm run prettier`. Dos XML de
     `Senal__c` estaban en ISO-8859-1 y la org guardó «se�al»: ya son UTF-8.
+43. **Un `messageType` desconocido se perdía.** `Tipo_Mensaje__c` es una lista
+    restringida y el `upsert` fallaba: la señal no llegaba a la bitácora. Ahora
+    se guarda con el tipo vacío, rechazada, y el tipo recibido en `Detalle__c`.
+44. **El conflicto conserva la primera afirmación.** Entre páginas, la segunda
+    entrega reescribía carga, resumen y fechas de una señal que quizá ya estaba
+    aplicada. Ahora solo suma la entrega y deja en `Detalle__c` el `deliveryId`
+    que la contradice. Un reenvío idéntico conserva `Fecha_Procesamiento__c`.
+45. **Una señal que no se puede guardar deja rastro.** Se reintenta como fila
+    mínima Fallida con «Error del sistema» y el error, sin la carga. Si tampoco
+    entra, el error va a `Ultimo_Error__c`. Antes se marcaba Rechazado solo en
+    memoria. Un aviso que no se publica también queda Fallido, no Pendiente.
+46. **`Ultimo_Error__c` es el último problema, no el estado de ahora.** Una
+    consulta buena ya no lo borra; así el 409 no desaparece en la misma
+    transacción. Tiene historial y `Control_Registro` lo muestra en la barra
+    lateral. Para eso el formato de página del control entra en el repositorio
+    con la lista de historial: la lista individual de Lightning solo ofrece las
+    listas que están en el formato.
 
 ## Historial breve
 
@@ -499,4 +517,5 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-01 | Nota opcional al abrir una intervención y «Edit Tasks» para operador y coordinador. PR #34 fusionado. Cierra #29 |
 | 2026-10-01 | El detalle del incidente es `Caso_Registro`: fuera `obtenerIncidente`. PR #35 fusionado. Cierra #30 |
 | 2026-10-03 | Identidad visual: tema SLDS 1 con cabecera blanca, logo, iconos, etiquetas y páginas de activo, edificio y estado. PR #36. Cierra #15 |
-| 2026-10-05 | Formato de Prettier en 22 archivos, XML de metadatos fuera de Prettier y dos XML de la señal en UTF-8. Cierra #37 |
+| 2026-10-05 | Formato de Prettier en 22 archivos, XML de metadatos fuera de Prettier y dos XML de la señal en UTF-8. PR #38 fusionado. Cierra #37 |
+| 2026-10-05 | La bitácora conserva la evidencia: reenvío, conflicto, tipo desconocido, guardado fallido y 409. Cierra #39 |

@@ -200,7 +200,7 @@ private class IngestaServicioTest {
     );
     Test.stopTest();
     Senal__c senal = [
-      SELECT Resultado__c, Entregas__c
+      SELECT Resultado__c, Entregas__c, Carga__c, Detalle__c
       FROM Senal__c
       WHERE Clave__c = 'nova-casa-simulator|msg_000014'
     ];
@@ -211,6 +211,242 @@ private class IngestaServicioTest {
     );
     Assert.areEqual(2, senal.Entregas__c.intValue(), 'Dos afirmaciones');
     Assert.areEqual(0, r.publicadas, 'Un conflicto no se publica');
+    Assert.isTrue(
+      senal.Carga__c.contains('dlv_000014'),
+      'La carga es la de la primera afirmacion'
+    );
+    Assert.isTrue(
+      senal.Detalle__c.contains('dlv_000016'),
+      'El detalle senala la entrega que contradice'
+    );
+  }
+
+  @isTest
+  static void shouldConservarPrimeraAfirmacion_WhenConflictoEnOtraPagina() {
+    Datetime ahora = Datetime.newInstanceGmt(2026, 9, 22, 22, 0, 0);
+    IngestaServicio.procesarPagina(
+      TestDataFactory.sobre(
+        new List<Map<String, Object>>{ TestDataFactory.mensajePresion() },
+        'c1',
+        true
+      ),
+      ahora
+    );
+    Test.getEventBus().deliver();
+    Senal__c primera = [
+      SELECT
+        Resultado__c,
+        Carga__c,
+        Hash_Contenido__c,
+        Fecha_Origen__c,
+        Fecha_Procesamiento__c
+      FROM Senal__c
+      WHERE Clave__c = 'nova-casa-simulator|msg_000002'
+    ];
+    Assert.areEqual(
+      IngestaConstantes.RESULTADO_APLICADO,
+      primera.Resultado__c,
+      'La primera afirmacion se aplico'
+    );
+
+    Test.startTest();
+    IngestaServicio.ResultadoPagina r = IngestaServicio.procesarPagina(
+      TestDataFactory.sobre(
+        new List<Map<String, Object>>{
+          TestDataFactory.mensajePresion('msg_000002', 'dlv_000050', 3.9, 'BAR')
+        },
+        'c2',
+        true
+      ),
+      ahora.addMinutes(2)
+    );
+    Test.stopTest();
+
+    Senal__c despues = [
+      SELECT
+        Resultado__c,
+        Carga__c,
+        Hash_Contenido__c,
+        Fecha_Origen__c,
+        Fecha_Procesamiento__c,
+        Entregas__c,
+        Ultimo_Delivery_Id__c,
+        Detalle__c
+      FROM Senal__c
+      WHERE Clave__c = 'nova-casa-simulator|msg_000002'
+    ];
+    Assert.areEqual(0, r.publicadas, 'Un conflicto no se publica');
+    Assert.areEqual(
+      IngestaConstantes.RESULTADO_CONFLICTO,
+      despues.Resultado__c,
+      'Dos afirmaciones distintas'
+    );
+    Assert.areEqual(
+      primera.Carga__c,
+      despues.Carga__c,
+      'Conserva la carga de la primera'
+    );
+    Assert.areEqual(
+      primera.Hash_Contenido__c,
+      despues.Hash_Contenido__c,
+      'Conserva su resumen'
+    );
+    Assert.areEqual(
+      primera.Fecha_Origen__c,
+      despues.Fecha_Origen__c,
+      'Conserva su fecha de origen'
+    );
+    Assert.areEqual(
+      primera.Fecha_Procesamiento__c,
+      despues.Fecha_Procesamiento__c,
+      'Conserva cuando se proceso'
+    );
+    Assert.areEqual(2, despues.Entregas__c.intValue(), 'Cuenta la entrega');
+    Assert.areEqual(
+      'dlv_000050',
+      despues.Ultimo_Delivery_Id__c,
+      'Ultima entrega'
+    );
+    Assert.isTrue(
+      despues.Detalle__c.contains('dlv_000050'),
+      'El detalle senala la entrega que contradice'
+    );
+  }
+
+  @isTest
+  static void shouldConservarProcesamiento_WhenReenvioIdenticoDeAplicada() {
+    Datetime ahora = Datetime.newInstanceGmt(2026, 9, 22, 22, 0, 0);
+    IngestaServicio.procesarPagina(
+      TestDataFactory.sobre(
+        new List<Map<String, Object>>{ TestDataFactory.mensajePresion() },
+        'c1',
+        true
+      ),
+      ahora
+    );
+    Test.getEventBus().deliver();
+    Senal__c aplicada = [
+      SELECT Resultado__c, Fecha_Procesamiento__c
+      FROM Senal__c
+      WHERE Clave__c = 'nova-casa-simulator|msg_000002'
+    ];
+    Assert.isNotNull(aplicada.Fecha_Procesamiento__c, 'Ya se proceso');
+
+    Test.startTest();
+    IngestaServicio.procesarPagina(
+      TestDataFactory.sobre(
+        new List<Map<String, Object>>{
+          TestDataFactory.mensajePresion(
+            'msg_000002',
+            'dlv_000099',
+            2.76,
+            'BAR'
+          )
+        },
+        'c2',
+        true
+      ),
+      ahora.addMinutes(2)
+    );
+    Test.stopTest();
+
+    Senal__c despues = [
+      SELECT Resultado__c, Fecha_Procesamiento__c, Entregas__c
+      FROM Senal__c
+      WHERE Clave__c = 'nova-casa-simulator|msg_000002'
+    ];
+    Assert.areEqual(
+      IngestaConstantes.RESULTADO_APLICADO,
+      despues.Resultado__c,
+      'Sigue aplicada'
+    );
+    Assert.areEqual(
+      aplicada.Fecha_Procesamiento__c,
+      despues.Fecha_Procesamiento__c,
+      'El reenvio no borra la fecha de procesamiento'
+    );
+    Assert.areEqual(2, despues.Entregas__c.intValue(), 'Cuenta la entrega');
+  }
+
+  @isTest
+  static void shouldGuardarRechazo_WhenTipoDeMensajeDesconocido() {
+    Map<String, Object> alarma = TestDataFactory.mensajePresion();
+    alarma.put('messageType', 'ALARM');
+    Test.startTest();
+    IngestaServicio.ResultadoPagina r = IngestaServicio.procesarPagina(
+      TestDataFactory.sobre(new List<Map<String, Object>>{ alarma }, 'c', true),
+      Datetime.newInstanceGmt(2026, 9, 22, 22, 0, 0)
+    );
+    Test.stopTest();
+    Assert.areEqual(0, r.publicadas, 'Un rechazo no se publica');
+    Senal__c senal = [
+      SELECT
+        Resultado__c,
+        Motivo__c,
+        Reintentable__c,
+        Tipo_Mensaje__c,
+        Detalle__c,
+        Carga__c
+      FROM Senal__c
+      WHERE Clave__c = 'nova-casa-simulator|msg_000002'
+    ];
+    Assert.areEqual(
+      IngestaConstantes.RESULTADO_RECHAZADO,
+      senal.Resultado__c,
+      'Rechazado'
+    );
+    Assert.areEqual(
+      IngestaConstantes.MOTIVO_TIPO_MENSAJE,
+      senal.Motivo__c,
+      'Tipo de mensaje desconocido'
+    );
+    Assert.isTrue(senal.Reintentable__c, 'Se resuelve ampliando el contrato');
+    Assert.isNull(senal.Tipo_Mensaje__c, 'La lista no admite otros tipos');
+    Assert.isTrue(senal.Detalle__c.contains('ALARM'), 'Dice que tipo llego');
+    Assert.isTrue(senal.Carga__c.contains('ALARM'), 'Conserva la carga');
+  }
+
+  @isTest
+  static void shouldDejarRastroFallido_WhenLaSenalNoSePuedeGuardar() {
+    Map<String, Object> enorme = TestDataFactory.mensajePresion();
+    ((Map<String, Object>) enorme.get('building'))
+      .put('name', 'x'.repeat(33000));
+    Map<String, Object> buena = TestDataFactory.mensajePresion(
+      'msg_000003',
+      'dlv_000003',
+      2.76,
+      'BAR'
+    );
+    Test.startTest();
+    IngestaServicio.ResultadoPagina r = IngestaServicio.procesarPagina(
+      TestDataFactory.sobre(
+        new List<Map<String, Object>>{ enorme, buena },
+        'c',
+        true
+      ),
+      Datetime.newInstanceGmt(2026, 9, 22, 22, 0, 0)
+    );
+    Test.stopTest();
+    Assert.areEqual(1, r.publicadas, 'La buena sigue su camino');
+    Assert.isNull(r.errorGuardado, 'El rastro si entro');
+    Senal__c rastro = [
+      SELECT Resultado__c, Motivo__c, Reintentable__c, Detalle__c, Carga__c
+      FROM Senal__c
+      WHERE Clave__c = 'nova-casa-simulator|msg_000002'
+    ];
+    Assert.areEqual(
+      IngestaConstantes.RESULTADO_FALLIDO,
+      rastro.Resultado__c,
+      'Fallo al escribir'
+    );
+    Assert.areEqual(
+      IngestaConstantes.MOTIVO_SISTEMA,
+      rastro.Motivo__c,
+      'Error del sistema'
+    );
+    Assert.isTrue(rastro.Reintentable__c, 'Un reenvio lo vuelve a intentar');
+    Assert.isTrue(String.isNotBlank(rastro.Detalle__c), 'Dice el error');
+    Assert.isNull(rastro.Carga__c, 'El rastro va sin la carga que no cupo');
   }
 
   @isTest
