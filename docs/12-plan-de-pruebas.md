@@ -129,6 +129,8 @@ y es la única forma de probarlo.
 | Fuera de todas las bandas | 60.19 °C clasifica **crítico**, no se rechaza |
 | Sin umbral | Rechazo con motivo, marcado reintentable |
 | Rango contradictorio | La regla de validación impide guardar el umbral |
+| Crítico bajo sobre las altas | Crítico bajo 20 con advertencia alta 10 no se guarda |
+| Medición solo con minutos | Un umbral de temperatura sin bandas no se guarda |
 | Cambiar un límite | El historial **no** se reclasifica |
 | Aplicar límites | Los estados afectados se reclasifican, sin abrir casos |
 

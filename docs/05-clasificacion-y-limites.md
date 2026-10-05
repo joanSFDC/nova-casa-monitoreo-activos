@@ -170,9 +170,18 @@ el registro no se pueda guardar contradictorio:
 | Orden bajo | `Critico_Bajo__c > Advertencia_Bajo__c` |
 | Orden alto | `Critico_Alto__c < Advertencia_Alto__c` |
 | Bandas cruzadas | `Advertencia_Bajo__c >= Advertencia_Alto__c` |
+| Crítico bajo cruzado | `Critico_Bajo__c >= Advertencia_Alto__c` |
 | Bandas altas incompletas | `Advertencia_Alto__c` vacío y `Critico_Alto__c` con valor |
-| Sin ninguna frontera | Los cuatro campos vacíos |
+| Sin ninguna frontera | Los cuatro campos y los dos minutos vacíos |
+| Medición sin bandas | Una medición que no es `CAMERA_CONNECTIVITY` con los cuatro campos vacíos |
 | Minutos de silencio | `Minutos_Advertencia__c >= Minutos_Critico__c` |
+
+Las dos que no son obvias cierran huecos de las demás. **Crítico bajo cruzado**: con la
+advertencia baja vacía, un crítico bajo de 20 y una advertencia alta de 10 pasaban todas
+las reglas, y cualquier lectura salía crítica, por abajo o por arriba. Basta comparar con
+la advertencia alta, porque un crítico alto exige advertencia alta y no puede quedar por
+debajo de ella. **Medición sin bandas**: un umbral de temperatura con solo minutos pasaba
+«Sin ninguna frontera» y clasificaba todo como normal en silencio.
 
 Validar en el origen es mejor que validar al clasificar por una razón de momento: el error
 aparece delante de la persona que lo puede corregir, en el instante en que lo comete, con

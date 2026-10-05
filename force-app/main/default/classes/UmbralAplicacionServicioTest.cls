@@ -75,6 +75,49 @@ private class UmbralAplicacionServicioTest {
   }
 
   @IsTest
+  static void criticoBajoSobreLasAltasNoSeGuarda() {
+    Umbral__c umbral = new Umbral__c(
+      Clave__c = 'TECHNICAL_ROOM|TEMPERATURE|' + sufijo().left(8),
+      Tipo_Activo__c = 'TECHNICAL_ROOM',
+      Tipo_Medicion__c = 'TEMPERATURE',
+      Critico_Bajo__c = 20,
+      Advertencia_Alto__c = 10,
+      Critico_Alto__c = 15
+    );
+
+    try {
+      insert umbral;
+      System.assert(false, 'Debio bloquear un rango donde todo es critico');
+    } catch (DmlException e) {
+      System.assert(
+        e.getMessage().contains('crítico bajo debe ser menor'),
+        e.getMessage()
+      );
+    }
+  }
+
+  @IsTest
+  static void medicionSoloConMinutosNoSeGuarda() {
+    Umbral__c umbral = new Umbral__c(
+      Clave__c = 'TECHNICAL_ROOM|TEMPERATURE|' + sufijo().left(8),
+      Tipo_Activo__c = 'TECHNICAL_ROOM',
+      Tipo_Medicion__c = 'TEMPERATURE',
+      Minutos_Advertencia__c = 15,
+      Minutos_Critico__c = 60
+    );
+
+    try {
+      insert umbral;
+      System.assert(false, 'Debio bloquear una medicion sin bandas');
+    } catch (DmlException e) {
+      System.assert(
+        e.getMessage().contains('frontera de valor'),
+        e.getMessage()
+      );
+    }
+  }
+
+  @IsTest
   static void sinNingunaFronteraNoSeGuarda() {
     Umbral__c umbral = new Umbral__c(
       Clave__c = 'TECHNICAL_ROOM|TEMPERATURE|' + sufijo().left(8),
