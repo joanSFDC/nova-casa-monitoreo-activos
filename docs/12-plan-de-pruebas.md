@@ -143,6 +143,7 @@ inventados.
 | Reentrega del bus | El segundo procesamiento no crea un segundo caso |
 | Ráfaga de críticos | Diez mensajes críticos del mismo activo producen **un** caso |
 | Escalada | Una advertencia y después un crítico producen un caso que sube de prioridad |
+| Crítico superado en la tanda | Un crítico y una advertencia posterior en la misma tanda abren el caso en baja, con la advertencia como origen |
 | Conflicto | Misma clave con distinto contenido se marca conflicto y no abre caso |
 | Concurrencia | Un error de duplicado se trata como éxito y se reintenta la escalada |
 | **Cierre y reapertura** | Cerrar, volver a poner en crítico, y se abre uno nuevo |
