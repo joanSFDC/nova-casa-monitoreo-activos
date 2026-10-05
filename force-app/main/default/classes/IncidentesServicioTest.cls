@@ -140,6 +140,65 @@ private class IncidentesServicioTest {
   }
 
   @isTest
+  static void shouldNoEscalar_WhenCriticoQuedaAtrasadoEnLaTanda() {
+    Activo__c bomba = bomba();
+    Map<String, Object> critico = TestDataFactory.mensajePresion(
+      'msg_cri',
+      'dlv_cri',
+      5.5,
+      'BAR'
+    );
+    critico.put('occurredAt', '2026-09-22T22:50:00.000Z');
+    Map<String, Object> advertencia = TestDataFactory.mensajePresion(
+      'msg_adv',
+      'dlv_adv',
+      4.5,
+      'BAR'
+    );
+    advertencia.put('occurredAt', '2026-09-22T22:55:00.000Z');
+    insert new List<Senal__c>{
+      TestDataFactory.senalPendiente(critico, bomba.Id, bomba.Edificio__c),
+      TestDataFactory.senalPendiente(advertencia, bomba.Id, bomba.Edificio__c)
+    };
+
+    Test.startTest();
+    ProcesamientoServicio.procesar(
+      new List<Aviso_de_Senal__e>{
+        TestDataFactory.avisoDe(critico),
+        TestDataFactory.avisoDe(advertencia)
+      }
+    );
+    Test.stopTest();
+
+    Case incidente = [
+      SELECT Priority, Origen_Senal__c
+      FROM Case
+      WHERE Clave_Abierta__c = :CLAVE_PRESION
+    ];
+    Assert.areEqual(
+      IncidentesServicio.PRIORIDAD_BAJA,
+      incidente.Priority,
+      'La situacion vigente es una advertencia'
+    );
+    Assert.areEqual(
+      'nova-casa-simulator|msg_adv',
+      incidente.Origen_Senal__c,
+      'El origen es la lectura aplicada'
+    );
+    Senal__c superada = [
+      SELECT Resultado__c, Incidente__c
+      FROM Senal__c
+      WHERE Clave__c = 'nova-casa-simulator|msg_cri'
+    ];
+    Assert.areEqual(
+      IngestaConstantes.RESULTADO_ATRASADO,
+      superada.Resultado__c,
+      'El critico perdio la tanda'
+    );
+    Assert.isNull(superada.Incidente__c, 'Una atrasada no se liga al caso');
+  }
+
+  @isTest
   static void shouldNoCrearSegundo_WhenReentregaDelBus() {
     Activo__c bomba = bomba();
     Map<String, Object> mensaje = TestDataFactory.mensajePresion(

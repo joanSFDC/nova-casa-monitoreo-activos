@@ -300,8 +300,8 @@ como detalle del incidente (issue #30). La identidad visual (issue #15) está
 hecha. US-210 (issue #13) espera sus criterios.
 
 La revisión previa a la entrega encontró faltas que se cierran una por issue:
-el formato y la codificación (issue #37) y la evidencia de la bitácora en la
-ingesta (issue #39).
+el formato y la codificación (issue #37), la evidencia de la bitácora en la
+ingesta (issue #39) y el crítico superado dentro de una tanda (issue #41).
 
 ## Decisiones que aparecieron al implementar
 
@@ -495,6 +495,11 @@ No estaban en la especificación y conviene no redescubrirlas.
     lateral. Para eso el formato de página del control entra en el repositorio
     con la lista de historial: la lista individual de Lightning solo ofrece las
     listas que están en el formato.
+47. **Un crítico superado en la misma tanda no escala.** `acumular` guardaba el
+    nivel más alto de la tanda y la primera señal como origen, aunque esa señal
+    terminara Atrasado. Ahora la decisión guarda el nivel de cada señal y
+    `escribir` lo recalcula solo con las que quedaron Aplicado, como pide el
+    [módulo 06](06-estado-actual.md).
 
 ## Historial breve
 
@@ -518,4 +523,5 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-01 | El detalle del incidente es `Caso_Registro`: fuera `obtenerIncidente`. PR #35 fusionado. Cierra #30 |
 | 2026-10-03 | Identidad visual: tema SLDS 1 con cabecera blanca, logo, iconos, etiquetas y páginas de activo, edificio y estado. PR #36. Cierra #15 |
 | 2026-10-05 | Formato de Prettier en 22 archivos, XML de metadatos fuera de Prettier y dos XML de la señal en UTF-8. PR #38 fusionado. Cierra #37 |
-| 2026-10-05 | La bitácora conserva la evidencia: reenvío, conflicto, tipo desconocido, guardado fallido y 409. Cierra #39 |
+| 2026-10-05 | La bitácora conserva la evidencia: reenvío, conflicto, tipo desconocido, guardado fallido y 409. PR #40 fusionado. Cierra #39 |
+| 2026-10-05 | Un crítico superado en la misma tanda no abre ni escala el caso. Cierra #41 |

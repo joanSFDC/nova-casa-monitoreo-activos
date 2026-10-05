@@ -143,6 +143,11 @@ Las lecturas perdedoras no desaparecen: se registran en la bitácora como atrasa
 que si hubieran llegado en otra tanda. El resultado es el mismo que si se hubieran
 procesado de una en una, que es la propiedad que queríamos.
 
+Y como son atrasadas, les vale la decisión anterior: **no abren ni escalan el incidente**.
+El nivel del caso y su `Origen_Senal__c` salen solo de las lecturas que quedaron
+aplicadas. Un crítico a las 22:50 seguido de una advertencia a las 22:55 en la misma tanda
+abre el caso en prioridad baja, con la advertencia como origen.
+
 ## El resumen por activo
 
 US-206 pide que el activo muestre su peor estado. El mecanismo es el resumen automático

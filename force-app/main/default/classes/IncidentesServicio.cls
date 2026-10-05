@@ -21,6 +21,9 @@ public without sharing class IncidentesServicio {
     public Set<String> clavesSenal;
     public Integer nivel;
     public Boolean marcarRecuperado;
+    public List<String> orden = new List<String>();
+    public Map<String, Integer> nivelPorSenal = new Map<String, Integer>();
+    public Set<String> recuperadas = new Set<String>();
   }
 
   public static String claveDe(Aviso_de_Senal__e aviso) {
@@ -87,27 +90,82 @@ public without sharing class IncidentesServicio {
     if (String.isBlank(clave)) {
       return;
     }
-    Decision previa = decisiones.get(clave);
-    if (previa == null) {
-      Decision decision = new Decision();
+    Decision decision = decisiones.get(clave);
+    if (decision == null) {
+      decision = new Decision();
       decision.clave = clave;
       decision.activoId = activo == null ? null : activo.Id;
       decision.tipoMedicion = tipoMedicion;
       decision.episodioId = aviso.Episodio_Id__c;
       decision.claveSenal = senal.Clave__c;
-      decision.clavesSenal = new Set<String>{ senal.Clave__c };
+      decision.clavesSenal = new Set<String>();
       decision.nivel = nivel;
       decision.marcarRecuperado = restored;
       decisiones.put(clave, decision);
-      return;
     }
-    previa.clavesSenal.add(senal.Clave__c);
-    if (nivel > previa.nivel) {
-      previa.nivel = nivel;
-    }
+    decision.clavesSenal.add(senal.Clave__c);
+    decision.orden.add(senal.Clave__c);
+    decision.nivelPorSenal.put(senal.Clave__c, nivel);
     if (restored) {
-      previa.marcarRecuperado = true;
+      decision.recuperadas.add(senal.Clave__c);
     }
+  }
+
+  /**
+   * Nivel, origen y recuperacion salen solo de las senales que quedaron Aplicado.
+   * Una perdedora de la tanda es Atrasado y no abre ni escala (modulo 06).
+   */
+  private static Boolean depurarConAplicadas(
+    Decision decision,
+    Map<String, Senal__c> senales
+  ) {
+    if (decision.orden.isEmpty()) {
+      return hayAplicada(decision, senales);
+    }
+    Boolean alguna = false;
+    Integer nivel = 0;
+    String origen;
+    Boolean recuperado = false;
+    for (String claveSenal : decision.orden) {
+      Senal__c senal = senales.get(claveSenal);
+      if (
+        senal == null ||
+        senal.Resultado__c != IngestaConstantes.RESULTADO_APLICADO
+      ) {
+        continue;
+      }
+      Integer nivelSenal = decision.nivelPorSenal.get(claveSenal);
+      if (!alguna || nivelSenal > nivel) {
+        nivel = nivelSenal;
+        origen = claveSenal;
+      }
+      alguna = true;
+      if (decision.recuperadas.contains(claveSenal)) {
+        recuperado = true;
+      }
+    }
+    if (alguna) {
+      decision.nivel = nivel;
+      decision.claveSenal = origen;
+      decision.marcarRecuperado = recuperado;
+    }
+    return alguna;
+  }
+
+  private static Boolean hayAplicada(
+    Decision decision,
+    Map<String, Senal__c> senales
+  ) {
+    for (String claveSenal : decision.clavesSenal) {
+      Senal__c senal = senales.get(claveSenal);
+      if (
+        senal != null &&
+        senal.Resultado__c == IngestaConstantes.RESULTADO_APLICADO
+      ) {
+        return true;
+      }
+    }
+    return false;
   }
 
   public static void escribir(
@@ -136,18 +194,7 @@ public without sharing class IncidentesServicio {
       if (String.isNotBlank(decision.claveSenal)) {
         decision.clavesSenal.add(decision.claveSenal);
       }
-      Boolean hayAplicada = false;
-      for (String claveSenal : decision.clavesSenal) {
-        Senal__c senal = senales.get(claveSenal);
-        if (
-          senal != null &&
-          senal.Resultado__c == IngestaConstantes.RESULTADO_APLICADO
-        ) {
-          hayAplicada = true;
-          break;
-        }
-      }
-      if (!hayAplicada) {
+      if (!depurarConAplicadas(decision, senales)) {
         continue;
       }
       Case abierto = abiertos.get(decision.clave);
