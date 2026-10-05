@@ -334,7 +334,8 @@ los 200.
 }
 ```
 
-Se guarda con la clave `nova-casa-simulator|msg_000002`. La presión normal para una bomba
+Se guarda con la clave `nova-casa-simulator|2026-09-24T21:44:55Z|msg_000002`, donde la
+fecha es el inicio de la sesión del simulador. La presión normal para una bomba
 va de 2.5 a 4 BAR, así que 2.76 clasifica como normal, se actualiza el estado actual de
 presión de esa bomba y no se abre ningún incidente.
 

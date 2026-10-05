@@ -22,14 +22,13 @@ los distingue no puede responder si un mensaje está en camino o se quedó por e
 
 ## Los resultados
 
-Toda `Senal__c` tiene exactamente uno de estos siete valores en `Resultado__c`. No hay
+Toda `Senal__c` tiene exactamente uno de estos seis valores en `Resultado__c`. No hay
 señales sin resultado.
 
 | Resultado | Qué significa | ¿Tocó el estado? | ¿Reintentar? |
 | --- | --- | --- | --- |
 | **Pendiente** | Se recibió y se publicó. El procesamiento no ha terminado | No | — |
 | **Aplicado** | Actualizó el estado. Puede haber abierto o escalado un incidente | Sí | Sí, sin efecto |
-| **Duplicado** | La clave ya estaba procesada, con contenido idéntico | No | Sí, sin efecto |
 | **Atrasado** | Su fecha de origen es anterior a la del estado vigente | No | Sí, sin efecto |
 | **Conflicto** | Misma clave, contenido distinto | No | **No** |
 | **Rechazado** | No pasó una validación | No | Según el motivo |
@@ -56,6 +55,11 @@ contradictorias sobre el mismo hecho y no tiene forma de saber cuál es cierta. 
 no aporta nada: seguirían siendo contradictorias. Si la primera afirmación ya se había
 aplicado, el estado y la fila la conservan; el conflicto avisa de que hay que revisarla
 ([módulo 01](01-contrato-del-mensaje.md)).
+
+**Duplicado** sigue en la lista de valores, pero no se escribe. Un reenvío con la misma
+clave y el mismo contenido suma uno a `Entregas__c` y la señal conserva su resultado:
+si pasara a Duplicado, una señal ya aplicada perdería la constancia de que se aplicó. La
+vista Duplicadas filtra por el contador, no por este valor.
 
 ## Los motivos
 
