@@ -601,3 +601,4 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-05 | Atascadas y Últimas 24 horas filtran por horas con un campo fórmula; los módulos dejan de prometer orden y agrupación. Cierra #57 |
 | 2026-10-05 | Documentación al día: tipos numéricos, clave de la señal con sesión, Duplicado que no se escribe y la clase interna `without sharing`. Cierra #59 |
 | 2026-10-05 | El historial de umbrales sale en la página: el formato toma el nombre del de fábrica. Cierra #61 |
+| 2026-10-05 | Fecha de procesamiento vacía en lo que se decide al recibir: ayuda del campo y módulos 03 y 11. Cierra #63 |

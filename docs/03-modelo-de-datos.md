@@ -237,7 +237,7 @@ La bitácora. Cada mensaje recibido queda aquí con su resultado.
 | `Fecha_Publicacion__c` | Datetime | `publishedAt` del primer intento |
 | `Ultima_Fecha_Publicacion__c` | Datetime | `publishedAt` del último intento |
 | `Fecha_Recepcion__c` | Datetime | Cuándo la insertamos |
-| `Fecha_Procesamiento__c` | Datetime | Cuándo terminó el procesamiento |
+| `Fecha_Procesamiento__c` | Datetime | Cuándo terminó el procesamiento. Vacía si el resultado se decidió al recibir |
 | `Horas_Desde_Recepcion__c` | Fórmula, Number(17,1) | `(NOW() - Fecha_Recepcion__c) * 24`. Lo usan las vistas que filtran por horas |
 | `Edificio__c` | Lookup(Edificio__c) | Vacío si el edificio no se resolvió |
 | `Activo__c` | Lookup(Activo__c) | Vacío si el activo no se resolvió |
@@ -250,7 +250,8 @@ pasó el hecho y es la única que decide vigencia. `Fecha_Publicacion__c` es cu�
 proveedor lo puso a disposición, y su distancia respecto a la anterior mide el retraso del
 proveedor. `Fecha_Recepcion__c` es cuándo lo guardamos, y su distancia respecto a la
 publicación mide el retraso de nuestra ingesta. `Fecha_Procesamiento__c` es cuándo
-terminamos, y su distancia respecto a la recepción mide el retraso del bus.
+terminamos, y su distancia respecto a la recepción mide el retraso del bus. Una señal
+que se decide al recibir no pasa por el bus y la deja vacía ([módulo 11](11-trazabilidad.md)).
 
 Separadas, responden dónde está la demora. Juntas, no responden nada. El criterio de
 US-201 que pide conservar la fecha de origen separada de la de recepción se cumple aquí de

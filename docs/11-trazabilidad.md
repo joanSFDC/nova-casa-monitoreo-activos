@@ -50,6 +50,14 @@ fechas y el error en `Detalle__c`, sin la carga, que puede ser justo lo que no c
 reintentable: un reenvío idéntico lo vuelve a intentar. Si tampoco entra el rastro, el
 error queda en `Control_de_Ingesta__c.Ultimo_Error__c`.
 
+**Dónde se decidió** se lee en las fechas. La ingesta valida al recibir: lo que no pasa
+queda Rechazado, un contenido distinto bajo la misma clave queda Conflicto y una señal que
+no se puede guardar o avisar queda Fallido. Ninguna de las tres entra al bus, así que
+`Fecha_Procesamiento__c` queda vacía y el momento de la decisión es `Fecha_Recepcion__c`.
+El suscriptor vuelve a validar contra el catálogo y decide Aplicado, Atrasado, Rechazado o
+Fallido; esas sí llevan fecha de procesamiento. Con la fecha vacía, solo Pendiente está
+esperando algo.
+
 **Conflicto** es el único que exige una persona. El sistema recibió dos afirmaciones
 contradictorias sobre el mismo hecho y no tiene forma de saber cuál es cierta. Reintentar
 no aporta nada: seguirían siendo contradictorias. Si la primera afirmación ya se había
