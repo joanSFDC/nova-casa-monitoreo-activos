@@ -200,8 +200,9 @@ tipo de metadato personalizado está en el [módulo 03](03-modelo-de-datos.md).
 Lo que se construye:
 
 - Una **pestaña** de `Umbral__c` en la aplicación, visible para el coordinador.
-- Una **vista de lista** por defecto agrupada por tipo de activo, con los cuatro valores y
-  la unidad en columnas.
+- Una **vista de lista**, «Umbrales por tipo de activo», con el tipo de activo, la medición,
+  los cuatro valores, los minutos y la unidad en columnas. El metadato de una vista no fija
+  agrupación ni orden: se ordena pulsando la columna del tipo, y la vista lo recuerda.
 - El **historial de cambios** activado en los cuatro campos de umbral y en los dos de
   minutos, para que quede quién cambió qué y cuándo.
 - Las **reglas de validación** de la sección anterior.

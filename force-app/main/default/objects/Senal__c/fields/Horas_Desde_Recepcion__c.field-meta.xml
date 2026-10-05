@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Horas_Desde_Recepcion__c</fullName>
+    <formula>(NOW() - Fecha_Recepcion__c) * 24</formula>
+    <formulaTreatBlanksAs>BlankAsBlank</formulaTreatBlanksAs>
+    <inlineHelpText>Horas desde la recepción, calculadas al leer. Las vistas de lista no filtran por horas sobre una fecha; sobre este número, sí.</inlineHelpText>
+    <label>Horas desde la recepción</label>
+    <precision>18</precision>
+    <required>false</required>
+    <scale>1</scale>
+    <trackTrending>false</trackTrending>
+    <type>Number</type>
+    <unique>false</unique>
+</CustomField>

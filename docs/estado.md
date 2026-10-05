@@ -128,8 +128,8 @@ ni botón de reproceso.
 | Reintentables | `Reintentable__c` y resultado rechazado o fallido |
 | Conflictos | Resultado conflicto |
 | Duplicadas | `Entregas__c` mayor que uno |
-| Atascadas | Pendiente con recepción anterior a hoy |
-| Últimas 24 horas | Recepción del último día, más reciente primero |
+| Atascadas | Pendiente con más de una hora desde la recepción |
+| Últimas 24 horas | Menos de 24 horas desde la recepción |
 
 `IngestaConstantes.aplicar` es el único sitio que escribe resultado, motivo y
 reintentable juntos. El reenvío idéntico **no** cambia el resultado a
@@ -331,8 +331,8 @@ rangos contradictorios del umbral (issue #43), la cola del coordinador
 (issue #45), las claves que el script de usuarios restablecía en cada
 corrida (issue #47), el monitor que no se recalculaba con la ingesta parada
 (issue #49), la aplicación de entrada de los humanos (issue #51), la pestaña
-Inicio de ventas (issue #53) y el panel de gerencia que el módulo 09 daba por
-hecho (issue #55).
+Inicio de ventas (issue #53), el panel de gerencia que el módulo 09 daba por
+hecho (issue #55) y las vistas de la bitácora que no medían horas (issue #57).
 
 ## Decisiones que aparecieron al implementar
 
@@ -370,8 +370,12 @@ No estaban en la especificación y conviene no redescubrirlas.
     si esa señal ya se aplicó.
 12. GitHub no cierra issues con `Cierra #N`. En el PR hay que escribir
     `Closes #N`.
-13. Las vistas de lista **no aceptan** `LAST_N_HOURS`. Atascadas queda como
-    Pendiente con recepción anterior a hoy.
+13. Las vistas de lista **no aceptan** `LAST_N_HOURS` **ni fijan orden o
+    agrupación**. Atascadas y Últimas 24 horas filtran por la fórmula
+    `Horas_Desde_Recepcion__c`. Como una fórmula con `NOW()` no se indexa, cada
+    una lleva al lado un filtro indexado: el resultado Pendiente, o
+    `LAST_N_DAYS:1` sobre la recepción. Salesforce abre toda vista ordenada por
+    nombre; el orden lo elige quien la usa y la vista lo recuerda.
 14. **«Sin ninguna frontera» incluye los minutos.** La cámara no tiene bandas
     de valor, solo 15/60 minutos: si la regla mirara solo los cuatro números,
     no se podría guardar.
@@ -589,3 +593,4 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-05 | Nova Casa como aplicación de entrada de los humanos. PR #52 fusionado. Cierra #51 |
 | 2026-10-05 | La aplicación deja de llevar la pestaña Inicio de ventas. Cierra #53 |
 | 2026-10-05 | Panel de gerencia: dos informes, filtro por ciudad y carpetas para gerente y coordinador. Cierra #55 |
+| 2026-10-05 | Atascadas y Últimas 24 horas filtran por horas con un campo fórmula; los módulos dejan de prometer orden y agrupación. Cierra #57 |

@@ -238,6 +238,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>false</editable>
+        <field>Senal__c.Horas_Desde_Recepcion__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
         <field>Senal__c.Incidente__c</field>
         <readable>true</readable>
     </fieldPermissions>
