@@ -69,6 +69,11 @@ clave y el mismo contenido suma uno a `Entregas__c` y la señal conserva su resu
 si pasara a Duplicado, una señal ya aplicada perdería la constancia de que se aplicó. La
 vista Duplicadas filtra por el contador, no por este valor.
 
+El reenvío tampoco reescribe lo demás: solo anota la entrega. Si llega mientras el
+suscriptor procesa la primera, el resultado que queda es el del suscriptor
+([módulo 02](02-ingesta.md)). Una señal en Atascadas con `Entregas__c` en dos era el
+síntoma de lo contrario.
+
 ## Los motivos
 
 Cuando el resultado es rechazado o fallido, `Motivo__c` dice por qué. Es una lista
