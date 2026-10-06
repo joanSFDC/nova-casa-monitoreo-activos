@@ -14,6 +14,8 @@ const VIGILANCIA_MS = 60000;
 const POR_BOTON = "boton";
 const POR_TIMBRE = "timbre";
 const POR_VIGILANCIA = "vigilancia";
+const AVISO_SIN_TIEMPO_REAL =
+  "La actualización automática no está disponible. El monitor se revisa solo cada minuto y con Actualizar.";
 
 export default class MonitorDeActivos extends NavigationMixin(
   LightningElement
@@ -25,6 +27,7 @@ export default class MonitorDeActivos extends NavigationMixin(
   actualizando = false;
   anuncio = "";
   anunciarCarga = true;
+  tiempoRealCaido = false;
   suscripcion;
   temporizador;
   vigilancia;
@@ -49,13 +52,28 @@ export default class MonitorDeActivos extends NavigationMixin(
 
   connectedCallback() {
     this.anuncio = "Cargando el monitor";
-    onError(() => {});
-    subscribe(CANAL_TIMBRE, -1, () => {
-      this.programarConsulta();
-    }).then((respuesta) => {
-      this.suscripcion = respuesta;
+    onError(() => {
+      this.avisarSinTiempoReal();
     });
+    subscribe(CANAL_TIMBRE, -1, () => {
+      this.tiempoRealCaido = false;
+      this.programarConsulta();
+    })
+      .then((respuesta) => {
+        this.suscripcion = respuesta;
+      })
+      .catch(() => {
+        this.avisarSinTiempoReal();
+      });
     this.vigilar();
+  }
+
+  avisarSinTiempoReal() {
+    if (this.tiempoRealCaido) {
+      return;
+    }
+    this.tiempoRealCaido = true;
+    this.anuncio = AVISO_SIN_TIEMPO_REAL;
   }
 
   disconnectedCallback() {

@@ -44,6 +44,13 @@
         </div>
       </template>
 
+      <template lwc:if={tiempoRealCaido}>
+        <p class="aviso-tiempo-real slds-text-color_weak slds-m-bottom_small">
+          La actualización automática no está disponible. El monitor se revisa
+          solo cada minuto y con «Actualizar».
+        </p>
+      </template>
+
       <div
         class="slds-grid slds-grid_vertical-align-center slds-wrap slds-m-bottom_small"
       >

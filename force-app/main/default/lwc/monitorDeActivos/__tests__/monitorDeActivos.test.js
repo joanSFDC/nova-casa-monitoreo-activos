@@ -3,7 +3,7 @@ import MonitorDeActivos from "c/monitorDeActivos";
 import obtenerPanel from "@salesforce/apex/MonitorControlador.obtenerPanel";
 import abrirIntervencion from "@salesforce/apex/MonitorControlador.abrirIntervencion";
 import NotaIntervencion from "c/notaIntervencion";
-import { subscribe } from "lightning/empApi";
+import { subscribe, onError } from "lightning/empApi";
 import { refreshApex } from "@salesforce/apex";
 
 jest.mock(
@@ -123,6 +123,36 @@ describe("c-monitor-de-activos", () => {
     const callback = subscribe.mock.calls[0][2];
     callback({ data: { payload: { Codigo_Activo__c: "SECRETO-BAQ" } } });
     expect(el.shadowRoot.textContent).not.toContain("SECRETO-BAQ");
+  });
+
+  it("avisa si la actualización automática no está disponible", async () => {
+    const el = elemento();
+    obtenerPanel.emit(PANEL);
+    await flushPromises();
+    expect(el.shadowRoot.querySelector(".aviso-tiempo-real")).toBeNull();
+
+    onError.mock.calls[0][0]({ error: "403::Unknown client" });
+    await flushPromises();
+
+    expect(el.shadowRoot.querySelector(".aviso-tiempo-real")).not.toBeNull();
+    expect(
+      el.shadowRoot.querySelector('[aria-live="polite"]').textContent
+    ).toContain("La actualización automática no está disponible");
+
+    subscribe.mock.calls[0][2]({ data: { payload: {} } });
+    await flushPromises();
+    expect(el.shadowRoot.querySelector(".aviso-tiempo-real")).toBeNull();
+  });
+
+  it("avisa si la suscripción no se completa", async () => {
+    subscribe.mockImplementationOnce(() =>
+      Promise.reject(new Error("handshake"))
+    );
+    const el = elemento();
+    obtenerPanel.emit(PANEL);
+    await flushPromises();
+
+    expect(el.shadowRoot.querySelector(".aviso-tiempo-real")).not.toBeNull();
   });
 
   it("solo ofrece intervenir donde hay algo que atender", async () => {

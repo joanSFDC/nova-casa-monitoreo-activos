@@ -184,6 +184,7 @@ más, y el fallo sería completamente invisible sin esta prueba.
 | Suscripción | Escucha `Panel_Actualizado__e`, no el aviso de la ingesta; el timbre dispara una consulta nueva y nada de lo que llegue por el canal se pinta |
 | Timbre | Una tanda que escribe estados publica un solo timbre; una que solo rechaza, ninguno. Operador, coordinador y gerente leen el timbre y no el aviso |
 | Vigilancia | Sin consultas en un minuto, vuelve a pedir el panel; una consulta por timbre reinicia el minuto; al desmontar se cancela |
+| Sin tiempo real | Si empApi informa un error o la suscripción no se completa, aparece y se anuncia que la actualización automática no está disponible; un timbre posterior lo quita |
 | Región activa | Anuncia «Actualizando», «Monitor actualizado a las HH:MM» y el error; la vigilancia solo anuncia si cambia el aviso de atraso |
 
 La última se verifica en el componente comprobando que la carga del evento no llega a
