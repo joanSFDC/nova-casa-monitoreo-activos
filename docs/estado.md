@@ -626,3 +626,4 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-05 | Tildes en los textos que escribe el Apex: asunto del caso de corte, línea «Recuperado», detalle de conflicto y errores; datos existentes corregidos. Cierra #67 |
 | 2026-10-05 | El monitor escucha `Panel_Actualizado__e`, un timbre sin campos: operador, coordinador y gerente no podían suscribirse al aviso. Cierra #69 |
 | 2026-10-05 | El monitor avisa cuando la actualización automática no está disponible. Cierra #71 |
+| 2026-10-05 | Un solo prefijo para la clave inventada de los mensajes sin `messageId`, y prueba de ese camino. Cierra #73 |

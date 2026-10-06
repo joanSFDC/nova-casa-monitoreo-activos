@@ -72,11 +72,12 @@ versionan en el repositorio.
 | Claves repetidas en la misma página | Se deduplica en memoria y no falla la operación entera |
 | Reenvío idéntico de una señal aplicada | Conserva resultado y `Fecha_Procesamiento__c` |
 | Conflicto en otra página | La fila conserva la primera afirmación y el detalle nombra la entrega distinta |
+| Mensaje sin `messageId` | Se guarda rechazado por campo faltante, con su carga y una clave inventada que no se busca entre las previas; el válido de la misma página sigue su camino |
 | Tipo de mensaje desconocido | La señal se guarda rechazada, con el tipo recibido en el detalle |
 | Señal que no se puede guardar | Queda un rastro Fallido con «Error del sistema» y el error |
 
-La penúltima es la que más vale y la que menos se escribe: verifica que un fallo de
-autenticación no deje el sistema girando en vacío.
+La de la respuesta 401 es la que más vale y la que menos se escribe: verifica que un fallo
+de autenticación no deje el sistema girando en vacío.
 
 ### US-202 · Procesar sin perder las válidas
 

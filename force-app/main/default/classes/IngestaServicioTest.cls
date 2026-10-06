@@ -411,6 +411,70 @@ private class IngestaServicioTest {
   }
 
   @isTest
+  static void shouldRechazarSinBuscarPrevia_WhenFaltaMessageId() {
+    Map<String, Object> sinId = TestDataFactory.mensajePresion();
+    sinId.remove('messageId');
+    Map<String, Object> buena = TestDataFactory.mensajePresion(
+      'msg_000003',
+      'dlv_000003',
+      2.76,
+      'BAR'
+    );
+    Test.startTest();
+    IngestaServicio.ResultadoPagina r = IngestaServicio.procesarPagina(
+      TestDataFactory.sobre(
+        new List<Map<String, Object>>{ sinId, buena },
+        'c',
+        true
+      ),
+      Datetime.newInstanceGmt(2026, 9, 22, 22, 0, 0)
+    );
+    Test.stopTest();
+
+    Assert.areEqual(2, r.senales, 'Las dos se guardan');
+    Assert.areEqual(1, r.publicadas, 'Solo la valida se publica');
+    Senal__c huerfana = [
+      SELECT
+        Clave__c,
+        Resultado__c,
+        Motivo__c,
+        Reintentable__c,
+        Detalle__c,
+        Carga__c
+      FROM Senal__c
+      WHERE Message_Id__c = NULL
+    ];
+    Assert.areEqual(
+      IngestaConstantes.RESULTADO_RECHAZADO,
+      huerfana.Resultado__c,
+      'Rechazado'
+    );
+    Assert.areEqual(
+      IngestaConstantes.MOTIVO_CAMPO,
+      huerfana.Motivo__c,
+      'Campo faltante'
+    );
+    Assert.isFalse(huerfana.Reintentable__c, 'El mensaje esta mal');
+    Assert.areEqual(
+      'Falta source o messageId',
+      huerfana.Detalle__c,
+      'Dice que falta'
+    );
+    Assert.isTrue(
+      huerfana.Carga__c.contains('dlv_000002'),
+      'Conserva la carga'
+    );
+    Assert.isTrue(
+      IngestaServicio.esClaveSinId(huerfana.Clave__c),
+      'La clave inventada no se busca entre las previas'
+    );
+    Assert.isFalse(
+      IngestaServicio.esClaveSinId('nova-casa-simulator|msg_000003'),
+      'Una clave real si se busca'
+    );
+  }
+
+  @isTest
   static void shouldDejarRastroFallido_WhenLaSenalNoSePuedeGuardar() {
     Map<String, Object> enorme = TestDataFactory.mensajePresion();
     ((Map<String, Object>) enorme.get('building'))

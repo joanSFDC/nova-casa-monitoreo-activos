@@ -180,6 +180,11 @@ pierde los milisegundos. Los reenvíos ocurren dentro de una misma sesión y se 
 reconociendo igual. Las señales guardadas antes de este cambio conservan
 `source|messageId`.
 
+Un mensaje sin `source` o sin `messageId` no tiene clave. Se guarda igual, rechazado por
+campo faltante y con su carga, bajo una clave inventada: `nova-casa-simulator|sin-id-`
+seguido de un número aleatorio. Esa clave no se busca entre las señales previas, porque
+un mensaje sin identidad no puede ser el reenvío de nada.
+
 **Para distinguir un reenvío de un conflicto se guarda además un resumen del contenido**,
 en `Senal__c.Hash_Contenido__c`. Es un SHA-256 en base 64 calculado sobre los campos que
 afirman un hecho, no sobre el mensaje entero:
