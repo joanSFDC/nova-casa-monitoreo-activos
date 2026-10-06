@@ -5,6 +5,9 @@
  * Las consultas van en SYSTEM_MODE porque en API 67 without sharing no salta FLS.
  */
 public without sharing class IngestaServicio {
+  private static final String PREFIJO_SIN_ID =
+    IngestaConstantes.ORIGEN + '|sin-id-';
+
   @TestVisible
   static System.Callable antesDeGuardar;
 
@@ -224,7 +227,7 @@ public without sharing class IngestaServicio {
 
     Set<String> clavesReales = new Set<String>();
     for (String clave : porClave.keySet()) {
-      if (!clave.startsWith('sin-clave-')) {
+      if (!esClaveSinId(clave)) {
         clavesReales.add(clave);
       }
     }
@@ -625,6 +628,11 @@ public without sharing class IngestaServicio {
     return rastro;
   }
 
+  @TestVisible
+  private static Boolean esClaveSinId(String clave) {
+    return clave.startsWith(PREFIJO_SIN_ID);
+  }
+
   private static Senal__c senalRechazadaSinClave(
     Map<String, Object> mensaje,
     Datetime ahora
@@ -633,7 +641,7 @@ public without sharing class IngestaServicio {
       mensaje,
       ahora,
       IngestaValidador.hashDe(mensaje),
-      'nova-casa-simulator|sin-id-' + String.valueOf(Crypto.getRandomInteger())
+      PREFIJO_SIN_ID + String.valueOf(Crypto.getRandomInteger())
     );
     IngestaConstantes.aplicar(
       senal,
