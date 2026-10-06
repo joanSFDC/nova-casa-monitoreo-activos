@@ -15,6 +15,7 @@ public class IngestaSimuladorMock implements HttpCalloutMock {
   public Integer llamadasGet = 0;
   public List<String> metodos = new List<String>();
   public String ultimoCursor;
+  public String cuerpoSesionEnviado;
 
   public IngestaSimuladorMock() {
     this.cuerpoTelemetria = TestDataFactory.sobre(
@@ -35,6 +36,7 @@ public class IngestaSimuladorMock implements HttpCalloutMock {
     HttpResponse res = new HttpResponse();
     res.setHeader('Content-Type', 'application/json');
     if (req.getMethod() == 'POST') {
+      cuerpoSesionEnviado = req.getBody();
       res.setStatusCode(codigoSesion);
       res.setBody(cuerpoSesion);
       return res;

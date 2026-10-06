@@ -182,6 +182,13 @@ El registro se lee al inicio de cada ciclo y se escribe al final. Se bloquea con
 `FOR UPDATE` al leerlo, de modo que dos ejecuciones solapadas no puedan avanzar el cursor
 a la vez y perderse una página entre ambas.
 
+**Cambiar el escenario o la semilla abre una sesión nueva.** Los dos solo viajan al abrir
+sesión, así que el cursor de la sesión vieja deja de servir. El disparador
+`ControlNuevaSesion` lo vacía cuando un guardado cambia cualquiera de los dos, y el ciclo
+siguiente abre otra sesión con lo pedido. Si el mismo guardado trae un cursor nuevo, es la
+ingesta escribiendo la sesión que acaba de abrir, y ese cursor se respeta. La tanda no
+cuenta: viaja en cada consulta como `limit`.
+
 ## La cadencia
 
 ### El problema
