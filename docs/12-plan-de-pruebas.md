@@ -67,6 +67,7 @@ versionan en el repositorio.
 | Publicado no es procesado | Tras la ingesta, las señales están pendientes, no aplicadas |
 | Cursor persistido | Tras la ingesta, `Control_de_Ingesta__c.Cursor__c` cambió |
 | Respuesta 409 | Se abre sesión nueva y se registra en `Ultimo_Error__c`, que la página buena siguiente no borra |
+| Cambio de escenario o semilla | El cursor se vacía y el ciclo siguiente abre sesión con el escenario elegido; cambiar la tanda o apagar la ingesta lo conserva, y la sesión que abre la ingesta conserva su cursor |
 | Respuesta 429 | El ciclo se corta y el cursor **no** se pierde |
 | Respuesta 401 | La cadena se corta y queda registrado |
 | Claves repetidas en la misma página | Se deduplica en memoria y no falla la operación entera |

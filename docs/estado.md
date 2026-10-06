@@ -586,6 +586,13 @@ No estaban en la especificación y conviene no redescubrirlas.
     de errores vacío, y por eso el problema anterior pasó inadvertido. Ahora,
     si empApi falla, el monitor dice que la actualización automática no está
     disponible y que se revisa cada minuto; un timbre posterior quita el aviso.
+56. **Cambiar el escenario abre sesión nueva.** El escenario y la semilla solo
+    viajan al abrir sesión, y la ingesta solo la abre con el cursor vacío. El
+    punto 29 dejó editable el escenario, pero el cursor seguía lleno y la sesión
+    abierta dura un mes: el cambio no llegaba al simulador. `ControlNuevaSesion`
+    vacía el cursor cuando cambia cualquiera de los dos, salvo si el mismo
+    guardado trae cursor nuevo, que es la ingesta escribiendo su sesión
+    ([módulo 02](02-ingesta.md)).
 
 ## Historial breve
 
@@ -627,3 +634,4 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-05 | El monitor escucha `Panel_Actualizado__e`, un timbre sin campos: operador, coordinador y gerente no podían suscribirse al aviso. Cierra #69 |
 | 2026-10-05 | El monitor avisa cuando la actualización automática no está disponible. Cierra #71 |
 | 2026-10-05 | Un solo prefijo para la clave inventada de los mensajes sin `messageId`, y prueba de ese camino. Cierra #73 |
+| 2026-10-05 | Cambiar el escenario o la semilla vacía el cursor y abre sesión nueva. Cierra #75 |

@@ -337,4 +337,125 @@ private class IngestaQueueableTest {
     Assert.areEqual(0, mock.llamadas, 'No llama al simulador si esta apagada');
     Assert.areEqual(0, [SELECT COUNT() FROM Senal__c], 'No crea senales');
   }
+
+  @isTest
+  static void shouldAbrirSesionConElEscenarioNuevo_WhenCambiaEscenario() {
+    Control_de_Ingesta__c control = [
+      SELECT Id
+      FROM Control_de_Ingesta__c
+      LIMIT 1
+    ];
+    control.Cursor__c = 'cursor-de-mixed';
+    update control;
+    control.Escenario__c = 'DUPLICATES';
+    update control;
+    Assert.isNull(
+      cursorDe(control.Id),
+      'El cursor de la sesion vieja ya no sirve'
+    );
+
+    IngestaSimuladorMock mock = new IngestaSimuladorMock();
+    Test.setMock(HttpCalloutMock.class, mock);
+
+    Test.startTest();
+    System.enqueueJob(new IngestaQueueable(0));
+    Test.stopTest();
+
+    Assert.areEqual('POST', mock.metodos[0], 'Abre sesion antes de consultar');
+    Map<String, Object> pedido = (Map<String, Object>) JSON.deserializeUntyped(
+      mock.cuerpoSesionEnviado
+    );
+    Assert.areEqual(
+      'DUPLICATES',
+      pedido.get('scenario'),
+      'La sesion nueva pide el escenario elegido'
+    );
+    Assert.areEqual(
+      'cursor-siguiente',
+      cursorDe(control.Id),
+      'Sigue con el cursor de la sesion nueva'
+    );
+  }
+
+  @isTest
+  static void shouldVaciarCursor_WhenCambiaSemilla() {
+    Control_de_Ingesta__c control = [
+      SELECT Id
+      FROM Control_de_Ingesta__c
+      LIMIT 1
+    ];
+    control.Cursor__c = 'cursor-de-la-semilla-vieja';
+    update control;
+
+    Test.startTest();
+    control.Semilla__c = 7;
+    update control;
+    Test.stopTest();
+
+    Assert.isNull(cursorDe(control.Id), 'Otra semilla es otra sesion');
+  }
+
+  @isTest
+  static void shouldConservarCursor_WhenCambiaOtroCampo() {
+    Control_de_Ingesta__c control = [
+      SELECT Id
+      FROM Control_de_Ingesta__c
+      LIMIT 1
+    ];
+    control.Cursor__c = 'cursor-guardado';
+    update control;
+
+    Test.startTest();
+    control.Tamano_Tanda__c = 20;
+    control.Activo__c = false;
+    update control;
+    Test.stopTest();
+
+    Assert.areEqual(
+      'cursor-guardado',
+      cursorDe(control.Id),
+      'La tanda viaja en cada consulta y apagar no cambia la sesion'
+    );
+  }
+
+  @isTest
+  static void shouldConservarCursorDeLaSesion_WhenLaSesionFijaElEscenario() {
+    Control_de_Ingesta__c control = [
+      SELECT Id
+      FROM Control_de_Ingesta__c
+      LIMIT 1
+    ];
+    control.Escenario__c = null;
+    control.Semilla__c = null;
+    update control;
+
+    IngestaSimuladorMock mock = new IngestaSimuladorMock();
+    Test.setMock(HttpCalloutMock.class, mock);
+
+    Test.startTest();
+    System.enqueueJob(new IngestaQueueable(0));
+    Test.stopTest();
+
+    Control_de_Ingesta__c despues = [
+      SELECT Cursor__c, Escenario__c, Semilla__c
+      FROM Control_de_Ingesta__c
+      WHERE Id = :control.Id
+    ];
+    Assert.areEqual(
+      'MIXED',
+      despues.Escenario__c,
+      'La sesion deja escrito su escenario'
+    );
+    Assert.areEqual(20260922, despues.Semilla__c, 'Y su semilla');
+    Assert.areEqual(
+      'cursor-siguiente',
+      despues.Cursor__c,
+      'El cursor que trae ese mismo guardado se respeta'
+    );
+  }
+
+  private static String cursorDe(Id controlId) {
+    return [SELECT Cursor__c FROM Control_de_Ingesta__c WHERE Id = :controlId]
+    .Cursor__c;
+  }
 }
