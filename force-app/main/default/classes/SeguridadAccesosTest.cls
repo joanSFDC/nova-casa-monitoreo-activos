@@ -373,6 +373,41 @@ private class SeguridadAccesosTest {
   }
 
   @isTest
+  static void shouldEscucharTimbreSinLeerAviso_WhenPersonaDelMonitor() {
+    List<User> personas = new List<User>();
+    System.runAs(new User(Id = UserInfo.getUserId())) {
+      for (
+        String conjunto : new List<String>{
+          'Nova_Casa_Operador',
+          'Nova_Casa_Coordinador',
+          'Nova_Casa_Gerencia'
+        }
+      ) {
+        personas.add(TestDataFactory.usuarioConConjunto(conjunto));
+      }
+    }
+
+    List<Boolean> leenTimbre = new List<Boolean>();
+    List<Boolean> leenAviso = new List<Boolean>();
+    Test.startTest();
+    for (User persona : personas) {
+      System.runAs(persona) {
+        leenTimbre.add(Schema.SObjectType.Panel_Actualizado__e.isAccessible());
+        leenAviso.add(Schema.SObjectType.Aviso_de_Senal__e.isAccessible());
+      }
+    }
+    Test.stopTest();
+
+    for (Integer i = 0; i < personas.size(); i++) {
+      Assert.isTrue(leenTimbre[i], 'Se suscribe al timbre, que no lleva datos');
+      Assert.isFalse(
+        leenAviso[i],
+        'No lee el aviso, que trae lecturas de las dos ciudades'
+      );
+    }
+  }
+
+  @isTest
   static void shouldProcesarYEscribir_WhenUsuarioDeIntegracion() {
     User integracion;
     System.runAs(new User(Id = UserInfo.getUserId())) {

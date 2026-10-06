@@ -1,6 +1,7 @@
 /**
  * Orquesta una tanda de avisos: consulta, resuelve en memoria, escribe estado,
- * incidente y bitacora. Orden: estado, caso, senal.
+ * incidente y bitacora. Orden: estado, caso, senal. Si escribio estados,
+ * publica el timbre del monitor, Panel_Actualizado__e.
  *
  * without sharing: proceso de sistema. El disparador corre como el usuario de
  * integracion (scripts/configurar-suscriptor.sh), que no ve por ciudad.
@@ -24,6 +25,9 @@ public without sharing class ProcesamientoServicio {
 
   @TestVisible
   static Boolean inyectarFalloDeEscritura = false;
+
+  @TestVisible
+  static Integer timbresPublicados = 0;
 
   public static ResultadoTanda procesar(List<Aviso_de_Senal__e> avisos) {
     ResultadoTanda resultado = new ResultadoTanda();
@@ -158,8 +162,22 @@ public without sharing class ProcesamientoServicio {
       }
     }
 
+    if (!listaEstados.isEmpty()) {
+      avisarAlMonitor();
+    }
+
     marcarReanudacion(avisos);
     return resultado;
+  }
+
+  /**
+   * Si el timbre no sale, la vigilancia de un minuto del monitor lo cubre: no
+   * es motivo para marcar ninguna senal como fallida.
+   */
+  private static void avisarAlMonitor() {
+    if (EventBus.publish(new Panel_Actualizado__e()).isSuccess()) {
+      timbresPublicados++;
+    }
   }
 
   public static ResultadoTanda procesarPendientes() {

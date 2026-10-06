@@ -8,11 +8,11 @@ import obtenerPanel from "@salesforce/apex/MonitorControlador.obtenerPanel";
 import abrirIntervencion from "@salesforce/apex/MonitorControlador.abrirIntervencion";
 import NotaIntervencion from "c/notaIntervencion";
 
-const CANAL_AVISO = "/event/Aviso_de_Senal__e";
+const CANAL_TIMBRE = "/event/Panel_Actualizado__e";
 const ESPERA_MS = 2000;
 const VIGILANCIA_MS = 60000;
 const POR_BOTON = "boton";
-const POR_AVISO = "aviso";
+const POR_TIMBRE = "timbre";
 const POR_VIGILANCIA = "vigilancia";
 
 export default class MonitorDeActivos extends NavigationMixin(
@@ -50,7 +50,7 @@ export default class MonitorDeActivos extends NavigationMixin(
   connectedCallback() {
     this.anuncio = "Cargando el monitor";
     onError(() => {});
-    subscribe(CANAL_AVISO, -1, () => {
+    subscribe(CANAL_TIMBRE, -1, () => {
       this.programarConsulta();
     }).then((respuesta) => {
       this.suscripcion = respuesta;
@@ -209,22 +209,22 @@ export default class MonitorDeActivos extends NavigationMixin(
     if (this.temporizador) {
       clearTimeout(this.temporizador);
     }
-    // eslint-disable-next-line @lwc/lwc/no-async-operation -- una sola consulta por rafaga de avisos
+    // eslint-disable-next-line @lwc/lwc/no-async-operation -- una sola consulta por rafaga de timbres
     this.temporizador = setTimeout(() => {
       this.temporizador = undefined;
-      this.consultar(POR_AVISO);
+      this.consultar(POR_TIMBRE);
     }, ESPERA_MS);
   }
 
   /**
-   * Sin avisos no hay consultas, y el aviso de atraso y las antiguedades solo
+   * Sin timbres no hay consultas, y el aviso de atraso y las antiguedades solo
    * los recalcula el servidor. Si pasa un minuto sin consultar, se consulta.
    */
   vigilar() {
     if (this.vigilancia) {
       clearTimeout(this.vigilancia);
     }
-    // eslint-disable-next-line @lwc/lwc/no-async-operation -- la ingesta parada no manda avisos
+    // eslint-disable-next-line @lwc/lwc/no-async-operation -- la ingesta parada no manda timbres
     this.vigilancia = setTimeout(() => {
       this.vigilancia = undefined;
       this.consultar(POR_VIGILANCIA);

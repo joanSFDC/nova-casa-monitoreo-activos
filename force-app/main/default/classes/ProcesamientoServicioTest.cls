@@ -1,5 +1,6 @@
 /**
- * Tanda de avisos: aislamiento, vigencia, volumen y consumo constante.
+ * Tanda de avisos: aislamiento, vigencia, volumen, consumo constante y timbre
+ * del monitor.
  */
 @isTest
 private class ProcesamientoServicioTest {
@@ -274,6 +275,58 @@ private class ProcesamientoServicioTest {
       IngestaConstantes.RESULTADO_APLICADO,
       senal.Resultado__c,
       'El disparador aplica'
+    );
+  }
+
+  @isTest
+  static void shouldPublicarUnTimbre_WhenTandaEscribeEstados() {
+    Activo__c bomba = activoDe(TestDataFactory.AST_PUMP);
+    Activo__c camara = activoDe(TestDataFactory.AST_CAM);
+    Map<String, Object> presion = TestDataFactory.mensajePresion();
+    Map<String, Object> corte = TestDataFactory.mensajeCamara();
+    insert new List<Senal__c>{
+      TestDataFactory.senalPendiente(presion, bomba.Id, bomba.Edificio__c),
+      TestDataFactory.senalPendiente(corte, camara.Id, camara.Edificio__c)
+    };
+
+    Test.startTest();
+    ProcesamientoServicio.procesar(
+      new List<Aviso_de_Senal__e>{
+        TestDataFactory.avisoDe(presion),
+        TestDataFactory.avisoDe(corte)
+      }
+    );
+    Test.stopTest();
+
+    Assert.areEqual(
+      2,
+      [SELECT COUNT() FROM Estado_Actual__c],
+      'Dos estados escritos'
+    );
+    Assert.areEqual(
+      1,
+      ProcesamientoServicio.timbresPublicados,
+      'Un timbre por tanda, no uno por estado'
+    );
+  }
+
+  @isTest
+  static void shouldNoPublicarTimbre_WhenTandaSoloRechaza() {
+    Activo__c bomba = activoDe(TestDataFactory.AST_PUMP);
+    Map<String, Object> malo = TestDataFactory.mensajeActivoDesconocido();
+    insert TestDataFactory.senalPendiente(malo, null, bomba.Edificio__c);
+
+    Test.startTest();
+    ProcesamientoServicio.ResultadoTanda r = ProcesamientoServicio.procesar(
+      new List<Aviso_de_Senal__e>{ TestDataFactory.avisoDe(malo) }
+    );
+    Test.stopTest();
+
+    Assert.areEqual(1, r.rechazadas, 'Rechazada');
+    Assert.areEqual(
+      0,
+      ProcesamientoServicio.timbresPublicados,
+      'Sin estados nuevos no hay timbre'
     );
   }
 

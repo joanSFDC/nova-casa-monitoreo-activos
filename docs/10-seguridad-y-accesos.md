@@ -102,6 +102,7 @@ da exactamente lo que necesita y nada más:
 | `Edificio__c`, `Activo__c` | Solo leer |
 | `Case` | Crear, leer, editar |
 | `Aviso_de_Senal__e` | Publicar y suscribirse |
+| `Panel_Actualizado__e` | Publicar |
 | Named Credential del simulador | Acceso |
 
 No tiene borrado sobre nada. No tiene acceso a la configuración del sistema. Y no es un
@@ -178,10 +179,17 @@ permisos.
 | `Control_de_Ingesta__c` | Solo la última consulta | Solo la última consulta | Solo la última consulta | Leer, editar | Leer, editar |
 | `Case` | Leer, crear | Leer, crear, editar | Leer | Todo | Crear, leer, editar |
 | `Task` | Leer, crear, editar las suyas | Leer, crear, editar | Leer | Todo | — |
+| `Aviso_de_Senal__e` | — | — | — | Publicar, leer | Publicar, leer |
+| `Panel_Actualizado__e` | Leer | Leer | Leer | Publicar, leer | Publicar, leer |
 
 «Solo la última consulta» es `Ultima_Consulta_Exitosa__c`, la fecha que necesita el aviso
 de ingesta atrasada del monitor. El cursor, la semilla y el resto del control siguen
 ocultos.
+
+`Panel_Actualizado__e` es el timbre sin campos del monitor. Leerlo es lo que Salesforce
+exige para suscribirse. Ninguna persona lee `Aviso_de_Senal__e`: el canal no filtra por
+permisos y el aviso lleva lecturas de las dos ciudades. El administrador lo publica porque
+la cadena de ingesta corre a su nombre.
 
 Crear tareas exige además el permiso de usuario «Edit Tasks»: el permiso de objeto sobre
 `Task` no basta. Sin él, la nota con la que el operador abre una intervención se perdía en
@@ -351,6 +359,7 @@ Lo que cada prueba verifica. Salvo las dos primeras filas, están en `SeguridadA
 | Administrador sobre el control | `shouldEditarControlAjeno_WhenAdministradorYNoCoordinador` | Edita un control que no es suyo; el coordinador no |
 | Ingesta como integración | `shouldProcesarYEscribir_WhenUsuarioDeIntegracion` | Solo con su conjunto, guarda, aplica y abre el caso con ciudad |
 | Ciudad del caso | `shouldSellarCiudadDelActivo_WhenCasoSeGuardaOCambia` | La ciudad sale del activo, no de lo que se escriba |
+| Timbre del monitor | `shouldEscucharTimbreSinLeerAviso_WhenPersonaDelMonitor` | Operador, coordinador y gerente leen el timbre y no el aviso |
 
 La de `Carga__c` es la que más veces se olvida y la que más vale: comprueba que la
 seguridad a nivel de campo funciona de verdad, no solo la de registro. Se hace con el
