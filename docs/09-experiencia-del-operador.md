@@ -182,38 +182,40 @@ sigue siendo usable.
 
 ### La actualización automática
 
-El componente se suscribe al mismo evento de plataforma que usa el procesamiento, mediante
-la biblioteca de mensajería empresarial del navegador.
+El componente se suscribe, mediante la biblioteca de mensajería empresarial del navegador,
+a un evento de plataforma propio: `Panel_Actualizado__e`. El procesamiento lo publica una
+vez por tanda, cuando escribe estados. **No lleva ningún campo: solo dice «hay estados
+nuevos».** El componente lo usa como señal para volver a pedir los datos al servidor.
 
-Y aquí está la decisión más importante del módulo: **el componente nunca pinta el contenido
-del aviso. Lo usa solo como señal para volver a pedir los datos al servidor.**
+Y aquí está la decisión más importante del módulo: **la pantalla nunca recibe datos por el
+canal de eventos.** El motivo es una frontera de seguridad. **El canal de eventos de
+plataforma no filtra por permisos.** Un suscriptor recibe todos los eventos publicados, con
+independencia de a qué registros tenga acceso, y para suscribirse Salesforce le exige leer
+el evento. Si el monitor escuchara `Aviso_de_Senal__e`, el evento de la ingesta, habría que
+dar a operadores, coordinador y gerente lectura sobre códigos, valores y fechas de las dos
+ciudades: aunque la tabla no los pintara, cualquiera con las herramientas de desarrollo del
+navegador los vería pasar. Un timbre vacío no tiene nada que filtrar.
 
-El motivo es una frontera de seguridad. **El canal de eventos de plataforma no filtra por
-permisos.** Un suscriptor recibe todos los eventos publicados, con independencia de a qué
-registros tenga acceso. Si la pantalla pintara lo que le llega, un operador de Bogotá vería
-aparecer lecturas de Barranquilla en su tabla.
+Al volver a consultar con cada timbre, el filtro de autorización del servidor se aplica
+**siempre**, en cada refresco, sin que el componente tenga que acordarse de nada. Es el
+riesgo R-07 y está resuelto por construcción, no por disciplina.
 
-Al usar el aviso solo como disparador y volver a consultar, el filtro de autorización del
-servidor se aplica **siempre**, en cada refresco, sin que el componente tenga que acordarse
-de nada. Es el riesgo R-07 y está resuelto por construcción, no por disciplina.
-
-El coste de este diseño es una consulta extra por cada ráfaga de eventos. Se contiene con
-una **espera de dos segundos**: el componente agrupa los avisos que llegan en esa ventana y
-hace una sola consulta. Con doscientos mensajes procesados de golpe, eso es una consulta en
-lugar de doscientas.
+El coste de este diseño es una consulta extra por cada ráfaga de timbres. Una tanda de
+doscientos mensajes ya produce uno solo, y la **espera de dos segundos** agrupa además las
+tandas que llegan seguidas: el componente hace una sola consulta por ventana.
 
 La suscripción se cancela al desmontar el componente, para no dejar conexiones abiertas
 cuando el operador navega a otra parte.
 
 ### La vigilancia de un minuto
 
-Los avisos solo llegan mientras la ingesta trae señales. Si la cadena se para, no hay
-avisos, no hay consultas y la pantalla abierta se congela: la antigüedad seguiría diciendo
+Los timbres solo llegan mientras la ingesta trae señales. Si la cadena se para, no hay
+timbres, no hay consultas y la pantalla abierta se congela: la antigüedad seguiría diciendo
 «hace 3 min» y el aviso de consulta atrasada no aparecería nunca, porque los dos los
 calcula el servidor al consultar.
 
 Por eso el componente tiene una **vigilancia**: si pasa un minuto sin ninguna consulta, por
-botón, por aviso o por la propia vigilancia, vuelve a pedir el panel. Cada consulta
+botón, por timbre o por la propia vigilancia, vuelve a pedir el panel. Cada consulta
 reinicia el minuto, así que con la ingesta al día la vigilancia casi nunca llega a
 dispararse. Con la ingesta parada, a los cinco minutos de la última consulta exitosa el
 servidor marca el panel como atrasado y la franja aparece sola. La regla de que nada se
@@ -264,7 +266,7 @@ excluye a una parte real de los operadores.
 - Los cambios de estado —cargando, error, actualizado— se anuncian en una región activa,
   de modo que un lector de pantalla informe de que la tabla se refrescó. Al pulsar
   «Actualizar» o cambiar de edificio anuncia «Actualizando el monitor»; tras cada consulta
-  por botón o por aviso, «Monitor actualizado a las HH:MM», con la hora para que el texto
+  por botón o por timbre, «Monitor actualizado a las HH:MM», con la hora para que el texto
   cambie y se vuelva a leer; si falla, el error. La vigilancia de un minuto consulta en
   silencio y solo habla si el aviso de atraso aparece o desaparece.
 - El contraste cumple el mínimo de la norma para texto y para los indicadores de severidad.

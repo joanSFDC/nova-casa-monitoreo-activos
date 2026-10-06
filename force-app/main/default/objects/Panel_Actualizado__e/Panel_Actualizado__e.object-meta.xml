@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <deploymentStatus>Deployed</deploymentStatus>
+    <description>Timbre del monitor: el procesamiento lo publica una vez por tanda cuando escribe estados. No lleva campos porque el canal no filtra por permisos y lo leen operadores de las dos ciudades.</description>
+    <eventType>HighVolume</eventType>
+    <label>Panel actualizado</label>
+    <pluralLabel>Paneles actualizados</pluralLabel>
+    <publishBehavior>PublishAfterCommit</publishBehavior>
+</CustomObject>

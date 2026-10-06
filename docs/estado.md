@@ -36,11 +36,12 @@ en el repositorio desaparece ese día.
 
 ### Modelo
 
-Ocho elementos desplegados y verificados:
+Nueve elementos desplegados y verificados:
 
 - Objetos: `Edificio__c`, `Activo__c`, `Estado_Actual__c`, `Umbral__c`,
   `Senal__c`, `Control_de_Ingesta__c`
-- Evento: `Aviso_de_Senal__e` (`PublishAfterCommit`)
+- Eventos: `Aviso_de_Senal__e` y `Panel_Actualizado__e`, el timbre sin campos
+  del monitor (los dos `PublishAfterCommit`)
 - Campos en `Case`: `Clave_Abierta__c`, `Activo__c`, `Tipo_Medicion__c`,
   `Episodio_Id__c`, `Origen_Senal__c`, `Ciudad__c`
 - Catálogos globales: `Tipo_Activo`, `Tipo_Medicion`, `Unidad`, `Severidad`
@@ -86,7 +87,7 @@ Clases en `force-app/main/default/classes/`:
 | `IngestaValidador` | Contrato del [módulo 01](01-contrato-del-mensaje.md) |
 | `IngestaServicio` | Deduplica, upsert `Senal__c`, publica `Aviso_de_Senal__e`, avanza el cursor |
 | `ClasificacionServicio` | Severidad de medición y de conectividad contra `Umbral__c` |
-| `ProcesamientoServicio` | Suscriptor de `Aviso_de_Senal__e`: estado actual, incidentes y bitácora |
+| `ProcesamientoServicio` | Suscriptor de `Aviso_de_Senal__e`: estado actual, incidentes, bitácora y timbre del monitor |
 | `IncidentesServicio` | Un Case por `Clave_Abierta__c`; duplicado concurrente = éxito y reintenta escalada |
 
 Named Credential `Nova_Casa_Simulador` + External Credential del mismo nombre,
@@ -206,7 +207,8 @@ del activo sigue siendo `MAX` de `Severidad_Nivel__c`.
 contadores, filas de `Estado_Actual__c` y aviso de consulta atrasada (5 min).
 No consulta `Senal__c`. La antigüedad se calcula en Apex. El LWC
 `monitorDeActivos` filtra severidad en el navegador sobre esos datos, se
-suscribe a `Aviso_de_Senal__e` solo como disparador (R-07) y agrupa 2 s.
+suscribe a `Panel_Actualizado__e`, un timbre sin campos que el procesamiento
+publica una vez por tanda (R-07), y agrupa 2 s.
 
 «Abrir intervención» solo aparece si hay algo que atender (advertencia,
 crítico o sin comunicación) o si ya hay caso, y entonces dice «Ver
@@ -572,6 +574,13 @@ No estaban en la especificación y conviene no redescubrirlas.
     todas en Atascadas. Ahora solo suma la entrega, igual que el conflicto.
     `IngestaServicio.antesDeGuardar` es el gancho de prueba que simula al
     suscriptor entre la lectura y el guardado.
+54. **El monitor escucha un timbre sin campos.** Suscribirse a un evento exige
+    leerlo, y solo administración e integración leían `Aviso_de_Senal__e`: la
+    suscripción del operador, el coordinador y el gerente se rechazaba en
+    silencio y su monitor solo se movía con la vigilancia. Dar lectura sobre el
+    aviso habría expuesto en el navegador la telemetría de las dos ciudades.
+    `Panel_Actualizado__e` no lleva campos, lo publica el procesamiento una vez
+    por tanda y lo leen los cuatro roles humanos.
 
 ## Historial breve
 
@@ -610,3 +619,4 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-05 | Fecha de procesamiento vacía en lo que se decide al recibir: ayuda del campo y módulos 03 y 11. Cierra #63 |
 | 2026-10-05 | Un reenvío ya no devuelve a Pendiente la señal que el suscriptor acaba de resolver. Cierra #65 |
 | 2026-10-05 | Tildes en los textos que escribe el Apex: asunto del caso de corte, línea «Recuperado», detalle de conflicto y errores; datos existentes corregidos. Cierra #67 |
+| 2026-10-05 | El monitor escucha `Panel_Actualizado__e`, un timbre sin campos: operador, coordinador y gerente no podían suscribirse al aviso. Cierra #69 |

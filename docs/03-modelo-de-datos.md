@@ -39,6 +39,7 @@ Umbral__c                            (configuración, sin relación)
 Senal__c                             (bitácora, búsquedas a edificio y activo)
 Control_de_Ingesta__c                (control, registro único)
 Aviso_de_Senal__e                    (evento, no se guarda)
+Panel_Actualizado__e                 (evento sin campos, timbre del monitor)
 
 Case      ── Incidente               (estándar)
 Task      ── Intervención            (estándar, en la actividad del caso)
@@ -316,6 +317,15 @@ para siempre. Guardar y publicar en el mismo commit es lo que pide el
 [módulo 02](02-ingesta.md); `PublishAfterCommit` es ese orden a nivel de base de
 datos. Un fallo posterior en la transacción de ingesta echa atrás señal y aviso
 juntos, que es preferible a un aviso huérfano.
+
+## `Panel_Actualizado__e`
+
+El timbre del monitor. **No tiene campos.** El procesamiento lo publica una vez por tanda,
+cuando escribe estados, y el componente del operador lo usa para volver a consultar. Está
+separado de `Aviso_de_Senal__e` porque suscribirse exige leer el evento y el canal no filtra
+por permisos: con el aviso, un operador recibiría la telemetría de las dos ciudades. El
+[módulo 09](09-experiencia-del-operador.md#la-actualización-automática) cuenta la decisión.
+También va con `PublishAfterCommit`: si la tanda no se guarda, no hay timbre.
 
 ## `Control_de_Ingesta__c`
 

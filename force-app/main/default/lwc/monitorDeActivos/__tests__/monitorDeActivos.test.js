@@ -110,7 +110,7 @@ describe("c-monitor-de-activos", () => {
     expect(el.shadowRoot.textContent).toContain("Cargando el monitor");
   });
 
-  it("pinta filas y no usa el contenido del aviso", async () => {
+  it("pinta filas y no usa el contenido del timbre", async () => {
     const el = elemento();
     obtenerPanel.emit(PANEL);
     await flushPromises();
@@ -119,6 +119,7 @@ describe("c-monitor-de-activos", () => {
     expect(el.shadowRoot.textContent).toContain("Bomba");
 
     expect(subscribe).toHaveBeenCalled();
+    expect(subscribe.mock.calls[0][0]).toBe("/event/Panel_Actualizado__e");
     const callback = subscribe.mock.calls[0][2];
     callback({ data: { payload: { Codigo_Activo__c: "SECRETO-BAQ" } } });
     expect(el.shadowRoot.textContent).not.toContain("SECRETO-BAQ");
@@ -255,7 +256,7 @@ describe("c-monitor-de-activos", () => {
       expect(refreshApex).toHaveBeenCalledTimes(2);
     });
 
-    it("una consulta por aviso reinicia la vigilancia", async () => {
+    it("una consulta por timbre reinicia la vigilancia", async () => {
       await montado();
       jest.advanceTimersByTime(50000);
       subscribe.mock.calls[0][2]({ data: { payload: {} } });
