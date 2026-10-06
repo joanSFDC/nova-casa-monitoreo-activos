@@ -208,7 +208,8 @@ contadores, filas de `Estado_Actual__c` y aviso de consulta atrasada (5 min).
 No consulta `Senal__c`. La antigüedad se calcula en Apex. El LWC
 `monitorDeActivos` filtra severidad en el navegador sobre esos datos, se
 suscribe a `Panel_Actualizado__e`, un timbre sin campos que el procesamiento
-publica una vez por tanda (R-07), y agrupa 2 s.
+publica una vez por tanda (R-07), y agrupa 2 s. Si la suscripción falla,
+avisa que la actualización automática no está disponible.
 
 «Abrir intervención» solo aparece si hay algo que atender (advertencia,
 crítico o sin comunicación) o si ya hay caso, y entonces dice «Ver
@@ -581,6 +582,10 @@ No estaban en la especificación y conviene no redescubrirlas.
     aviso habría expuesto en el navegador la telemetría de las dos ciudades.
     `Panel_Actualizado__e` no lleva campos, lo publica el procesamiento una vez
     por tanda y lo leen los cuatro roles humanos.
+55. **Una suscripción caída se avisa.** El componente registraba un manejador
+    de errores vacío, y por eso el problema anterior pasó inadvertido. Ahora,
+    si empApi falla, el monitor dice que la actualización automática no está
+    disponible y que se revisa cada minuto; un timbre posterior quita el aviso.
 
 ## Historial breve
 
@@ -620,3 +625,4 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-05 | Un reenvío ya no devuelve a Pendiente la señal que el suscriptor acaba de resolver. Cierra #65 |
 | 2026-10-05 | Tildes en los textos que escribe el Apex: asunto del caso de corte, línea «Recuperado», detalle de conflicto y errores; datos existentes corregidos. Cierra #67 |
 | 2026-10-05 | El monitor escucha `Panel_Actualizado__e`, un timbre sin campos: operador, coordinador y gerente no podían suscribirse al aviso. Cierra #69 |
+| 2026-10-05 | El monitor avisa cuando la actualización automática no está disponible. Cierra #71 |

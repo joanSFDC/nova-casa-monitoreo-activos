@@ -207,6 +207,13 @@ tandas que llegan seguidas: el componente hace una sola consulta por ventana.
 La suscripción se cancela al desmontar el componente, para no dejar conexiones abiertas
 cuando el operador navega a otra parte.
 
+Si la suscripción falla, el monitor lo dice. Cuando la biblioteca informa un error o la
+suscripción no se completa, aparece bajo el título una línea discreta: la actualización
+automática no está disponible, y el monitor se revisa solo cada minuto y con el botón
+**Actualizar**. La región activa la anuncia una vez. Si después llega un timbre, la línea
+desaparece. Sin este aviso el operador cree que ve tiempo real cuando solo ve la
+vigilancia: fue lo que pasó mientras los roles humanos no podían leer el evento.
+
 ### La vigilancia de un minuto
 
 Los timbres solo llegan mientras la ingesta trae señales. Si la cadena se para, no hay
