@@ -175,10 +175,16 @@ public with sharing class MonitorControlador {
         Id,
         Tipo_Medicion__c,
         Episodio_Id__c,
+        Severidad__c,
         Severidad_Nivel__c,
         Estado_Comunicacion__c,
+        Gap_Segundos__c,
+        Valor__c,
+        Unidad__c,
+        Fecha_Origen__c,
         Activo__c,
-        Activo__r.Codigo_Externo__c
+        Activo__r.Codigo_Externo__c,
+        Activo__r.Tipo__c
       FROM Estado_Actual__c
       WHERE Id = :estadoId
       WITH USER_MODE
@@ -198,7 +204,7 @@ public with sharing class MonitorControlador {
     }
     Boolean sano =
       (estado.Severidad_Nivel__c == null || estado.Severidad_Nivel__c == 0) &&
-      comunicacionDe(estado.Estado_Comunicacion__c) == null;
+      LecturaFormato.comunicacion(estado.Estado_Comunicacion__c) == null;
     List<Case> abiertos = [
       SELECT Id
       FROM Case
@@ -233,6 +239,13 @@ public with sharing class MonitorControlador {
       AccessLevel.USER_MODE
     );
     if (resultado.isSuccess()) {
+      new RegistroLectura()
+        .completar(
+          resultado.getId(),
+          estado,
+          decimalesPorClave()
+            .get(estado.Activo__r.Tipo__c + '|' + estado.Tipo_Medicion__c)
+        );
       if (String.isNotBlank(nota)) {
         Task tarea = new Task();
         tarea.WhatId = resultado.getId();
@@ -260,6 +273,38 @@ public with sharing class MonitorControlador {
     throw new AuraHandledException(
       'No se pudo abrir la intervenci\u00f3n. Si no tienes permiso, habla con tu coordinador.'
     );
+  }
+
+  /**
+   * La lectura con la que una persona abre el caso. Va despues del insert en
+   * USER_MODE, en modo sistema, porque las personas leen estos campos pero no
+   * los escriben: son evidencia del sistema, como en el procesamiento.
+   */
+  private without sharing class RegistroLectura {
+    void completar(Id casoId, Estado_Actual__c estado, Integer lugares) {
+      String texto = LecturaFormato.lectura(
+        estado.Tipo_Medicion__c,
+        estado.Valor__c,
+        estado.Unidad__c,
+        lugares,
+        estado.Estado_Comunicacion__c,
+        estado.Gap_Segundos__c
+      );
+      String severidad = String.isBlank(estado.Severidad__c)
+        ? IngestaConstantes.SEV_NORMAL
+        : estado.Severidad__c;
+      Case incidente = new Case(
+        Id = casoId,
+        Lectura_Apertura__c = texto,
+        Severidad_Apertura__c = severidad,
+        Fecha_Lectura_Apertura__c = estado.Fecha_Origen__c,
+        Ultima_Lectura__c = texto,
+        Severidad_Ultima_Lectura__c = severidad,
+        Fecha_Ultima_Lectura__c = estado.Fecha_Origen__c,
+        Condicion_Equipo__c = IncidentesServicio.CONDICION_EN_FALLA
+      );
+      Database.update(incidente, false, AccessLevel.SYSTEM_MODE);
+    }
   }
 
   private static void rellenarIngesta(PanelDTO panel) {
@@ -338,14 +383,16 @@ public with sharing class MonitorControlador {
     fila.activoId = estado.Activo__c;
     fila.edificio = estado.Activo__r.Edificio__r.Name;
     fila.equipo = estado.Activo__r.Name;
-    fila.medicion = etiquetaMedicion(estado.Tipo_Medicion__c);
+    fila.medicion = LecturaFormato.medicion(estado.Tipo_Medicion__c);
     fila.severidad = estado.Severidad__c;
     fila.severidadNivel = estado.Severidad_Nivel__c == null
       ? 0
       : Integer.valueOf(estado.Severidad_Nivel__c);
-    fila.severidadEtiqueta = etiquetaSeveridad(fila.severidadNivel);
-    fila.antiguedad = antiguedadDe(estado.Fecha_Origen__c, ahora);
-    fila.comunicacion = comunicacionDe(estado.Estado_Comunicacion__c);
+    fila.severidadEtiqueta = LecturaFormato.severidad(fila.severidadNivel);
+    fila.antiguedad = LecturaFormato.antiguedad(estado.Fecha_Origen__c, ahora);
+    fila.comunicacion = LecturaFormato.comunicacion(
+      estado.Estado_Comunicacion__c
+    );
     fila.valor = valorDe(estado, decimales);
     String clave = claveDe(estado);
     fila.casoId = casosAbiertos.get(clave);
@@ -379,12 +426,9 @@ public with sharing class MonitorControlador {
   ) {
     if (estado.Tipo_Medicion__c == 'CAMERA_CONNECTIVITY') {
       if (estado.Gap_Segundos__c == null) {
-        return '—';
+        return LecturaFormato.SIN_VALOR;
       }
       return String.valueOf(estado.Gap_Segundos__c.intValue()) + ' s';
-    }
-    if (estado.Valor__c == null) {
-      return '—';
     }
     String claveUmbral =
       (estado.Activo__r == null ? '' : estado.Activo__r.Tipo__c) +
@@ -393,93 +437,6 @@ public with sharing class MonitorControlador {
     Integer lugares = decimales.containsKey(claveUmbral)
       ? decimales.get(claveUmbral)
       : 0;
-    String numero = conDecimales(estado.Valor__c, lugares);
-    String unidad = etiquetaUnidad(estado.Unidad__c);
-    return String.isBlank(unidad) ? numero : numero + ' ' + unidad;
-  }
-
-  // format() respeta la configuracion regional pero borra los ceros finales.
-  @TestVisible
-  static String conDecimales(Decimal valor, Integer lugares) {
-    String numero = valor.setScale(lugares).format();
-    if (lugares <= 0) {
-      return numero;
-    }
-    String separador = Decimal.valueOf('1.5').format().substring(1, 2);
-    Integer posicion = numero.lastIndexOf(separador);
-    if (posicion < 0) {
-      numero += separador;
-      posicion = numero.length() - 1;
-    }
-    Integer faltan = lugares - (numero.length() - posicion - 1);
-    for (Integer i = 0; i < faltan; i++) {
-      numero += '0';
-    }
-    return numero;
-  }
-
-  private static String comunicacionDe(String estado) {
-    if (String.isBlank(estado) || estado == 'HEALTHY') {
-      return null;
-    }
-    if (estado == 'LOST') {
-      return 'Sin comunicaci\u00f3n';
-    }
-    if (estado == 'RESTORED') {
-      return 'Recuperada';
-    }
-    return estado;
-  }
-
-  @TestVisible
-  static String antiguedadDe(Datetime origen, Datetime ahora) {
-    if (origen == null || ahora == null) {
-      return 'Sin fecha';
-    }
-    Long segundos = (ahora.getTime() - origen.getTime()) / 1000;
-    if (segundos < 60) {
-      return 'hace un momento';
-    }
-    Long minutos = segundos / 60;
-    if (minutos < 60) {
-      return 'hace ' + minutos + ' min';
-    }
-    Long horas = minutos / 60;
-    if (horas < 24) {
-      return 'hace ' + horas + ' h';
-    }
-    return 'hace ' + (horas / 24) + ' d';
-  }
-
-  private static String etiquetaMedicion(String tipo) {
-    Map<String, String> etiquetas = new Map<String, String>{
-      'TEMPERATURE' => 'Temperatura',
-      'WATER_PRESSURE' => 'Presi\u00f3n de agua',
-      'WATER_CONSUMPTION' => 'Consumo de agua',
-      'ENERGY_CONSUMPTION' => 'Consumo de energ\u00eda',
-      'CAMERA_CONNECTIVITY' => 'Conectividad'
-    };
-    return etiquetas.containsKey(tipo) ? etiquetas.get(tipo) : tipo;
-  }
-
-  private static String etiquetaSeveridad(Integer nivel) {
-    if (nivel == 2) {
-      return 'Cr\u00edtico';
-    }
-    if (nivel == 1) {
-      return 'Advertencia';
-    }
-    return 'Normal';
-  }
-
-  private static String etiquetaUnidad(String unidad) {
-    Map<String, String> etiquetas = new Map<String, String>{
-      'BAR' => 'bar',
-      'CELSIUS' => '°C',
-      'LITER_PER_15_MIN' => 'L/15 min',
-      'KWH_PER_15_MIN' => 'kWh/15 min',
-      'SECONDS' => 's'
-    };
-    return etiquetas.containsKey(unidad) ? etiquetas.get(unidad) : unidad;
+    return LecturaFormato.valor(estado.Valor__c, estado.Unidad__c, lugares);
   }
 }

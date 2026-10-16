@@ -3,6 +3,10 @@
  * de prioridad y evidencia de recuperacion. No cierra el caso. Lo critico va a
  * la cola Coordinacion; lo bajo no es de nadie.
  *
+ * El caso guarda la lectura que lo abrio y la ultima que cambio su severidad,
+ * y queda Normalizado cuando el equipo vuelve a lo normal. Una lectura que
+ * repite la severidad no toca el caso.
+ *
  * without sharing: proceso de sistema. Lo invoca el procesamiento, no una persona.
  */
 public without sharing class IncidentesServicio {
@@ -10,6 +14,8 @@ public without sharing class IncidentesServicio {
   public static final String PRIORIDAD_BAJA = 'Low';
   public static final String PRIORIDAD_ALTA = 'High';
   public static final String COLA_COORDINACION = 'Coordinacion';
+  public static final String CONDICION_EN_FALLA = 'En_falla';
+  public static final String CONDICION_NORMALIZADO = 'Normalizado';
 
   @TestVisible
   static Boolean inyectarFalloDeCaso = false;
@@ -29,6 +35,18 @@ public without sharing class IncidentesServicio {
     public List<String> orden = new List<String>();
     public Map<String, Integer> nivelPorSenal = new Map<String, Integer>();
     public Set<String> recuperadas = new Set<String>();
+    public Map<String, Lectura> lecturaPorSenal = new Map<String, Lectura>();
+  }
+
+  /**
+   * Lo que el caso guarda de una lectura. En una camara, normalizado es que
+   * volvio la comunicacion, no que el silencio todavia sea corto.
+   */
+  public class Lectura {
+    public String texto;
+    public String severidad;
+    public Datetime fecha;
+    public Boolean normalizado;
   }
 
   public static String claveDe(Aviso_de_Senal__e aviso) {
@@ -65,7 +83,9 @@ public without sharing class IncidentesServicio {
         OwnerId,
         Description,
         IsClosed,
-        Status
+        Status,
+        Severidad_Ultima_Lectura__c,
+        Condicion_Equipo__c
       FROM Case
       WHERE Clave_Abierta__c IN :claves
       WITH SYSTEM_MODE
@@ -83,6 +103,22 @@ public without sharing class IncidentesServicio {
     String tipoMedicion,
     ClasificacionServicio.Dictamen dictamen
   ) {
+    acumular(decisiones, aviso, senal, activo, tipoMedicion, dictamen, null);
+  }
+
+  /**
+   * Las lecturas normales tambien entran: son las que normalizan un caso
+   * abierto. escribir no abre ningun caso por ellas.
+   */
+  public static void acumular(
+    Map<String, Decision> decisiones,
+    Aviso_de_Senal__e aviso,
+    Senal__c senal,
+    Activo__c activo,
+    String tipoMedicion,
+    ClasificacionServicio.Dictamen dictamen,
+    Integer lugares
+  ) {
     if (
       decisiones == null ||
       aviso == null ||
@@ -91,13 +127,11 @@ public without sharing class IncidentesServicio {
     ) {
       return;
     }
+    Boolean conectividad =
+      aviso.Tipo_Mensaje__c == IngestaConstantes.TIPO_CONECTIVIDAD;
     Boolean restored =
-      aviso.Tipo_Mensaje__c == IngestaConstantes.TIPO_CONECTIVIDAD &&
-      aviso.Estado_Comunicacion__c == 'RESTORED';
+      conectividad && aviso.Estado_Comunicacion__c == 'RESTORED';
     Integer nivel = dictamen.nivel == null ? 0 : dictamen.nivel;
-    if (nivel < 1 && !restored) {
-      return;
-    }
     String clave = claveDe(aviso);
     if (String.isBlank(clave)) {
       return;
@@ -121,6 +155,22 @@ public without sharing class IncidentesServicio {
     if (restored) {
       decision.recuperadas.add(senal.Clave__c);
     }
+
+    Lectura lectura = new Lectura();
+    lectura.texto = LecturaFormato.lectura(
+      tipoMedicion,
+      aviso.Valor__c,
+      aviso.Unidad__c,
+      lugares,
+      aviso.Estado_Comunicacion__c,
+      aviso.Gap_Segundos__c
+    );
+    lectura.severidad = LecturaFormato.severidadApi(nivel);
+    lectura.fecha = aviso.Fecha_Origen__c;
+    lectura.normalizado = conectividad
+      ? aviso.Estado_Comunicacion__c != 'LOST'
+      : nivel < 1;
+    decision.lecturaPorSenal.put(senal.Clave__c, lectura);
   }
 
   /**
@@ -210,33 +260,39 @@ public without sharing class IncidentesServicio {
         continue;
       }
       Case abierto = abiertos.get(decision.clave);
-      if (decision.marcarRecuperado && abierto != null && !abierto.IsClosed) {
-        abierto.Description = lineaRecuperado(
-          abierto.Description,
-          decision.claveSenal,
-          ahora
-        );
-        aActualizar.put(abierto.Id, abierto);
-        senalPorCaso.put(abierto.Id, decision.claveSenal);
+      if (abierto != null && abierto.IsClosed) {
+        continue;
+      }
+      if (abierto != null) {
+        Boolean cambio = false;
+        if (decision.marcarRecuperado) {
+          abierto.Description = lineaRecuperado(
+            abierto.Description,
+            decision.claveSenal,
+            ahora
+          );
+          cambio = true;
+        }
+        if (registrarCambio(abierto, decision, ahora)) {
+          cambio = true;
+        }
+        if (debeEscalar(abierto, decision.nivel)) {
+          escalar(abierto);
+          cambio = true;
+        }
+        if (cambio) {
+          aActualizar.put(abierto.Id, abierto);
+          senalPorCaso.put(abierto.Id, decision.claveSenal);
+        } else if (decision.nivel >= 1) {
+          ligar(decision, senales, abierto.Id);
+        }
+        continue;
       }
       if (decision.nivel < 1) {
         continue;
       }
-      if (abierto == null) {
-        aInsertar.add(armarCaso(decision));
-        senalesInsert.add(decision.clave);
-        continue;
-      }
-      if (abierto.IsClosed) {
-        continue;
-      }
-      if (debeEscalar(abierto, decision.nivel)) {
-        escalar(abierto);
-        aActualizar.put(abierto.Id, abierto);
-        senalPorCaso.put(abierto.Id, decision.claveSenal);
-      } else {
-        ligar(decision, senales, abierto.Id);
-      }
+      aInsertar.add(armarCaso(decision));
+      senalesInsert.add(decision.clave);
     }
 
     if (!aInsertar.isEmpty()) {
@@ -317,8 +373,12 @@ public without sharing class IncidentesServicio {
         continue;
       }
       ligar(decision, senales, ganador.Id);
+      Boolean cambio = registrarCambio(ganador, decision, Datetime.now());
       if (debeEscalar(ganador, decision.nivel)) {
         escalar(ganador);
+        cambio = true;
+      }
+      if (cambio) {
         aEscalar.add(ganador);
       }
     }
@@ -417,10 +477,67 @@ public without sharing class IncidentesServicio {
       incidente.OwnerId = colaCoordinacion();
     }
     incidente.Subject = asuntoDe(decision);
+    Lectura lectura = lecturaDe(decision);
+    incidente.Lectura_Apertura__c = lectura.texto;
+    incidente.Severidad_Apertura__c = lectura.severidad;
+    incidente.Fecha_Lectura_Apertura__c = lectura.fecha;
+    incidente.Ultima_Lectura__c = lectura.texto;
+    incidente.Severidad_Ultima_Lectura__c = lectura.severidad;
+    incidente.Fecha_Ultima_Lectura__c = lectura.fecha;
+    incidente.Ultima_Senal__c = decision.claveSenal;
+    incidente.Condicion_Equipo__c = CONDICION_EN_FALLA;
     if (inyectarFalloDeCaso) {
       incidente.Tipo_Medicion__c = 'TIPO_INEXISTENTE';
     }
     return incidente;
+  }
+
+  /**
+   * Solo cambia el caso si la lectura trae otra severidad o otra condicion que
+   * la ultima registrada: abre, escala, baja, normaliza o vuelve a fallar.
+   */
+  private static Boolean registrarCambio(
+    Case abierto,
+    Decision decision,
+    Datetime ahora
+  ) {
+    Lectura lectura = lecturaDe(decision);
+    String condicion = lectura.normalizado
+      ? CONDICION_NORMALIZADO
+      : CONDICION_EN_FALLA;
+    if (
+      abierto.Severidad_Ultima_Lectura__c == lectura.severidad &&
+      abierto.Condicion_Equipo__c == condicion
+    ) {
+      return false;
+    }
+    abierto.Ultima_Lectura__c = lectura.texto;
+    abierto.Severidad_Ultima_Lectura__c = lectura.severidad;
+    abierto.Fecha_Ultima_Lectura__c = lectura.fecha;
+    abierto.Ultima_Senal__c = decision.claveSenal;
+    abierto.Condicion_Equipo__c = condicion;
+    abierto.Normalizado_En__c = lectura.normalizado
+      ? (lectura.fecha == null ? ahora : lectura.fecha)
+      : null;
+    return true;
+  }
+
+  /**
+   * La lectura de la senal que decide. Una decision armada a mano, sin lectura,
+   * se describe solo por su nivel.
+   */
+  private static Lectura lecturaDe(Decision decision) {
+    Lectura lectura = decision.lecturaPorSenal == null
+      ? null
+      : decision.lecturaPorSenal.get(decision.claveSenal);
+    if (lectura != null) {
+      return lectura;
+    }
+    lectura = new Lectura();
+    Integer nivel = decision.nivel == null ? 0 : decision.nivel;
+    lectura.severidad = LecturaFormato.severidadApi(nivel);
+    lectura.normalizado = nivel < 1;
+    return lectura;
   }
 
   private static String asuntoDe(Decision decision) {

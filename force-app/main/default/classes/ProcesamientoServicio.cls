@@ -338,7 +338,11 @@ public without sharing class ProcesamientoServicio {
       senal,
       activo,
       tipoMedicion,
-      dictamen
+      dictamen,
+      umbral == null ||
+        umbral.Decimales__c == null
+        ? 0
+        : Integer.valueOf(umbral.Decimales__c)
     );
   }
 
@@ -462,6 +466,7 @@ public without sharing class ProcesamientoServicio {
         Advertencia_Alto__c,
         Minutos_Advertencia__c,
         Minutos_Critico__c,
+        Decimales__c,
         Vigente__c
       FROM Umbral__c
       WHERE Vigente__c = TRUE
