@@ -154,6 +154,14 @@ inventados.
 | Fallo al crear el caso | La señal queda fallida y el estado actual **sí** se actualizó |
 | Cola del coordinador | El crítico nace en la cola Coordinación; la advertencia no; la escalada y su reintento pasan el caso a la cola |
 | Caso ya tomado | Escala a alta y conserva a la persona que lo tomó |
+| Lectura de apertura | El caso guarda la lectura que lo abrió con su unidad, su severidad y su fecha de origen; al abrir, la última lectura es la misma |
+| Escalada con lecturas | La apertura sigue siendo la advertencia y la última lectura pasa a ser el crítico, con su señal |
+| Severidad repetida | Otro crítico no reescribe el caso, pero su señal se liga |
+| Bajada | De crítico a advertencia cambia la última lectura y no baja la prioridad |
+| Normalización | Una lectura normal deja el caso abierto, «Normalizado», con la fecha de origen; la señal queda ligada y la prioridad no baja |
+| Reincidencia | Falla después de normalizado: vuelve a «En falla», se borra la fecha y no se abre otro caso |
+| Normal sin caso | Una lectura normal sin caso abierto no abre nada |
+| Caso manual | El que abre el monitor guarda la lectura del estado actual, sin que la persona pueda escribir esos campos |
 
 La séptima es la que protege contra el riesgo R-18 y **no es negociable**. Si el cierre
 dejara de vaciar `Clave_Abierta__c`, ese activo no podría volver a abrir un incidente nunca
@@ -169,7 +177,8 @@ más, y el fallo sería completamente invisible sin esta prueba.
 | Corte corto | `LOST` con 90 segundos marca sin comunicación pero no escala |
 | Corte de quince minutos | Escala a advertencia |
 | Corte de una hora | Escala a crítico, sobre el **mismo** caso |
-| Recuperación | `RESTORED` limpia el estado y **no** cierra el caso |
+| Recuperación | `RESTORED` limpia el estado y **no** cierra el caso: lo deja «Normalizado», con «Comunicación recuperada» como última lectura |
+| Lecturas del corte | El caso de un corte guarda «Sin comunicación · 15 min» al abrir y «Sin comunicación · 1 h» al escalar |
 | Dos episodios | Dos cortes distintos producen dos casos, aunque el primero siga abierto |
 | Advertencia | Crea caso en prioridad baja, sin propietario |
 

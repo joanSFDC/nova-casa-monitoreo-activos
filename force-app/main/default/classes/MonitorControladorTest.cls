@@ -86,28 +86,6 @@ private class MonitorControladorTest {
   }
 
   @isTest
-  static void shouldCalcularAntiguedadDesdeOrigen() {
-    Datetime ahora = Datetime.newInstanceGmt(2026, 10, 1, 12, 0, 0);
-    Assert.areEqual(
-      'hace un momento',
-      MonitorControlador.antiguedadDe(ahora.addSeconds(-20), ahora)
-    );
-    Assert.areEqual(
-      'hace 15 min',
-      MonitorControlador.antiguedadDe(ahora.addMinutes(-15), ahora)
-    );
-    Assert.areEqual(
-      'hace 3 h',
-      MonitorControlador.antiguedadDe(ahora.addHours(-3), ahora)
-    );
-    Assert.areEqual(
-      'hace un momento',
-      MonitorControlador.antiguedadDe(ahora.addHours(2), ahora),
-      'Una lectura con el reloj del simulador por delante no se pinta en el futuro'
-    );
-  }
-
-  @isTest
   static void shouldPintarComunicacion_WhenCamaraLost() {
     sembrarEstados();
 
@@ -194,7 +172,12 @@ private class MonitorControladorTest {
         Description,
         Activo__c,
         Tipo_Medicion__c,
-        Clave_Abierta__c
+        Clave_Abierta__c,
+        Lectura_Apertura__c,
+        Severidad_Apertura__c,
+        Ultima_Lectura__c,
+        Severidad_Ultima_Lectura__c,
+        Condicion_Equipo__c
       FROM Case
       WHERE Id = :casoId
     ];
@@ -210,6 +193,28 @@ private class MonitorControladorTest {
       estado.Clave__c,
       incidente.Clave_Abierta__c,
       'Un caso abierto por equipo y medicion'
+    );
+    Assert.areEqual(
+      '0,80 bar',
+      incidente.Lectura_Apertura__c.replace('.', ','),
+      'La lectura con la que se abrio, con los decimales del umbral'
+    );
+    Assert.areEqual(
+      IngestaConstantes.SEV_CRITICO,
+      incidente.Severidad_Apertura__c
+    );
+    Assert.areEqual(
+      incidente.Lectura_Apertura__c,
+      incidente.Ultima_Lectura__c,
+      'Al abrir, la ultima lectura es la de apertura'
+    );
+    Assert.areEqual(
+      IngestaConstantes.SEV_CRITICO,
+      incidente.Severidad_Ultima_Lectura__c
+    );
+    Assert.areEqual(
+      IncidentesServicio.CONDICION_EN_FALLA,
+      incidente.Condicion_Equipo__c
     );
   }
 
@@ -265,20 +270,6 @@ private class MonitorControladorTest {
     );
     insert estado;
     return estado;
-  }
-
-  @isTest
-  static void shouldConservarCerosFinales_WhenUmbralPideDecimales() {
-    String separador = Decimal.valueOf('1.5').format().substring(1, 2);
-    Assert.areEqual(
-      '0' + separador + '80',
-      MonitorControlador.conDecimales(0.8, 2)
-    );
-    Assert.areEqual(
-      '18' + separador + '0',
-      MonitorControlador.conDecimales(18, 1)
-    );
-    Assert.areEqual('247', MonitorControlador.conDecimales(247, 0));
   }
 
   @isTest

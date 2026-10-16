@@ -165,13 +165,43 @@ private class ConectividadTest {
 
     Assert.areEqual(1, [SELECT COUNT() FROM Case], 'Mismo episodio, un caso');
     Case incidente = [
-      SELECT Priority, Clave_Abierta__c, IsClosed
+      SELECT
+        Priority,
+        Clave_Abierta__c,
+        IsClosed,
+        Lectura_Apertura__c,
+        Severidad_Apertura__c,
+        Ultima_Lectura__c,
+        Severidad_Ultima_Lectura__c,
+        Condicion_Equipo__c
       FROM Case
     ];
     Assert.areEqual('CONN|EPI-BOG-out-0', incidente.Clave_Abierta__c);
     Assert.areEqual(IncidentesServicio.PRIORIDAD_ALTA, incidente.Priority);
     Assert.areEqual(false, incidente.IsClosed);
     Assert.areEqual(IngestaConstantes.SEV_CRITICO, estadoCamara().Severidad__c);
+    Assert.areEqual(
+      'Sin comunicaci\u00f3n \u00b7 15 min',
+      incidente.Lectura_Apertura__c,
+      'Lo abrio el corte de quince minutos'
+    );
+    Assert.areEqual(
+      IngestaConstantes.SEV_ADVERTENCIA,
+      incidente.Severidad_Apertura__c
+    );
+    Assert.areEqual(
+      'Sin comunicaci\u00f3n \u00b7 1 h',
+      incidente.Ultima_Lectura__c,
+      'Lo escalo el de una hora'
+    );
+    Assert.areEqual(
+      IngestaConstantes.SEV_CRITICO,
+      incidente.Severidad_Ultima_Lectura__c
+    );
+    Assert.areEqual(
+      IncidentesServicio.CONDICION_EN_FALLA,
+      incidente.Condicion_Equipo__c
+    );
   }
 
   @isTest
@@ -213,11 +243,41 @@ private class ConectividadTest {
     Assert.areEqual(null, estado.Valor__c);
 
     Case incidente = [
-      SELECT IsClosed, Description, Priority
+      SELECT
+        IsClosed,
+        Description,
+        Priority,
+        Condicion_Equipo__c,
+        Normalizado_En__c,
+        Ultima_Lectura__c,
+        Severidad_Ultima_Lectura__c,
+        Ultima_Senal__c
       FROM Case
     ];
     Assert.areEqual(false, incidente.IsClosed, 'Cerrar es humano');
     Assert.areEqual(IncidentesServicio.PRIORIDAD_BAJA, incidente.Priority);
+    Assert.areEqual(
+      IncidentesServicio.CONDICION_NORMALIZADO,
+      incidente.Condicion_Equipo__c,
+      'La comunicacion volvio: el caso queda normalizado'
+    );
+    Assert.areEqual(
+      Datetime.newInstanceGmt(2026, 9, 22, 22, 16, 0),
+      incidente.Normalizado_En__c,
+      'Con la fecha de origen de la recuperacion'
+    );
+    Assert.areEqual(
+      'Comunicaci\u00f3n recuperada',
+      incidente.Ultima_Lectura__c
+    );
+    Assert.areEqual(
+      IngestaConstantes.SEV_NORMAL,
+      incidente.Severidad_Ultima_Lectura__c
+    );
+    Assert.isTrue(
+      incidente.Ultima_Senal__c.endsWith('msg_restored'),
+      'Y nombra la senal que lo normalizo'
+    );
     Assert.isTrue(
       incidente.Description != null &&
       incidente.Description.contains('Recuperado'),

@@ -349,8 +349,21 @@ Campos añadidos:
 | `Tipo_Medicion__c` | Picklist global | |
 | `Episodio_Id__c` | Text(60) | Solo en incidentes de conectividad |
 | `Origen_Senal__c` | Text(120) | La clave de la señal que lo abrió |
+| `Lectura_Apertura__c` | Text(120) | La lectura que lo abrió, con su unidad: «5,50 bar», «Sin comunicación · 15 min» |
+| `Severidad_Apertura__c` | Picklist global `Severidad` | |
+| `Fecha_Lectura_Apertura__c` | DateTime | La fecha de origen de esa lectura |
+| `Ultima_Lectura__c` | Text(120) | La última lectura que cambió su severidad |
+| `Severidad_Ultima_Lectura__c` | Picklist global `Severidad` | Con ella se compara la siguiente |
+| `Fecha_Ultima_Lectura__c` | DateTime | La fecha de origen de esa lectura |
+| `Ultima_Senal__c` | Text(120) | La clave de la señal que hizo el último cambio |
+| `Condicion_Equipo__c` | Picklist: En falla, Normalizado | Normalizado cuando el equipo volvió a lo normal con el caso abierto |
+| `Normalizado_En__c` | DateTime | La fecha de origen de la lectura que normalizó; se vacía si reincide |
 
-El mecanismo de `Clave_Abierta__c` está explicado en el [módulo 07](07-incidentes.md).
+El mecanismo de `Clave_Abierta__c` y el de las lecturas están explicados en el
+[módulo 07](07-incidentes.md). Las lecturas se copian al caso, en lugar de leerse de la
+bitácora, porque el operador no tiene acceso a `Senal__c`: sin copia, no podría ver qué
+lectura abrió su caso. Las personas leen esos campos y no los escriben; los escribe el
+sistema.
 
 ### `Task` como intervención
 

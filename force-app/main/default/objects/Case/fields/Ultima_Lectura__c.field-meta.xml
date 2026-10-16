@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Ultima_Lectura__c</fullName>
+    <externalId>false</externalId>
+    <inlineHelpText>La última lectura que cambió la severidad del caso: lo abrió, lo escaló, lo bajó o lo normalizó. Las lecturas que repiten la severidad no la cambian.</inlineHelpText>
+    <label>Última lectura que lo cambió</label>
+    <length>120</length>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

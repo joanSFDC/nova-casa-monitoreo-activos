@@ -5,6 +5,8 @@
     <columns>CASES.SUBJECT</columns>
     <columns>Activo__c</columns>
     <columns>Ciudad__c</columns>
+    <columns>Condicion_Equipo__c</columns>
+    <columns>Ultima_Lectura__c</columns>
     <columns>CASES.PRIORITY</columns>
     <columns>CASES.STATUS</columns>
     <columns>CASES.CREATED_DATE_DATE_ONLY</columns>
