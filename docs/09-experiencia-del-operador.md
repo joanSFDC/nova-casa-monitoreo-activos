@@ -92,10 +92,29 @@ no abre nada.
 
 ## Lo que se ve
 
-### Encabezado
+### Encabezado y barra de filtros
 
-Los tres contadores por severidad, que funcionan como filtros, y un selector de edificio
-cuando el operador tiene más de uno.
+El título, el botón **Actualizar** y, debajo, una barra con todo lo que filtra y ordena:
+
+- **Cuatro fichas** con un punto de color y su conteo: críticos, advertencias, normales y
+  sin comunicación. Una ficha con conteo se tiñe de su color; en cero queda gris. Pulsarla
+  filtra y queda marcada (`aria-pressed`); pulsarla otra vez quita el filtro. Los conteos
+  los calcula el servidor.
+- **Edificio**, cuando la persona tiene más de uno. Es el único filtro que va al servidor.
+- **Tipo de equipo**, con los tipos presentes en sus filas.
+- **Ordenar por**: severidad (lo grave primero, el orden por defecto), antigüedad (lo más
+  viejo primero), equipo o edificio, de la A a la Z.
+- **Buscar equipo**, por nombre o código, sin importar mayúsculas ni tildes.
+
+Tipo, orden y búsqueda se aplican en el navegador **sobre filas que el servidor ya
+autorizó**: no muestran nada nuevo, solo eligen entre lo que la persona ya puede ver. Por
+eso no rompen la regla de que nada se calcula en el navegador. Si los filtros dejan la
+tabla vacía, la pantalla lo dice y ofrece **Quitar filtros**.
+
+El encabezado no muestra la hora de la última actualización ni un indicador de «en vivo»:
+se quitaron para no recargar la cabecera. La hora se sigue anunciando en la región activa
+para lectores de pantalla, y si la suscripción falla aparece el aviso de que la
+actualización automática no está disponible.
 
 También, cuando corresponde, el **aviso de consulta atrasada**: una franja visible que
 aparece si `Control_de_Ingesta__c.Ultima_Consulta_Exitosa__c` es demasiado antigua.
@@ -108,18 +127,40 @@ mirando datos de hace dos horas y uno que no.
 
 ### Tabla de equipos
 
-Una fila por activo y medición, ordenada con lo peor arriba. Las columnas:
+Una fila por activo y medición, **agrupada por edificio**. Cada grupo abre con el nombre
+del edificio, su ciudad y un resumen («2 críticos · 1 sin comunicación», o «Todo
+normal»). Con el orden por severidad, el edificio que tiene lo más grave va primero. Cada
+fila lleva a la izquierda una barra del color de su severidad. Las columnas:
 
-| Columna | De dónde sale |
-| --- | --- |
-| Edificio | `Activo__c.Edificio__r.Name` |
-| Equipo | `Activo__c.Name` |
-| Medición | `Estado_Actual__c.Tipo_Medicion__c` |
-| Valor | `Valor__c` y `Unidad__c`, con los decimales del umbral |
-| Severidad | `Severidad__c`, con tratamiento visual propio |
-| Antigüedad | Calculada desde `Fecha_Origen__c` en la presentación |
-| Comunicación | `Estado_Comunicacion__c` cuando no es `HEALTHY` |
-| Acción | Abrir intervención, o ir al incidente si ya existe |
+| Columna | Qué muestra | De dónde sale |
+| --- | --- | --- |
+| Equipo | Ícono del tipo, nombre (enlace al activo), tipo y código | `Activo__c.Name`, `Tipo__c`, `Codigo_Externo__c` |
+| Lectura | El valor con su unidad y, debajo, la medición. En una cámara, una ficha con el estado del corte: «Sin comunicación · 15 min», «Comunicación recuperada» o «En línea» | `Valor__c` y `Unidad__c` con los decimales del umbral; `Estado_Comunicacion__c` y `Gap_Segundos__c` |
+| Severidad | La pastilla de color y, si el equipo volvió a lo normal con un caso abierto, la insignia «Normalizado · caso abierto» | `Severidad__c` y el caso abierto |
+| Antigüedad | Cuánto hace que ocurrió | `Fecha_Origen__c` |
+| Acción | Abrir intervención, o ir al incidente si ya existe | `puedeIntervenir` y el caso abierto |
+
+**La columna Comunicación desapareció.** En casi todas las filas quedaba vacía, porque
+solo las cámaras emiten conectividad, y una columna vacía parece un dato que falta. Ahora
+la cámara dice su estado en su propia lectura, y una cámara sana también se nombra («En
+línea») para que su fila no quede en blanco.
+
+**La insignia de normalizado** responde a algo que parecía un error: un equipo en normal
+con «Ver incidente». El caso sigue abierto porque cerrarlo es una decisión humana
+([módulo 07](07-incidentes.md)); la insignia dice que el equipo ya volvió y que falta que
+coordinación lo verifique y lo cierre. El caso abierto de una fila se busca por equipo y
+medición, no por la clave: la clave de una cámara es su episodio, que el estado borra
+cuando vuelve la comunicación, y así la fila sigue llevando al caso del último corte.
+
+**El ícono** dibuja el tipo de equipo: bomba, gota (agua), rayo (energía), termómetro
+(sala técnica) y cámara. Son SVG propios dentro del componente `iconoEquipo`, porque los
+íconos de SLDS no tienen bomba ni medidor de agua. Son decorativos (`aria-hidden`): el tipo
+va escrito al lado. La severidad la pinta `pastillaSeveridad`, que también usan los
+resúmenes de las páginas de registro.
+
+«Abrir intervención» solo aparece si el panel trae `puedeAbrir`, es decir, si la persona
+puede crear casos ([módulo 10](10-seguridad-y-accesos.md)). El gerente ve «Ver incidente»
+y nunca «Abrir intervención».
 
 La **antigüedad** merece su columna propia y no es decorativa. Es la única defensa, para
 los activos que no emiten conectividad, contra el riesgo R-03: un equipo que deja de
@@ -349,9 +390,14 @@ pide el texto pequeño. Si algún día hiciera falta texto en cobre, el tono es
 
 ### La severidad no cambia con el tema
 
-Los tres colores se fijan en `monitorDeActivos.css` en lugar de tomarse de los ganchos
-del sistema de diseño: crítico `#ba0517`, advertencia `#a15c00` y normal `#2e844a`. Así un
-cambio de tema, o volver a Cosmos, no los mueve.
+Los colores de severidad se fijan en `pastillaSeveridad.css` y `monitorDeActivos.css` en
+lugar de tomarse de los ganchos del sistema de diseño: crítico `#ba0517` sobre `#fef1ee`,
+advertencia `#8c4b02` sobre `#fef4e6` y normal `#22683e` sobre `#ebf7e6`. La advertencia y
+el normal son más oscuros que antes porque ahora van sobre un fondo tenue, no sobre blanco.
+Sin comunicación es morado (`#5a1ba9`) y la comunicación recuperada y la insignia de
+normalizado, azul (`#0b5cab`). Así un cambio de tema, o volver a Cosmos, no los mueve. Lo
+que no es severidad (bordes, fondos, texto suave) usa los ganchos de SLDS con un valor de
+respaldo.
 
 ### Los iconos
 
