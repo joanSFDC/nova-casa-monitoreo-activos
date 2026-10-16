@@ -152,6 +152,199 @@ private class IncidentesServicioTest {
       senalCritica.Incidente__c,
       'La senal critica apunta al caso'
     );
+    Case lecturas = lecturasDelCaso();
+    Assert.areEqual(
+      '4,50 bar',
+      lecturas.Lectura_Apertura__c.replace('.', ','),
+      'Lo abrio la advertencia'
+    );
+    Assert.areEqual(
+      IngestaConstantes.SEV_ADVERTENCIA,
+      lecturas.Severidad_Apertura__c
+    );
+    Assert.areEqual(
+      '5,50 bar',
+      lecturas.Ultima_Lectura__c.replace('.', ','),
+      'Y lo cambio el critico'
+    );
+    Assert.areEqual(
+      IngestaConstantes.SEV_CRITICO,
+      lecturas.Severidad_Ultima_Lectura__c
+    );
+    Assert.areEqual(
+      Datetime.newInstanceGmt(2026, 9, 22, 22, 55, 0),
+      lecturas.Fecha_Ultima_Lectura__c
+    );
+    Assert.areEqual('nova-casa-simulator|msg_cri', lecturas.Ultima_Senal__c);
+    Assert.areEqual(
+      IncidentesServicio.CONDICION_EN_FALLA,
+      lecturas.Condicion_Equipo__c
+    );
+  }
+
+  @isTest
+  static void shouldGuardarLecturaDeApertura_WhenCriticoAbre() {
+    Activo__c bomba = bomba();
+    Map<String, Object> critico = presion('msg_abre', 5.5, '22:10:00');
+    insert TestDataFactory.senalPendiente(critico, bomba.Id, bomba.Edificio__c);
+
+    Test.startTest();
+    ProcesamientoServicio.procesar(
+      new List<Aviso_de_Senal__e>{ TestDataFactory.avisoDe(critico) }
+    );
+    Test.stopTest();
+
+    Case incidente = lecturasDelCaso();
+    Assert.areEqual(
+      '5,50 bar',
+      incidente.Lectura_Apertura__c.replace('.', ','),
+      'Con los decimales y la unidad del umbral'
+    );
+    Assert.areEqual(
+      IngestaConstantes.SEV_CRITICO,
+      incidente.Severidad_Apertura__c
+    );
+    Assert.areEqual(
+      Datetime.newInstanceGmt(2026, 9, 22, 22, 10, 0),
+      incidente.Fecha_Lectura_Apertura__c,
+      'La fecha es la de origen, no la de proceso'
+    );
+    Assert.areEqual(
+      incidente.Lectura_Apertura__c,
+      incidente.Ultima_Lectura__c,
+      'Al abrir, la ultima lectura es la de apertura'
+    );
+    Assert.areEqual('nova-casa-simulator|msg_abre', incidente.Ultima_Senal__c);
+    Assert.areEqual(
+      IncidentesServicio.CONDICION_EN_FALLA,
+      incidente.Condicion_Equipo__c
+    );
+    Assert.isNull(incidente.Normalizado_En__c);
+  }
+
+  @isTest
+  static void shouldNoTocarCaso_WhenSeveridadSeRepite() {
+    Activo__c bomba = bomba();
+    Map<String, Object> primero = presion('msg_uno', 5.5, '22:10:00');
+    Map<String, Object> segundo = presion('msg_dos', 5.9, '22:20:00');
+    insert new List<Senal__c>{
+      TestDataFactory.senalPendiente(primero, bomba.Id, bomba.Edificio__c),
+      TestDataFactory.senalPendiente(segundo, bomba.Id, bomba.Edificio__c)
+    };
+
+    Test.startTest();
+    ProcesamientoServicio.procesar(
+      new List<Aviso_de_Senal__e>{ TestDataFactory.avisoDe(primero) }
+    );
+    ProcesamientoServicio.procesar(
+      new List<Aviso_de_Senal__e>{ TestDataFactory.avisoDe(segundo) }
+    );
+    Test.stopTest();
+
+    Case incidente = lecturasDelCaso();
+    Assert.areEqual(
+      'nova-casa-simulator|msg_uno',
+      incidente.Ultima_Senal__c,
+      'Otro critico no cambia la severidad: el caso no se reescribe'
+    );
+    Assert.areEqual(
+      Datetime.newInstanceGmt(2026, 9, 22, 22, 10, 0),
+      incidente.Fecha_Ultima_Lectura__c
+    );
+    Senal__c segundaSenal = [
+      SELECT Incidente__c
+      FROM Senal__c
+      WHERE Clave__c = 'nova-casa-simulator|msg_dos'
+    ];
+    Assert.areEqual(
+      incidente.Id,
+      segundaSenal.Incidente__c,
+      'La lectura se sigue ligando al caso abierto'
+    );
+  }
+
+  @isTest
+  static void shouldBajarSinCambiarPrioridad_WhenCriticoPasaAAdvertencia() {
+    Activo__c bomba = bomba();
+    Map<String, Object> critico = presion('msg_cri', 5.5, '22:10:00');
+    Map<String, Object> advertencia = presion('msg_adv', 4.5, '22:20:00');
+    insert new List<Senal__c>{
+      TestDataFactory.senalPendiente(critico, bomba.Id, bomba.Edificio__c),
+      TestDataFactory.senalPendiente(advertencia, bomba.Id, bomba.Edificio__c)
+    };
+
+    Test.startTest();
+    ProcesamientoServicio.procesar(
+      new List<Aviso_de_Senal__e>{ TestDataFactory.avisoDe(critico) }
+    );
+    ProcesamientoServicio.procesar(
+      new List<Aviso_de_Senal__e>{ TestDataFactory.avisoDe(advertencia) }
+    );
+    Test.stopTest();
+
+    Case incidente = lecturasDelCaso();
+    Assert.areEqual(
+      IngestaConstantes.SEV_ADVERTENCIA,
+      incidente.Severidad_Ultima_Lectura__c,
+      'La bajada tambien es un cambio de severidad'
+    );
+    Assert.areEqual(
+      IncidentesServicio.CONDICION_EN_FALLA,
+      incidente.Condicion_Equipo__c
+    );
+    Assert.areEqual(
+      IncidentesServicio.PRIORIDAD_ALTA,
+      incidente.Priority,
+      'La prioridad no baja'
+    );
+  }
+
+  @isTest
+  static void shouldVolverAEnFalla_WhenReincideDespuesDeNormalizar() {
+    Activo__c bomba = bomba();
+    Map<String, Object> critico = presion('msg_cri', 5.5, '22:10:00');
+    Map<String, Object> normal = presion('msg_ok', 2.76, '22:20:00');
+    Map<String, Object> advertencia = presion('msg_adv', 4.5, '22:30:00');
+    insert new List<Senal__c>{
+      TestDataFactory.senalPendiente(critico, bomba.Id, bomba.Edificio__c),
+      TestDataFactory.senalPendiente(normal, bomba.Id, bomba.Edificio__c),
+      TestDataFactory.senalPendiente(advertencia, bomba.Id, bomba.Edificio__c)
+    };
+
+    Test.startTest();
+    ProcesamientoServicio.procesar(
+      new List<Aviso_de_Senal__e>{ TestDataFactory.avisoDe(critico) }
+    );
+    ProcesamientoServicio.procesar(
+      new List<Aviso_de_Senal__e>{ TestDataFactory.avisoDe(normal) }
+    );
+    Assert.areEqual(
+      IncidentesServicio.CONDICION_NORMALIZADO,
+      lecturasDelCaso().Condicion_Equipo__c,
+      'Primero se normaliza'
+    );
+    ProcesamientoServicio.procesar(
+      new List<Aviso_de_Senal__e>{ TestDataFactory.avisoDe(advertencia) }
+    );
+    Test.stopTest();
+
+    Assert.areEqual(1, [SELECT COUNT() FROM Case], 'Reincidir no abre otro');
+    Case incidente = lecturasDelCaso();
+    Assert.areEqual(
+      IncidentesServicio.CONDICION_EN_FALLA,
+      incidente.Condicion_Equipo__c,
+      'Vuelve a fallar con el mismo caso abierto'
+    );
+    Assert.isNull(
+      incidente.Normalizado_En__c,
+      'La fecha de normalizacion se borra'
+    );
+    Assert.areEqual('4,50 bar', incidente.Ultima_Lectura__c.replace('.', ','));
+    Assert.areEqual(
+      '5,50 bar',
+      incidente.Lectura_Apertura__c.replace('.', ','),
+      'La apertura no cambia nunca'
+    );
   }
 
   @isTest
@@ -521,6 +714,52 @@ private class IncidentesServicioTest {
       estado.Severidad__c,
       'El estado si volvio'
     );
+    Case lecturas = lecturasDelCaso();
+    Assert.areEqual(
+      IncidentesServicio.CONDICION_NORMALIZADO,
+      lecturas.Condicion_Equipo__c,
+      'El caso dice que el equipo se normalizo'
+    );
+    Assert.areEqual(
+      Datetime.newInstanceGmt(2026, 9, 22, 22, 56, 0),
+      lecturas.Normalizado_En__c,
+      'Con la fecha de origen de la lectura normal'
+    );
+    Assert.areEqual('2,76 bar', lecturas.Ultima_Lectura__c.replace('.', ','));
+    Assert.areEqual(
+      IngestaConstantes.SEV_NORMAL,
+      lecturas.Severidad_Ultima_Lectura__c
+    );
+    Assert.areEqual(
+      IncidentesServicio.PRIORIDAD_ALTA,
+      lecturas.Priority,
+      'La prioridad no baja'
+    );
+    Senal__c normalizadora = [
+      SELECT Incidente__c
+      FROM Senal__c
+      WHERE Clave__c = 'nova-casa-simulator|msg_ok'
+    ];
+    Assert.areEqual(
+      lecturas.Id,
+      normalizadora.Incidente__c,
+      'La lectura que normalizo queda ligada al caso'
+    );
+  }
+
+  @isTest
+  static void shouldNoAbrirCaso_WhenLecturaNormalSinCaso() {
+    Activo__c bomba = bomba();
+    Map<String, Object> normal = presion('msg_ok', 2.76, '22:10:00');
+    insert TestDataFactory.senalPendiente(normal, bomba.Id, bomba.Edificio__c);
+
+    Test.startTest();
+    ProcesamientoServicio.procesar(
+      new List<Aviso_de_Senal__e>{ TestDataFactory.avisoDe(normal) }
+    );
+    Test.stopTest();
+
+    Assert.areEqual(0, [SELECT COUNT() FROM Case], 'Normal no abre nada');
   }
 
   @isTest
@@ -569,6 +808,40 @@ private class IncidentesServicioTest {
       incidente.Priority,
       '15 min es advertencia'
     );
+  }
+
+  private static Map<String, Object> presion(
+    String messageId,
+    Decimal valor,
+    String hora
+  ) {
+    Map<String, Object> mensaje = TestDataFactory.mensajePresion(
+      messageId,
+      'dlv_' + messageId,
+      valor,
+      'BAR'
+    );
+    mensaje.put('occurredAt', '2026-09-22T' + hora + '.000Z');
+    return mensaje;
+  }
+
+  private static Case lecturasDelCaso() {
+    return [
+      SELECT
+        Id,
+        Priority,
+        Lectura_Apertura__c,
+        Severidad_Apertura__c,
+        Fecha_Lectura_Apertura__c,
+        Ultima_Lectura__c,
+        Severidad_Ultima_Lectura__c,
+        Fecha_Ultima_Lectura__c,
+        Ultima_Senal__c,
+        Condicion_Equipo__c,
+        Normalizado_En__c
+      FROM Case
+      WHERE Clave_Abierta__c = :CLAVE_PRESION
+    ];
   }
 
   private static Activo__c bomba() {
