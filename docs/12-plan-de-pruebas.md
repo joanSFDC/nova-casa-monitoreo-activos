@@ -204,7 +204,10 @@ ninguna propiedad del estado visual. Es la prueba del riesgo R-07.
 ### US-208 · Autorización
 
 Detallada en el [módulo 10](10-seguridad-y-accesos.md). Cuatro usuarios de prueba, todas
-las consultas dentro de `System.runAs`.
+las consultas dentro de `System.runAs`. Cada botón tiene la suya: «Abrir intervención» se
+ofrece a quien crea casos y se niega al gerente también en el servidor, «Registrar
+intervención» solo lo tiene el coordinador, y las lecturas del caso se leen sin poder
+escribirse.
 
 El panel de gerencia es metadato y no tiene prueba de Apex. Se comprueba en la org con
 «Iniciar sesión como»:
@@ -215,6 +218,8 @@ El panel de gerencia es metadato y no tiene prueba de Apex. Se comprueba en la o
 | Gerente, filtro Barranquilla | Equipos fuera de rango y casos abiertos coinciden con los informes |
 | Gerente, informe | Ve «Suscribir» en el informe de casos |
 | Operador | La barra no muestra Paneles ni Informes |
+| Gerente, monitor | Ve «Ver incidente» y nunca «Abrir intervención» |
+| Coordinador, caso | La cabecera muestra «Registrar intervención» y crea la tarea; operador, gerente y administrador no la ven |
 
 ### US-209 · Trazabilidad
 
