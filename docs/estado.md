@@ -307,7 +307,9 @@ sf org assign permset -o novacasa2 -n Nova_Casa_Administracion
 
 `crear-usuarios-demo.sh` se puede volver a correr: solo manda el correo de
 clave a los usuarios que crea en esa corrida, así que no invalida las claves
-de quienes ya existían.
+de quienes ya existían. El correo de los cinco humanos es el de Joan, adonde
+llegan la invitación y los códigos de verificación de un navegador nuevo. Un
+usuario que ya existía conserva su correo: el script solo lo pone al crearlo.
 
 `configurar-suscriptor.sh` va después de los usuarios porque busca al de
 integración. Si el disparador ya estaba suscrito, hay que suspender y

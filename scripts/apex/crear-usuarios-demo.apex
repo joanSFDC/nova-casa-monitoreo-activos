@@ -13,10 +13,10 @@
 // corrida les manda el correo de restablecer clave; a los que ya existian no,
 // para no invalidar sus claves. Al usuario de integracion nunca.
 //
-// El correo de los humanos apunta a Juan para que llegue la invitacion.
-// El Username es lo que se escribe en el login.
+// El correo de los humanos apunta a Joan para que lleguen la invitacion y los
+// codigos de verificacion. El Username es lo que se escribe en el login.
 
-String correoHumano = 'juan.palma.a0651088b6@salesforce.com';
+String correoHumano = 'jorduz@salesforce.com';
 
 Profile perfilMinimo = [
     SELECT Id
