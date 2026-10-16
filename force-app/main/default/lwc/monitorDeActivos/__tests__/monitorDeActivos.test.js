@@ -40,10 +40,12 @@ jest.mock(
 const PANEL = {
   criticos: 1,
   advertencias: 0,
-  normales: 1,
+  normales: 2,
+  sinComunicacion: 1,
   sinEdificios: false,
   sinLecturas: false,
   consultaAtrasada: false,
+  puedeAbrir: true,
   edificios: [
     { id: "a01xx0000001", nombre: "Edificio Nova Alameda" },
     { id: "a01xx0000002", nombre: "Edificio Nova Caribe" }
@@ -54,30 +56,75 @@ const PANEL = {
       activoId: "a03xx0000001",
       casoId: null,
       edificio: "Edificio Nova Alameda",
+      edificioId: "a01xx0000001",
+      ciudad: "Bogotá",
       equipo: "Bomba",
+      codigo: "AST-BOG-PUMP-001",
+      tipoActivo: "WATER_PUMP",
+      tipoActivoEtiqueta: "Bomba de presión",
       medicion: "Presion de agua",
       valor: "0,80 bar",
+      lectura: "0,80 bar",
       severidad: "Critico",
       severidadEtiqueta: "Crítico",
       severidadNivel: 2,
       puedeIntervenir: true,
       antiguedad: "hace 40 min",
-      comunicacion: null
+      fechaOrigen: "2026-10-16T10:00:00.000Z",
+      esCamara: false,
+      comunicacionEstado: null,
+      comunicacion: null,
+      casoNormalizado: false
     },
     {
       estadoId: "a08xx0000002",
       activoId: "a03xx0000002",
       casoId: null,
       edificio: "Edificio Nova Alameda",
+      edificioId: "a01xx0000001",
+      ciudad: "Bogotá",
       equipo: "Camara",
+      codigo: "AST-BOG-CAM-001",
+      tipoActivo: "SECURITY_CAMERA",
+      tipoActivoEtiqueta: "Cámara de seguridad",
       medicion: "Conectividad",
       valor: "90 s",
+      lectura: "Sin comunicación · 1 min",
       severidad: "Normal",
       severidadEtiqueta: "Normal",
       severidadNivel: 0,
       puedeIntervenir: false,
       antiguedad: "hace 5 min",
-      comunicacion: "Sin comunicacion"
+      fechaOrigen: "2026-10-16T09:00:00.000Z",
+      esCamara: true,
+      comunicacionEstado: "LOST",
+      comunicacion: "Sin comunicacion",
+      casoNormalizado: false
+    },
+    {
+      estadoId: "a08xx0000003",
+      activoId: "a03xx0000003",
+      casoId: "500xx0000009",
+      edificio: "Edificio Nova Caribe",
+      edificioId: "a01xx0000002",
+      ciudad: "Barranquilla",
+      equipo: "Sala técnica",
+      codigo: "AST-BAQ-TEMP-001",
+      tipoActivo: "TECHNICAL_ROOM",
+      tipoActivoEtiqueta: "Sala técnica",
+      medicion: "Temperatura",
+      valor: "26,8 °C",
+      lectura: "26,8 °C",
+      severidad: "Normal",
+      severidadEtiqueta: "Normal",
+      severidadNivel: 0,
+      puedeIntervenir: true,
+      antiguedad: "hace 10 min",
+      fechaOrigen: "2026-10-16T10:20:00.000Z",
+      esCamara: false,
+      comunicacionEstado: null,
+      comunicacion: null,
+      casoNormalizado: true
     }
   ]
 };
@@ -115,7 +162,7 @@ describe("c-monitor-de-activos", () => {
     obtenerPanel.emit(PANEL);
     await flushPromises();
 
-    expect(el.shadowRoot.querySelectorAll("tbody tr")).toHaveLength(2);
+    expect(el.shadowRoot.querySelectorAll("tr.fila-equipo")).toHaveLength(3);
     expect(el.shadowRoot.textContent).toContain("Bomba");
 
     expect(subscribe).toHaveBeenCalled();
@@ -160,7 +207,7 @@ describe("c-monitor-de-activos", () => {
     obtenerPanel.emit(PANEL);
     await flushPromises();
 
-    const filas = el.shadowRoot.querySelectorAll("tbody tr");
+    const filas = el.shadowRoot.querySelectorAll("tr.fila-equipo");
     expect(filas[0].querySelector("lightning-button")).not.toBeNull();
     expect(filas[1].querySelector("lightning-button")).toBeNull();
     expect(el.shadowRoot.textContent).toContain("1 crítico");
@@ -191,9 +238,173 @@ describe("c-monitor-de-activos", () => {
     el.shadowRoot.querySelector('[data-severidad="Critico"]').click();
     await flushPromises();
 
-    expect(el.shadowRoot.querySelectorAll("tbody tr")).toHaveLength(1);
+    expect(el.shadowRoot.querySelectorAll("tr.fila-equipo")).toHaveLength(1);
     expect(el.shadowRoot.textContent).toContain("Bomba");
     expect(el.shadowRoot.textContent).not.toContain("Camara");
+  });
+
+  function filasVisibles(el) {
+    return Array.from(el.shadowRoot.querySelectorAll("tr.fila-equipo"));
+  }
+
+  function nombres(el) {
+    return filasVisibles(el).map((fila) =>
+      fila.querySelector(".equipo-nombre").textContent.trim()
+    );
+  }
+
+  function cambiar(el, selector, valor) {
+    el.shadowRoot
+      .querySelector(selector)
+      .dispatchEvent(new CustomEvent("change", { detail: { value: valor } }));
+  }
+
+  it("agrupa por edificio con su ciudad y su resumen", async () => {
+    const el = elemento();
+    obtenerPanel.emit(PANEL);
+    await flushPromises();
+
+    const grupos = el.shadowRoot.querySelectorAll("tr.fila-grupo");
+    expect(grupos).toHaveLength(2);
+    expect(grupos[0].textContent).toContain("Edificio Nova Alameda");
+    expect(grupos[0].textContent).toContain("Bogotá");
+    expect(grupos[0].textContent).toContain("1 crítico · 1 sin comunicación");
+    expect(grupos[1].textContent).toContain("Barranquilla");
+    expect(grupos[1].textContent).toContain("Todo normal");
+    expect(grupos[0].querySelector('th[scope="rowgroup"]')).not.toBeNull();
+  });
+
+  it("dibuja el ícono del tipo de cada equipo", async () => {
+    const el = elemento();
+    obtenerPanel.emit(PANEL);
+    await flushPromises();
+
+    const iconos = el.shadowRoot.querySelectorAll("c-icono-equipo");
+    expect(iconos).toHaveLength(3);
+    expect(iconos[0].tipo).toBe("WATER_PUMP");
+    expect(iconos[1].tipo).toBe("SECURITY_CAMERA");
+    expect(filasVisibles(el)[0].textContent).toContain(
+      "Bomba de presión · AST-BOG-PUMP-001"
+    );
+  });
+
+  it("dice la comunicación solo en las cámaras, sin columna aparte", async () => {
+    const el = elemento();
+    obtenerPanel.emit(PANEL);
+    await flushPromises();
+
+    const cabeceras = Array.from(
+      el.shadowRoot.querySelectorAll("thead th")
+    ).map((th) => th.textContent.trim());
+    expect(cabeceras).not.toContain("Comunicación");
+    const [bomba, camara] = filasVisibles(el);
+    expect(bomba.querySelector(".comunicacion")).toBeNull();
+    expect(bomba.querySelector(".valor").textContent).toBe("0,80 bar");
+    const ficha = camara.querySelector(".comunicacion_perdida");
+    expect(ficha).not.toBeNull();
+    expect(ficha.textContent).toContain("Sin comunicación · 1 min");
+  });
+
+  it("dice normalizado cuando el equipo volvió a lo normal con el caso abierto", async () => {
+    const el = elemento();
+    obtenerPanel.emit(PANEL);
+    await flushPromises();
+
+    const [bomba, , sala] = filasVisibles(el);
+    expect(bomba.querySelector(".insignia-normalizado")).toBeNull();
+    const insignia = sala.querySelector(".insignia-normalizado");
+    expect(insignia).not.toBeNull();
+    expect(insignia.textContent).toContain("Normalizado · caso abierto");
+    expect(sala.querySelector("lightning-button").label).toBe("Ver incidente");
+  });
+
+  it("pasa la severidad a la pastilla de cada fila", async () => {
+    const el = elemento();
+    obtenerPanel.emit(PANEL);
+    await flushPromises();
+
+    const pastilla = filasVisibles(el)[0].querySelector("c-pastilla-severidad");
+    expect(pastilla.severidad).toBe("Critico");
+    expect(pastilla.etiqueta).toBe("Crítico");
+  });
+
+  it("filtra por tipo de equipo", async () => {
+    const el = elemento();
+    obtenerPanel.emit(PANEL);
+    await flushPromises();
+
+    const tipo = el.shadowRoot.querySelector(".control_tipo");
+    expect(tipo.options.map((o) => o.value)).toEqual([
+      "",
+      "WATER_PUMP",
+      "SECURITY_CAMERA",
+      "TECHNICAL_ROOM"
+    ]);
+    cambiar(el, ".control_tipo", "SECURITY_CAMERA");
+    await flushPromises();
+    expect(nombres(el)).toEqual(["Camara"]);
+  });
+
+  it("busca por nombre o código sin importar las tildes", async () => {
+    const el = elemento();
+    obtenerPanel.emit(PANEL);
+    await flushPromises();
+
+    cambiar(el, ".control_busqueda", "tecnica");
+    await flushPromises();
+    expect(nombres(el)).toEqual(["Sala técnica"]);
+
+    cambiar(el, ".control_busqueda", "bog-pump");
+    await flushPromises();
+    expect(nombres(el)).toEqual(["Bomba"]);
+  });
+
+  it("ordena por antigüedad dentro de cada edificio", async () => {
+    const el = elemento();
+    obtenerPanel.emit(PANEL);
+    await flushPromises();
+    expect(nombres(el)).toEqual(["Bomba", "Camara", "Sala técnica"]);
+
+    cambiar(el, ".control_orden", "antiguedad");
+    await flushPromises();
+    expect(nombres(el)).toEqual(["Camara", "Bomba", "Sala técnica"]);
+  });
+
+  it("la ficha sin comunicación deja solo los cortes", async () => {
+    const el = elemento();
+    obtenerPanel.emit(PANEL);
+    await flushPromises();
+
+    const ficha = el.shadowRoot.querySelector(
+      '[data-severidad="SinComunicacion"]'
+    );
+    expect(ficha.textContent).toContain("1 sin comunicación");
+    ficha.click();
+    await flushPromises();
+    expect(nombres(el)).toEqual(["Camara"]);
+    expect(
+      el.shadowRoot
+        .querySelector('[data-severidad="SinComunicacion"]')
+        .getAttribute("aria-pressed")
+    ).toBe("true");
+  });
+
+  it("sin resultados ofrece quitar los filtros", async () => {
+    const el = elemento();
+    obtenerPanel.emit(PANEL);
+    await flushPromises();
+
+    cambiar(el, ".control_busqueda", "no existe");
+    await flushPromises();
+    expect(el.shadowRoot.textContent).toContain(
+      "Ningún equipo coincide con los filtros"
+    );
+    const quitar = Array.from(
+      el.shadowRoot.querySelectorAll("lightning-button")
+    ).find((boton) => boton.label === "Quitar filtros");
+    quitar.click();
+    await flushPromises();
+    expect(filasVisibles(el)).toHaveLength(3);
   });
 
   async function pulsarIntervenir(respuesta) {

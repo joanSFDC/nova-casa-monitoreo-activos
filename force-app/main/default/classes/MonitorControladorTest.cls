@@ -104,6 +104,103 @@ private class MonitorControladorTest {
     Assert.areEqual('90 s', camara.valor);
     Assert.areEqual(null, camara.casoId, 'LOST corto no abre caso');
     Assert.isTrue(camara.puedeIntervenir, 'Sin comunicacion se puede atender');
+    Assert.isTrue(camara.esCamara);
+    Assert.areEqual('LOST', camara.comunicacionEstado);
+    Assert.areEqual(
+      'Sin comunicaci\u00f3n \u00b7 1 min',
+      camara.lectura,
+      'La camara dice su estado en la lectura, no en una columna aparte'
+    );
+    Assert.areEqual('C\u00e1mara de seguridad', camara.tipoActivoEtiqueta);
+    Assert.areEqual('SECURITY_CAMERA', camara.tipoActivo);
+    Assert.areEqual('Bogota', camara.ciudad);
+    Assert.areEqual(1, panel.sinComunicacion, 'El contador de cortes');
+  }
+
+  @isTest
+  static void shouldMarcarNormalizado_WhenCasoAbiertoYEquipoNormal() {
+    Activo__c bomba = [
+      SELECT Id, Codigo_Externo__c
+      FROM Activo__c
+      WHERE Codigo_Externo__c = :TestDataFactory.AST_PUMP
+    ];
+    insert new Estado_Actual__c(
+      Activo__c = bomba.Id,
+      Clave__c = bomba.Codigo_Externo__c + '|WATER_PRESSURE',
+      Tipo_Medicion__c = 'WATER_PRESSURE',
+      Valor__c = 3.8,
+      Unidad__c = 'BAR',
+      Severidad__c = IngestaConstantes.SEV_NORMAL,
+      Severidad_Nivel__c = 0,
+      Fecha_Origen__c = Datetime.now()
+    );
+    Case abierto = new Case(
+      Subject = 'Lectura fuera de rango',
+      Status = 'New',
+      Origin = 'Web',
+      Priority = 'High',
+      Clave_Abierta__c = bomba.Codigo_Externo__c + '|WATER_PRESSURE',
+      Activo__c = bomba.Id,
+      Tipo_Medicion__c = 'WATER_PRESSURE'
+    );
+    insert abierto;
+
+    Test.startTest();
+    MonitorControlador.PanelDTO panel = MonitorControlador.obtenerPanel(null);
+    Test.stopTest();
+
+    MonitorControlador.FilaDTO fila = panel.filas[0];
+    Assert.areEqual(abierto.Id, fila.casoId, 'Sigue llevando al caso');
+    Assert.isTrue(
+      fila.casoNormalizado,
+      'Normal con caso abierto se dice normalizado, no parece un error'
+    );
+    Assert.isTrue(fila.puedeIntervenir, 'Ver incidente sigue disponible');
+    Assert.areEqual('3,80 bar', fila.lectura.replace('.', ','));
+  }
+
+  @isTest
+  static void shouldConservarCasoDeCamara_WhenVuelveLaComunicacion() {
+    Activo__c camara = [
+      SELECT Id, Codigo_Externo__c
+      FROM Activo__c
+      WHERE Codigo_Externo__c = :TestDataFactory.AST_CAM
+    ];
+    insert new Estado_Actual__c(
+      Activo__c = camara.Id,
+      Clave__c = camara.Codigo_Externo__c + '|CAMERA_CONNECTIVITY',
+      Tipo_Medicion__c = 'CAMERA_CONNECTIVITY',
+      Estado_Comunicacion__c = 'HEALTHY',
+      Gap_Segundos__c = 20,
+      Severidad__c = IngestaConstantes.SEV_NORMAL,
+      Severidad_Nivel__c = 0,
+      Fecha_Origen__c = Datetime.now()
+    );
+    Case corte = new Case(
+      Subject = 'Corte de comunicaci\u00f3n EPI-1',
+      Status = 'New',
+      Origin = 'Web',
+      Priority = 'Low',
+      Clave_Abierta__c = 'CONN|EPI-1',
+      Episodio_Id__c = 'EPI-1',
+      Activo__c = camara.Id,
+      Tipo_Medicion__c = 'CAMERA_CONNECTIVITY'
+    );
+    insert corte;
+
+    Test.startTest();
+    MonitorControlador.PanelDTO panel = MonitorControlador.obtenerPanel(null);
+    Test.stopTest();
+
+    MonitorControlador.FilaDTO fila = panel.filas[0];
+    Assert.areEqual(
+      corte.Id,
+      fila.casoId,
+      'Sin episodio en el estado, la fila sigue llevando al caso del corte'
+    );
+    Assert.isTrue(fila.casoNormalizado);
+    Assert.areEqual('En l\u00ednea', fila.lectura);
+    Assert.isNull(fila.comunicacion, 'En linea no es un aviso');
   }
 
   @isTest
