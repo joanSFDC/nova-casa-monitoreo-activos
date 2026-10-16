@@ -595,6 +595,16 @@ No estaban en la especificación y conviene no redescubrirlas.
     vacía el cursor cuando cambia cualquiera de los dos, salvo si el mismo
     guardado trae cursor nuevo, que es la ingesta escribiendo su sesión
     ([módulo 02](02-ingesta.md)).
+57. **El caso guarda sus lecturas y la normalización.** Un equipo en normal con
+    un caso abierto mostraba «Ver incidente» sin explicación, y el operador no
+    podía ver qué lectura abrió su caso porque no lee la bitácora. El caso
+    guarda ahora la lectura de apertura y la última que cambió su severidad,
+    y «Condición del equipo» pasa a «Normalizado» cuando el equipo vuelve a lo
+    normal. Solo se reescribe cuando cambia la severidad o la condición. El
+    formato de las lecturas vive en `LecturaFormato`, que comparten el monitor
+    y el procesamiento. El `docs/07` prometía «evidencia de recuperación» en
+    todos los casos y el código solo la dejaba en las cámaras: ahora la deja la
+    normalización ([módulo 07](07-incidentes.md)).
 
 ## Historial breve
 
@@ -637,3 +647,5 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-05 | El monitor avisa cuando la actualización automática no está disponible. Cierra #71 |
 | 2026-10-05 | Un solo prefijo para la clave inventada de los mensajes sin `messageId`, y prueba de ese camino. Cierra #73 |
 | 2026-10-05 | Cambiar el escenario o la semilla vacía el cursor y abre sesión nueva. Cierra #75 |
+| 2026-10-16 | El correo de los usuarios de demo es el de Joan. PR #78 fusionado. Cierra #77 |
+| 2026-10-16 | El caso guarda la lectura de apertura, la última que lo cambió y si el equipo se normalizó. PR #80 fusionado. Cierra #79 |

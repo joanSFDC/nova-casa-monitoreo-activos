@@ -93,8 +93,43 @@ Los casos a crear y a actualizar se acumulan en listas y se escriben de una vez,
 | Advertencia con caso ya abierto | Nada |
 | Primer crítico, sin caso | Se crea con prioridad **alta** y entra en la cola del coordinador |
 | Crítico con caso en prioridad baja | **Sube a alta** y entra en la cola. No se crea otro |
-| Crítico con caso ya en alta | Nada |
-| Vuelta a normal | El caso **no se cierra solo** |
+| Crítico con caso ya en alta | Nada con la prioridad |
+| Vuelta a normal | El caso **no se cierra solo**: queda «Normalizado» |
+
+La prioridad solo sube. Una lectura que baja de crítico a advertencia, o que vuelve a lo
+normal, no la toca: la prioridad dice lo peor que pasó en el episodio, y lo que pasa ahora
+lo dicen la condición del equipo y el monitor. Si bajara con cada lectura buena, un equipo
+que oscila alrededor del límite haría subir y bajar el caso en la cola sin parar.
+
+### Lo que el caso registra de las lecturas
+
+El operador no puede leer la bitácora, así que «qué lectura abrió esto y qué pasó después»
+tiene que estar en el propio caso. **Decisión: el caso guarda la lectura que lo abrió y la
+última que cambió su severidad, en campos estructurados**: el texto con su unidad, la
+severidad y la fecha de origen, más la clave de la señal para quien sí puede ir a la
+bitácora.
+
+La última lectura **solo se actualiza cuando la lectura cambia la severidad o la condición
+registradas en el caso**: cuando lo abre, lo escala, lo baja, lo normaliza o vuelve a
+fallar. Una lectura que repite la severidad no reescribe el caso. Con la ingesta trayendo
+cientos de lecturas por minuto, actualizarlo con cada una lo reescribiría sin parar y
+ocultaría el cambio que importa.
+
+| Lectura sobre un caso abierto | Qué cambia en el caso |
+| --- | --- |
+| Misma severidad, mismo estado | Nada; la señal se liga al caso como antes |
+| Otra severidad de falla (sube o baja) | Última lectura, severidad, fecha y señal |
+| Normal, o `RESTORED` en una cámara | Lo mismo, y **Condición del equipo** pasa a «Normalizado» con su fecha |
+| Falla después de normalizado | Vuelve a «En falla» y se borra la fecha de normalización |
+
+En una cámara, normalizado significa que **volvió la comunicación** (`RESTORED`), no que el
+silencio todavía sea corto: un `LOST` de noventa segundos es normal por severidad, pero el
+corte sigue abierto.
+
+La normalización resuelve un problema concreto del monitor. Un equipo en normal con un caso
+abierto mostraba «Ver incidente» sin explicación, y parecía un error. Ahora el caso dice
+que el equipo se normalizó y cuándo, la cola de coordinación lo muestra en una columna para
+que el coordinador verifique y cierre, y el monitor lo dice en la fila.
 
 ### Por qué se abre incidente ya en advertencia
 
@@ -140,8 +175,9 @@ haberse resuelto, o puede que el sensor se haya averiado, o que la lectura buena
 casualidad entre dos malas.
 
 **Decisión: el cierre es siempre una acción humana.** El sistema puede decir «ya no lo veo»
-y lo dice, dejando el estado actual en normal y marcando el caso con la evidencia de
-recuperación. Pero cerrar es afirmar que se arregló, y eso no lo sabe el sistema.
+y lo dice: deja el estado actual en normal y el caso en «Normalizado», con la lectura que
+lo normalizó y su fecha. En una cámara añade además a la descripción la línea «Recuperado».
+Pero cerrar es afirmar que se arregló, y eso no lo sabe el sistema.
 
 El precio es el riesgo R-18 y hay que decirlo claro: **al cerrar un caso hay que vaciar
 `Clave_Abierta__c`.** Si ese paso fallara, ese activo y esa medición no podrían volver a
@@ -222,9 +258,10 @@ huérfanos.
 
 ## Cómo se ve la trazabilidad
 
-Cada caso guarda en `Origen_Senal__c` la clave de la señal que lo abrió, y cada señal
-guarda en `Incidente__c` el caso que abrió o escaló. La relación es navegable en los dos
-sentidos.
+Cada caso guarda en `Origen_Senal__c` la clave de la señal que lo abrió y en
+`Ultima_Senal__c` la del último cambio, y cada señal guarda en `Incidente__c` el caso que
+abrió, escaló o normalizó, o al que se sumó con la misma severidad. La relación es
+navegable en los dos sentidos.
 
 Eso permite dos preguntas que el administrador va a hacer: «¿qué mensaje abrió este caso?»
 y «¿este mensaje produjo algún caso?». Sin los dos campos, la segunda exigiría recorrer
