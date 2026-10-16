@@ -605,6 +605,13 @@ No estaban en la especificación y conviene no redescubrirlas.
     y el procesamiento. El `docs/07` prometía «evidencia de recuperación» en
     todos los casos y el código solo la dejaba en las cámaras: ahora la deja la
     normalización ([módulo 07](07-incidentes.md)).
+58. **Cada botón lo ve solo quien puede usarlo.** El gerente veía «Abrir
+    intervención», escribía la nota y recibía un error. El panel trae
+    `puedeAbrir` (`Case.isCreateable()`), la fila solo ofrece el botón con él
+    y el servidor lo comprueba antes de escribir. El coordinador tiene en el
+    caso «Registrar intervención», una acción que crea la tarea y que la
+    cabecera muestra con el permiso personalizado
+    `Nova_Casa_Registrar_Intervencion` ([módulo 10](10-seguridad-y-accesos.md)).
 
 ## Historial breve
 
@@ -649,3 +656,4 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-05 | Cambiar el escenario o la semilla vacía el cursor y abre sesión nueva. Cierra #75 |
 | 2026-10-16 | El correo de los usuarios de demo es el de Joan. PR #78 fusionado. Cierra #77 |
 | 2026-10-16 | El caso guarda la lectura de apertura, la última que lo cambió y si el equipo se normalizó. PR #80 fusionado. Cierra #79 |
+| 2026-10-16 | Cada botón solo para quien puede usarlo: el gerente ya no ve «Abrir intervención» y el coordinador registra la intervención desde el caso. PR #82 fusionado. Cierra #81 |

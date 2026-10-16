@@ -416,6 +416,11 @@
         <field>Case.Ultima_Senal__c</field>
         <readable>true</readable>
     </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Task.ActivityDate</field>
+        <readable>true</readable>
+    </fieldPermissions>
     <hasActivationRequired>false</hasActivationRequired>
     <label>Nova Casa · Administración</label>
     <objectPermissions>

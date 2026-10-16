@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomPermission xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Muestra en la página del caso la acción Registrar intervención, que crea la tarea de trabajo. La tiene el coordinador: decide qué se hace, quién y cuándo.</description>
+    <isLicensed>false</isLicensed>
+    <label>Registrar intervención</label>
+</CustomPermission>

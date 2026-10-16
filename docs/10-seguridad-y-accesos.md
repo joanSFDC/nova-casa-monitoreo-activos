@@ -306,10 +306,28 @@ Ver no basta: cada acción comprueba también quién la pide, en el servidor.
 
 | Acción | Quién | Cómo se impide al resto |
 | --- | --- | --- |
-| Abrir intervención, en el monitor | Operador y coordinador | `abrirIntervencion` lee el estado con `USER_MODE` y crea caso y nota con `USER_MODE`. Sobre un equipo ajeno responde que no existe |
+| Abrir intervención, en el monitor | Quien puede crear casos: operador, coordinador y administrador | El panel trae `puedeAbrir` (`Case.isCreateable()`) y la fila solo ofrece el botón si es verdadero: el gerente no lo ve. `abrirIntervencion` lo vuelve a comprobar antes de escribir, lee el estado con `USER_MODE` y crea caso y nota con `USER_MODE`. Sobre un equipo ajeno responde que no existe |
+| Ver incidente, en el monitor | Todos los que ven el equipo | Solo navega al caso; la página aplica la compartición por ciudad |
+| Registrar intervención, en el caso | Coordinador | Acción rápida que crea la tarea. La cabecera del caso la muestra solo con el permiso personalizado `Nova_Casa_Registrar_Intervencion`, que solo tiene `Nova_Casa_Coordinador` |
 | Aplicar límites | Quien edita `Umbral__c`: coordinador y administrador | `UmbralAplicacionServicio.aplicar` lo comprueba antes de nada y lanza `SinPermisoException` |
 | Programar la ingesta | Administrador | Es quien tiene la credencial. `./scripts/programar-ingesta.sh` |
 | Procesar avisos | Usuario de integración | `./scripts/configurar-suscriptor.sh` |
+
+**Un botón que no sirve no se muestra.** Un botón que lleva a un error es peor que no
+tenerlo: el gerente pulsaba «Abrir intervención», escribía la nota y recibía «No se pudo
+abrir la intervención». Ahora el criterio es el mismo en todo el sistema: el botón se
+muestra solo a quien puede hacer la acción, y el servidor lo comprueba igual por si alguien
+la pide directo. «Abrir intervención» se decide por el permiso de crear casos.
+«Registrar intervención» no se puede decidir así, porque el operador también crea tareas
+(sus notas): por eso es un permiso personalizado, que el coordinador tiene y nadie más.
+«Aplicar límites» ya lo cumplía: el flujo solo está habilitado para coordinador y
+administración, y Salesforce no muestra la acción a los demás.
+
+Las lecturas que el caso guarda (apertura, última lectura, condición del equipo) las leen
+las cuatro personas y no las escribe ninguna: las escribe el sistema. El caso que abre el
+monitor las completa en modo sistema, justo después de crearlo en `USER_MODE`, con una
+clase interna `without sharing` de `MonitorControlador`, igual que la escritura de Aplicar
+límites.
 
 Aplicar límites dependía de que el botón no estuviera en la página del operador. Llamada
 desde Apex, la habría ejecutado cualquiera con lectura. Y fallaba justo a quien debía
@@ -360,6 +378,11 @@ Lo que cada prueba verifica. Salvo las dos primeras filas, están en `SeguridadA
 | Ingesta como integración | `shouldProcesarYEscribir_WhenUsuarioDeIntegracion` | Solo con su conjunto, guarda, aplica y abre el caso con ciudad |
 | Ciudad del caso | `shouldSellarCiudadDelActivo_WhenCasoSeGuardaOCambia` | La ciudad sale del activo, no de lo que se escriba |
 | Timbre del monitor | `shouldEscucharTimbreSinLeerAviso_WhenPersonaDelMonitor` | Operador, coordinador y gerente leen el timbre y no el aviso |
+| Gerente en el monitor | `shouldOcultarYNegarAbrirIntervencion_WhenGerente` | No tiene `puedeAbrir`, la fila crítica no le ofrece abrir intervención y el servidor la rechaza si la pide directo |
+| Quien crea casos | `shouldOfrecerAbrirIntervencion_WhenPuedeCrearCasos` | Operador, coordinador y administrador tienen `puedeAbrir` |
+| Registrar intervención | `shouldMostrarRegistrarIntervencion_SoloAlCoordinador` | Solo el coordinador tiene el permiso personalizado |
+| Coordinador registra | `shouldRegistrarIntervencion_WhenCoordinador` | La tarea se crea en `USER_MODE` sobre el caso |
+| Lecturas del caso | `shouldLeerSinEscribirLecturasDelCaso_WhenPersonas` | Operador, coordinador y gerente las leen y no las escriben; ni el coordinador, que edita casos, puede cambiar una |
 
 La de `Carga__c` es la que más veces se olvida y la que más vale: comprueba que la
 seguridad a nivel de campo funciona de verdad, no solo la de registro. Se hace con el

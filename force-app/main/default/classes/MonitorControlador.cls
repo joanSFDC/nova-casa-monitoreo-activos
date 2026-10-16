@@ -21,6 +21,8 @@ public with sharing class MonitorControlador {
     @AuraEnabled
     public Datetime ultimaConsultaExitosa;
     @AuraEnabled
+    public Boolean puedeAbrir;
+    @AuraEnabled
     public List<EdificioDTO> edificios;
     @AuraEnabled
     public List<FilaDTO> filas;
@@ -71,6 +73,7 @@ public with sharing class MonitorControlador {
     panel.sinEdificios = false;
     panel.sinLecturas = false;
     panel.consultaAtrasada = false;
+    panel.puedeAbrir = puedeAbrir();
     panel.edificios = new List<EdificioDTO>();
     panel.filas = new List<FilaDTO>();
 
@@ -151,7 +154,13 @@ public with sharing class MonitorControlador {
     Map<String, Id> casosAbiertos = casosPorClave(estados);
     Datetime ahora = Datetime.now();
     for (Estado_Actual__c estado : estados) {
-      FilaDTO fila = filaDe(estado, decimales, casosAbiertos, ahora);
+      FilaDTO fila = filaDe(
+        estado,
+        decimales,
+        casosAbiertos,
+        ahora,
+        panel.puedeAbrir
+      );
       panel.filas.add(fila);
       if (fila.severidadNivel == 2) {
         panel.criticos++;
@@ -214,6 +223,11 @@ public with sharing class MonitorControlador {
     ];
     if (!abiertos.isEmpty()) {
       return abiertos[0].Id;
+    }
+    if (!puedeAbrir()) {
+      throw new AuraHandledException(
+        'No tienes permiso para abrir intervenciones.'
+      );
     }
     if (sano) {
       throw new AuraHandledException(
@@ -372,11 +386,20 @@ public with sharing class MonitorControlador {
     return mapa;
   }
 
+  /**
+   * Abrir intervencion es crear un caso: quien no puede, no ve el boton. El
+   * gerente lee los casos y no los crea; ver un caso existente no lo pide.
+   */
+  private static Boolean puedeAbrir() {
+    return Schema.SObjectType.Case.isCreateable();
+  }
+
   private static FilaDTO filaDe(
     Estado_Actual__c estado,
     Map<String, Integer> decimales,
     Map<String, Id> casosAbiertos,
-    Datetime ahora
+    Datetime ahora,
+    Boolean puedeAbrir
   ) {
     FilaDTO fila = new FilaDTO();
     fila.estadoId = estado.Id;
@@ -398,7 +421,8 @@ public with sharing class MonitorControlador {
     fila.casoId = casosAbiertos.get(clave);
     fila.puedeIntervenir =
       fila.casoId != null ||
-      (String.isNotBlank(clave) &&
+      (puedeAbrir &&
+      String.isNotBlank(clave) &&
       (fila.severidadNivel > 0 ||
       fila.comunicacion != null));
     return fila;
