@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>67.0</apiVersion>
+    <description>El dibujo del tipo de equipo: bomba, gota, rayo, termómetro o cámara. Decorativo: el tipo va escrito al lado.</description>
+    <isExposed>false</isExposed>
+    <masterLabel>Ícono de equipo</masterLabel>
+</LightningComponentBundle>
