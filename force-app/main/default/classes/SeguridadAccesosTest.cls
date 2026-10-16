@@ -513,6 +513,205 @@ private class SeguridadAccesosTest {
     );
   }
 
+  @isTest
+  static void shouldOcultarYNegarAbrirIntervencion_WhenGerente() {
+    User gerente;
+    System.runAs(new User(Id = UserInfo.getUserId())) {
+      gerente = TestDataFactory.usuarioConConjunto('Nova_Casa_Gerencia');
+    }
+    compartirEdificio(TestDataFactory.BLD_BOG, gerente.Id);
+    Estado_Actual__c bomba = estado(CLAVE_BOMBA);
+    bomba.Severidad__c = IngestaConstantes.SEV_CRITICO;
+    bomba.Severidad_Nivel__c = 2;
+    update bomba;
+
+    MonitorControlador.PanelDTO panel;
+    Boolean negada = false;
+    Test.startTest();
+    System.runAs(gerente) {
+      panel = MonitorControlador.obtenerPanel(null);
+      try {
+        MonitorControlador.abrirIntervencion(bomba.Id, 'Desde la consola');
+      } catch (AuraHandledException e) {
+        negada = true;
+      }
+    }
+    Test.stopTest();
+
+    Assert.isFalse(panel.puedeAbrir, 'El gerente lee casos y no los crea');
+    Boolean vioLaBomba = false;
+    for (MonitorControlador.FilaDTO fila : panel.filas) {
+      if (fila.estadoId == bomba.Id) {
+        vioLaBomba = true;
+        Assert.isFalse(
+          fila.puedeIntervenir,
+          'Un critico sin caso no le ofrece abrir intervencion'
+        );
+      }
+    }
+    Assert.isTrue(vioLaBomba, 'Ve el equipo critico de su ciudad');
+    Assert.isTrue(negada, 'Y el servidor lo rechaza aunque llame directo');
+    Assert.areEqual(1, [SELECT COUNT() FROM Case], 'No se creo ningun caso');
+  }
+
+  @isTest
+  static void shouldOfrecerAbrirIntervencion_WhenPuedeCrearCasos() {
+    List<User> personas = new List<User>();
+    System.runAs(new User(Id = UserInfo.getUserId())) {
+      for (
+        String conjunto : new List<String>{
+          'Nova_Casa_Operador',
+          'Nova_Casa_Coordinador',
+          'Nova_Casa_Administracion'
+        }
+      ) {
+        personas.add(TestDataFactory.usuarioConConjunto(conjunto));
+      }
+    }
+
+    List<Boolean> pueden = new List<Boolean>();
+    Test.startTest();
+    for (User persona : personas) {
+      System.runAs(persona) {
+        pueden.add(MonitorControlador.obtenerPanel(null).puedeAbrir);
+      }
+    }
+    Test.stopTest();
+
+    for (Integer i = 0; i < personas.size(); i++) {
+      Assert.isTrue(
+        pueden[i],
+        'Operador, coordinador y administrador abren intervenciones'
+      );
+    }
+  }
+
+  @isTest
+  static void shouldMostrarRegistrarIntervencion_SoloAlCoordinador() {
+    Map<String, User> personas = new Map<String, User>();
+    System.runAs(new User(Id = UserInfo.getUserId())) {
+      for (
+        String conjunto : new List<String>{
+          'Nova_Casa_Operador',
+          'Nova_Casa_Coordinador',
+          'Nova_Casa_Gerencia',
+          'Nova_Casa_Administracion'
+        }
+      ) {
+        personas.put(conjunto, TestDataFactory.usuarioConConjunto(conjunto));
+      }
+    }
+
+    Map<String, Boolean> tienen = new Map<String, Boolean>();
+    Test.startTest();
+    for (String conjunto : personas.keySet()) {
+      System.runAs(personas.get(conjunto)) {
+        tienen.put(
+          conjunto,
+          FeatureManagement.checkPermission('Nova_Casa_Registrar_Intervencion')
+        );
+      }
+    }
+    Test.stopTest();
+
+    Assert.isTrue(
+      tienen.get('Nova_Casa_Coordinador'),
+      'El coordinador ve Registrar intervencion en el caso'
+    );
+    Assert.isFalse(tienen.get('Nova_Casa_Operador'));
+    Assert.isFalse(tienen.get('Nova_Casa_Gerencia'));
+    Assert.isFalse(tienen.get('Nova_Casa_Administracion'));
+  }
+
+  @isTest
+  static void shouldRegistrarIntervencion_WhenCoordinador() {
+    User coordinador;
+    System.runAs(new User(Id = UserInfo.getUserId())) {
+      coordinador = TestDataFactory.usuarioConConjunto('Nova_Casa_Coordinador');
+    }
+    Case casoCaribe = [
+      SELECT Id
+      FROM Case
+      WHERE Clave_Abierta__c = :CLAVE_SALA
+    ];
+
+    Database.SaveResult resultado;
+    Test.startTest();
+    System.runAs(coordinador) {
+      resultado = Database.insert(
+        new Task(
+          WhatId = casoCaribe.Id,
+          Subject = 'Revisar el aire de la sala',
+          ActivityDate = Date.today().addDays(1),
+          OwnerId = coordinador.Id
+        ),
+        false,
+        AccessLevel.USER_MODE
+      );
+    }
+    Test.stopTest();
+
+    Assert.isTrue(resultado.isSuccess(), 'La accion del caso crea la tarea');
+    Assert.areEqual(
+      1,
+      [SELECT COUNT() FROM Task WHERE WhatId = :casoCaribe.Id],
+      'Y queda en la actividad del caso'
+    );
+  }
+
+  @isTest
+  static void shouldLeerSinEscribirLecturasDelCaso_WhenPersonas() {
+    List<User> personas = new List<User>();
+    System.runAs(new User(Id = UserInfo.getUserId())) {
+      for (
+        String conjunto : new List<String>{
+          'Nova_Casa_Operador',
+          'Nova_Casa_Coordinador',
+          'Nova_Casa_Gerencia'
+        }
+      ) {
+        personas.add(TestDataFactory.usuarioConConjunto(conjunto));
+      }
+    }
+    Case casoCaribe = [
+      SELECT Id
+      FROM Case
+      WHERE Clave_Abierta__c = :CLAVE_SALA
+    ];
+
+    List<Boolean> leen = new List<Boolean>();
+    List<Boolean> escriben = new List<Boolean>();
+    Boolean coordinadorGuardo;
+    Test.startTest();
+    for (User persona : personas) {
+      System.runAs(persona) {
+        leen.add(
+          Schema.SObjectType.Case.fields.Ultima_Lectura__c.isAccessible() &&
+          Schema.SObjectType.Case.fields.Condicion_Equipo__c.isAccessible()
+        );
+        escriben.add(
+          Schema.SObjectType.Case.fields.Ultima_Lectura__c.isUpdateable() ||
+          Schema.SObjectType.Case.fields.Condicion_Equipo__c.isUpdateable()
+        );
+      }
+    }
+    System.runAs(personas[1]) {
+      coordinadorGuardo = guardar(
+        new Case(Id = casoCaribe.Id, Ultima_Lectura__c = 'Inventada')
+      );
+    }
+    Test.stopTest();
+
+    for (Integer i = 0; i < personas.size(); i++) {
+      Assert.isTrue(leen[i], 'Las personas leen las lecturas del caso');
+      Assert.isFalse(escriben[i], 'Pero no las escriben: son del sistema');
+    }
+    Assert.isFalse(
+      coordinadorGuardo,
+      'Ni el coordinador, que edita casos, puede inventar una lectura'
+    );
+  }
+
   private static User operadorDeAlameda() {
     User operador;
     System.runAs(new User(Id = UserInfo.getUserId())) {
