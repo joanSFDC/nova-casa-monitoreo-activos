@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Severidad_Ultima_Lectura__c</fullName>
+    <inlineHelpText>La severidad de la última lectura que cambió el caso. Es con la que se compara la siguiente.</inlineHelpText>
+    <label>Severidad de la última lectura</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetName>Severidad</valueSetName>
+    </valueSet>
+</CustomField>

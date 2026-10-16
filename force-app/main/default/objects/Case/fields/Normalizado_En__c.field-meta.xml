@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Normalizado_En__c</fullName>
+    <inlineHelpText>La fecha de origen de la lectura con la que el equipo volvió a lo normal. Se vacía si vuelve a fallar.</inlineHelpText>
+    <label>Normalizado el</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>DateTime</type>
+</CustomField>

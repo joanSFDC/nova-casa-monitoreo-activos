@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Condicion_Equipo__c</fullName>
+    <inlineHelpText>En falla mientras la última lectura que cambió el caso es advertencia o crítico. Normalizado cuando el equipo volvió a lo normal: el caso sigue abierto hasta que alguien lo verifique y lo cierre.</inlineHelpText>
+    <label>Condición del equipo</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>En_falla</fullName>
+                <default>false</default>
+                <label>En falla</label>
+            </value>
+            <value>
+                <fullName>Normalizado</fullName>
+                <default>false</default>
+                <label>Normalizado</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>
