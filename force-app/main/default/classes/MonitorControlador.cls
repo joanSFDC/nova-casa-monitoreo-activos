@@ -13,6 +13,8 @@ public with sharing class MonitorControlador {
     @AuraEnabled
     public Integer normales;
     @AuraEnabled
+    public Integer sinComunicacion;
+    @AuraEnabled
     public Boolean sinEdificios;
     @AuraEnabled
     public Boolean sinLecturas;
@@ -62,6 +64,26 @@ public with sharing class MonitorControlador {
     public String antiguedad;
     @AuraEnabled
     public String comunicacion;
+    @AuraEnabled
+    public Id edificioId;
+    @AuraEnabled
+    public String ciudad;
+    @AuraEnabled
+    public String codigo;
+    @AuraEnabled
+    public String tipoActivo;
+    @AuraEnabled
+    public String tipoActivoEtiqueta;
+    @AuraEnabled
+    public Boolean esCamara;
+    @AuraEnabled
+    public String comunicacionEstado;
+    @AuraEnabled
+    public String lectura;
+    @AuraEnabled
+    public Datetime fechaOrigen;
+    @AuraEnabled
+    public Boolean casoNormalizado;
   }
 
   @AuraEnabled(cacheable=true)
@@ -70,6 +92,7 @@ public with sharing class MonitorControlador {
     panel.criticos = 0;
     panel.advertencias = 0;
     panel.normales = 0;
+    panel.sinComunicacion = 0;
     panel.sinEdificios = false;
     panel.sinLecturas = false;
     panel.consultaAtrasada = false;
@@ -114,7 +137,8 @@ public with sharing class MonitorControlador {
           Activo__r.Codigo_Externo__c,
           Activo__r.Tipo__c,
           Activo__r.Edificio__c,
-          Activo__r.Edificio__r.Name
+          Activo__r.Edificio__r.Name,
+          Activo__r.Edificio__r.Ciudad__c
         FROM Estado_Actual__c
         WITH USER_MODE
         ORDER BY Severidad_Nivel__c DESC, Fecha_Origen__c ASC
@@ -137,7 +161,8 @@ public with sharing class MonitorControlador {
           Activo__r.Codigo_Externo__c,
           Activo__r.Tipo__c,
           Activo__r.Edificio__c,
-          Activo__r.Edificio__r.Name
+          Activo__r.Edificio__r.Name,
+          Activo__r.Edificio__r.Ciudad__c
         FROM Estado_Actual__c
         WHERE Activo__r.Edificio__c = :edificioId
         WITH USER_MODE
@@ -151,7 +176,7 @@ public with sharing class MonitorControlador {
     }
 
     Map<String, Integer> decimales = decimalesPorClave();
-    Map<String, Id> casosAbiertos = casosPorClave(estados);
+    Map<String, Case> casosAbiertos = casosPorEquipo(estados);
     Datetime ahora = Datetime.now();
     for (Estado_Actual__c estado : estados) {
       FilaDTO fila = filaDe(
@@ -162,6 +187,9 @@ public with sharing class MonitorControlador {
         panel.puedeAbrir
       );
       panel.filas.add(fila);
+      if (fila.comunicacionEstado == 'LOST') {
+        panel.sinComunicacion++;
+      }
       if (fila.severidadNivel == 2) {
         panel.criticos++;
       } else if (fila.severidadNivel == 1) {
@@ -363,25 +391,31 @@ public with sharing class MonitorControlador {
     return mapa;
   }
 
-  private static Map<String, Id> casosPorClave(List<Estado_Actual__c> estados) {
-    Set<String> claves = new Set<String>();
+  /**
+   * El caso abierto de cada fila se busca por equipo y medicion, no por clave:
+   * la clave de una camara es su episodio, y al volver la comunicacion el estado
+   * lo borra. Buscando por equipo, la fila sigue llevando al caso del ultimo
+   * corte mientras siga abierto.
+   */
+  private static Map<String, Case> casosPorEquipo(
+    List<Estado_Actual__c> estados
+  ) {
+    Set<Id> activos = new Set<Id>();
     for (Estado_Actual__c estado : estados) {
-      String clave = claveDe(estado);
-      if (String.isNotBlank(clave)) {
-        claves.add(clave);
-      }
+      activos.add(estado.Activo__c);
     }
-    Map<String, Id> mapa = new Map<String, Id>();
-    if (claves.isEmpty()) {
-      return mapa;
-    }
+    Map<String, Case> mapa = new Map<String, Case>();
     for (Case incidente : [
-      SELECT Id, Clave_Abierta__c
+      SELECT Id, Activo__c, Tipo_Medicion__c
       FROM Case
-      WHERE Clave_Abierta__c IN :claves AND IsClosed = FALSE
+      WHERE Activo__c IN :activos AND IsClosed = FALSE
       WITH USER_MODE
+      ORDER BY CreatedDate DESC
     ]) {
-      mapa.put(incidente.Clave_Abierta__c, incidente.Id);
+      String clave = incidente.Activo__c + '|' + incidente.Tipo_Medicion__c;
+      if (!mapa.containsKey(clave)) {
+        mapa.put(clave, incidente);
+      }
     }
     return mapa;
   }
@@ -397,7 +431,7 @@ public with sharing class MonitorControlador {
   private static FilaDTO filaDe(
     Estado_Actual__c estado,
     Map<String, Integer> decimales,
-    Map<String, Id> casosAbiertos,
+    Map<String, Case> casosAbiertos,
     Datetime ahora,
     Boolean puedeAbrir
   ) {
@@ -405,24 +439,44 @@ public with sharing class MonitorControlador {
     fila.estadoId = estado.Id;
     fila.activoId = estado.Activo__c;
     fila.edificio = estado.Activo__r.Edificio__r.Name;
+    fila.edificioId = estado.Activo__r.Edificio__c;
+    fila.ciudad = estado.Activo__r.Edificio__r.Ciudad__c;
     fila.equipo = estado.Activo__r.Name;
+    fila.codigo = estado.Activo__r.Codigo_Externo__c;
+    fila.tipoActivo = estado.Activo__r.Tipo__c;
+    fila.tipoActivoEtiqueta = LecturaFormato.tipoActivo(fila.tipoActivo);
     fila.medicion = LecturaFormato.medicion(estado.Tipo_Medicion__c);
     fila.severidad = estado.Severidad__c;
     fila.severidadNivel = estado.Severidad_Nivel__c == null
       ? 0
       : Integer.valueOf(estado.Severidad_Nivel__c);
     fila.severidadEtiqueta = LecturaFormato.severidad(fila.severidadNivel);
+    fila.fechaOrigen = estado.Fecha_Origen__c;
     fila.antiguedad = LecturaFormato.antiguedad(estado.Fecha_Origen__c, ahora);
+    fila.esCamara = estado.Tipo_Medicion__c == LecturaFormato.CONECTIVIDAD;
+    fila.comunicacionEstado = estado.Estado_Comunicacion__c;
     fila.comunicacion = LecturaFormato.comunicacion(
       estado.Estado_Comunicacion__c
     );
     fila.valor = valorDe(estado, decimales);
-    String clave = claveDe(estado);
-    fila.casoId = casosAbiertos.get(clave);
+    fila.lectura = fila.esCamara
+      ? LecturaFormato.corte(
+          estado.Estado_Comunicacion__c,
+          estado.Gap_Segundos__c
+        )
+      : fila.valor;
+    Case caso = casosAbiertos.get(
+      estado.Activo__c + '|' + estado.Tipo_Medicion__c
+    );
+    fila.casoId = caso == null ? null : caso.Id;
+    fila.casoNormalizado =
+      caso != null &&
+      fila.severidadNivel == 0 &&
+      estado.Estado_Comunicacion__c != 'LOST';
     fila.puedeIntervenir =
       fila.casoId != null ||
       (puedeAbrir &&
-      String.isNotBlank(clave) &&
+      String.isNotBlank(claveDe(estado)) &&
       (fila.severidadNivel > 0 ||
       fila.comunicacion != null));
     return fila;

@@ -197,6 +197,12 @@ más, y el fallo sería completamente invisible sin esta prueba.
 | Vigilancia | Sin consultas en un minuto, vuelve a pedir el panel; una consulta por timbre reinicia el minuto; al desmontar se cancela |
 | Sin tiempo real | Si empApi informa un error o la suscripción no se completa, aparece y se anuncia que la actualización automática no está disponible; un timbre posterior lo quita |
 | Región activa | Anuncia «Actualizando», «Monitor actualizado a las HH:MM» y el error; la vigilancia solo anuncia si cambia el aviso de atraso |
+| Agrupación | Una sección por edificio, con su ciudad y su resumen; con el orden por severidad, el edificio con lo más grave va primero |
+| Ícono | Cada fila dibuja el tipo de su equipo, y un tipo desconocido usa un ícono genérico |
+| Comunicación en la lectura | No hay columna Comunicación; solo la cámara muestra la ficha de su corte, también «En línea» |
+| Normalizado | Un equipo normal con caso abierto muestra «Normalizado · caso abierto» y «Ver incidente»; la cámara sigue llevando al caso del corte cuando vuelve la comunicación |
+| Filtros del navegador | Tipo de equipo, búsqueda sin tildes, orden por antigüedad y la ficha sin comunicación filtran sobre filas ya autorizadas; sin resultados, ofrece quitar los filtros |
+| Pastilla de severidad | Pinta cada severidad con su color y su nombre, y «Sin datos» cuando falta |
 
 La última se verifica en el componente comprobando que la carga del evento no llega a
 ninguna propiedad del estado visual. Es la prueba del riesgo R-07.

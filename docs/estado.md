@@ -612,6 +612,14 @@ No estaban en la especificación y conviene no redescubrirlas.
     caso «Registrar intervención», una acción que crea la tarea y que la
     cabecera muestra con el permiso personalizado
     `Nova_Casa_Registrar_Intervencion` ([módulo 10](10-seguridad-y-accesos.md)).
+59. **El monitor dejó de ser una tabla genérica.** Las filas se agrupan por
+    edificio con su ciudad y su resumen, cada equipo lleva el ícono de su tipo
+    y una barra del color de su severidad, la cámara dice su corte en la
+    lectura (la columna Comunicación quedaba vacía en casi todas las filas) y
+    un equipo normal con caso abierto dice «Normalizado · caso abierto». La
+    barra de filtros suma tipo de equipo, orden y búsqueda, en el navegador
+    sobre filas ya autorizadas. Se quitó de la cabecera la hora y el
+    indicador de actualización automática ([módulo 09](09-experiencia-del-operador.md)).
 
 ## Historial breve
 
@@ -657,3 +665,4 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-16 | El correo de los usuarios de demo es el de Joan. PR #78 fusionado. Cierra #77 |
 | 2026-10-16 | El caso guarda la lectura de apertura, la última que lo cambió y si el equipo se normalizó. PR #80 fusionado. Cierra #79 |
 | 2026-10-16 | Cada botón solo para quien puede usarlo: el gerente ya no ve «Abrir intervención» y el coordinador registra la intervención desde el caso. PR #82 fusionado. Cierra #81 |
+| 2026-10-16 | Monitor rediseñado: grupos por edificio, íconos por tipo, comunicación en la lectura, normalizado y filtros por tipo, orden y búsqueda. PR #84 fusionado. Cierra #83 |

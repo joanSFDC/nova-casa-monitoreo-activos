@@ -1,9 +1,9 @@
 <template>
-  <div class="slds-p-around_medium">
+  <div class="monitor">
     <div aria-live="polite" class="slds-assistive-text">{anuncio}</div>
 
     <template lwc:if={cargando}>
-      <div class="slds-box">
+      <div class="tarjeta">
         <div class="slds-text-heading_small slds-m-bottom_small">
           Cargando el monitor
         </div>
@@ -44,154 +44,203 @@
         </div>
       </template>
 
-      <template lwc:if={tiempoRealCaido}>
-        <p class="aviso-tiempo-real slds-text-color_weak slds-m-bottom_small">
-          La actualización automática no está disponible. El monitor se revisa
-          solo cada minuto y con «Actualizar».
-        </p>
-      </template>
-
-      <div
-        class="slds-grid slds-grid_vertical-align-center slds-wrap slds-m-bottom_small"
-      >
-        <div class="slds-col slds-grow">
-          <h1 class="slds-text-heading_medium">Monitor de activos</h1>
-        </div>
-        <div class="slds-col slds-no-flex">
+      <div class="tarjeta">
+        <div class="cabecera">
+          <div>
+            <h1 class="titulo">Monitor de activos</h1>
+            <template lwc:if={tiempoRealCaido}>
+              <p class="aviso-tiempo-real">
+                La actualización automática no está disponible. El monitor se
+                revisa solo cada minuto y con «Actualizar».
+              </p>
+            </template>
+          </div>
           <lightning-button
             variant="neutral"
             label="Actualizar"
+            icon-name="utility:refresh"
             onclick={handleActualizar}
             disabled={actualizando}
           ></lightning-button>
         </div>
-      </div>
 
-      <div
-        class="slds-m-bottom_small"
-        role="toolbar"
-        aria-label="Filtros de severidad"
-      >
-        <button
-          type="button"
-          class={botonCriticos}
-          data-severidad="Critico"
-          aria-pressed={filtroCritico}
-          onclick={handleFiltro}
-        >
-          {etiquetaCriticos}
-        </button>
-        <button
-          type="button"
-          class={botonAdvertencias}
-          data-severidad="Advertencia"
-          aria-pressed={filtroAdvertencia}
-          onclick={handleFiltro}
-        >
-          {etiquetaAdvertencias}
-        </button>
-        <button
-          type="button"
-          class={botonNormales}
-          data-severidad="Normal"
-          aria-pressed={filtroNormal}
-          onclick={handleFiltro}
-        >
-          {etiquetaNormales}
-        </button>
-      </div>
-
-      <template lwc:if={mostrarSelectorEdificio}>
-        <lightning-combobox
-          class="slds-m-bottom_small slds-size_medium"
-          name="edificio"
-          label="Edificio"
-          value={edificioId}
-          options={opcionesEdificio}
-          onchange={handleEdificio}
-        ></lightning-combobox>
-      </template>
-
-      <template lwc:if={panel.sinEdificios}>
-        <p>
-          No tienes edificios asignados. Habla con tu coordinador para que te dé
-          acceso.
-        </p>
-      </template>
-      <template lwc:elseif={panel.sinLecturas}>
-        <p>Tus equipos no tienen lecturas todavía.</p>
-      </template>
-      <template lwc:elseif={sinResultadosDeFiltro}>
-        <p>Ningún equipo coincide con el filtro de severidad.</p>
-      </template>
-      <template lwc:else>
-        <div class="slds-scrollable_x">
-          <table class="slds-table slds-table_bordered slds-table_cell-buffer">
-            <thead>
-              <tr class="slds-line-height_reset">
-                <th scope="col"><div class="slds-truncate">Edificio</div></th>
-                <th scope="col"><div class="slds-truncate">Equipo</div></th>
-                <th scope="col"><div class="slds-truncate">Medición</div></th>
-                <th scope="col"><div class="slds-truncate">Valor</div></th>
-                <th scope="col"><div class="slds-truncate">Severidad</div></th>
-                <th scope="col"><div class="slds-truncate">Antigüedad</div></th>
-                <th scope="col">
-                  <div class="slds-truncate">Comunicación</div>
-                </th>
-                <th scope="col"><div class="slds-truncate">Acción</div></th>
-              </tr>
-            </thead>
-            <tbody>
-              <template for:each={filasVisibles} for:item="fila">
-                <tr key={fila.estadoId}>
-                  <td>
-                    <div class="slds-truncate">{fila.edificio}</div>
-                  </td>
-                  <th scope="row">
-                    <button
-                      type="button"
-                      class="slds-button slds-button_reset slds-text-link"
-                      data-id={fila.activoId}
-                      onclick={handleActivo}
-                    >
-                      {fila.equipo}
-                    </button>
-                  </th>
-                  <td>
-                    <div class="slds-truncate">{fila.medicion}</div>
-                  </td>
-                  <td>
-                    <div class="slds-truncate">{fila.valor}</div>
-                  </td>
-                  <td>
-                    <span class={fila.claseSeveridad}
-                      >{fila.severidadEtiqueta}</span
-                    >
-                  </td>
-                  <td>
-                    <div class="slds-truncate">{fila.antiguedad}</div>
-                  </td>
-                  <td>
-                    <div class="slds-truncate">{fila.comunicacion}</div>
-                  </td>
-                  <td>
-                    <template lwc:if={fila.puedeIntervenir}>
-                      <lightning-button
-                        variant="neutral"
-                        data-estado={fila.estadoId}
-                        data-caso={fila.casoId}
-                        label={fila.etiquetaAccion}
-                        title={fila.tituloAccion}
-                        onclick={handleAccion}
-                      ></lightning-button>
-                    </template>
-                  </td>
-                </tr>
-              </template>
-            </tbody>
-          </table>
+        <div class="barra">
+          <div class="fichas" role="toolbar" aria-label="Filtrar por severidad">
+            <template for:each={fichas} for:item="ficha">
+              <button
+                key={ficha.valor}
+                type="button"
+                class={ficha.clase}
+                data-severidad={ficha.valor}
+                aria-pressed={ficha.pulsada}
+                onclick={handleFiltro}
+              >
+                <span class="ficha-punto" aria-hidden="true"></span>
+                <span>{ficha.etiqueta}</span>
+              </button>
+            </template>
+          </div>
+          <div class="controles">
+            <template lwc:if={mostrarSelectorEdificio}>
+              <lightning-combobox
+                class="control control_edificio"
+                name="edificio"
+                label="Edificio"
+                value={edificioId}
+                options={opcionesEdificio}
+                onchange={handleEdificio}
+              ></lightning-combobox>
+            </template>
+            <lightning-combobox
+              class="control control_tipo"
+              name="tipo"
+              label="Tipo de equipo"
+              value={filtroTipo}
+              options={opcionesTipo}
+              onchange={handleTipo}
+            ></lightning-combobox>
+            <lightning-combobox
+              class="control control_orden"
+              name="orden"
+              label="Ordenar por"
+              value={orden}
+              options={opcionesOrden}
+              onchange={handleOrden}
+            ></lightning-combobox>
+            <lightning-input
+              class="control control_busqueda"
+              type="search"
+              name="busqueda"
+              label="Buscar equipo"
+              placeholder="Nombre o código"
+              value={busqueda}
+              onchange={handleBusqueda}
+            ></lightning-input>
+          </div>
         </div>
-      </template>
+
+        <template lwc:if={panel.sinEdificios}>
+          <p class="vacio">
+            No tienes edificios asignados. Habla con tu coordinador para que te
+            dé acceso.
+          </p>
+        </template>
+        <template lwc:elseif={panel.sinLecturas}>
+          <p class="vacio">Tus equipos no tienen lecturas todavía.</p>
+        </template>
+        <template lwc:elseif={sinResultadosDeFiltro}>
+          <div class="vacio">
+            <p>Ningún equipo coincide con los filtros.</p>
+            <lightning-button
+              variant="base"
+              label="Quitar filtros"
+              onclick={handleQuitarFiltros}
+            ></lightning-button>
+          </div>
+        </template>
+        <template lwc:else>
+          <div class="slds-scrollable_x">
+            <table class="tabla">
+              <caption class="slds-assistive-text">
+                Equipos por edificio, con su lectura, medición, severidad y
+                antigüedad
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">Equipo</th>
+                  <th scope="col">Lectura</th>
+                  <th scope="col">Severidad</th>
+                  <th scope="col">Antigüedad</th>
+                  <th scope="col">
+                    <span class="slds-assistive-text">Acción</span>
+                  </th>
+                </tr>
+              </thead>
+              <template for:each={grupos} for:item="grupo">
+                <tbody key={grupo.id}>
+                  <tr class="fila-grupo">
+                    <th scope="rowgroup" colspan="5">
+                      <span class="grupo-nombre">{grupo.nombre}</span>
+                      <template lwc:if={grupo.ciudad}>
+                        <span class="grupo-ciudad">{grupo.ciudad}</span>
+                      </template>
+                      <span class="grupo-resumen">{grupo.resumen}</span>
+                    </th>
+                  </tr>
+                  <template for:each={grupo.filas} for:item="fila">
+                    <tr key={fila.estadoId} class={fila.claseFila}>
+                      <th scope="row" class="celda-equipo">
+                        <div class="equipo">
+                          <c-icono-equipo
+                            tipo={fila.tipoActivo}
+                          ></c-icono-equipo>
+                          <div class="equipo-texto">
+                            <button
+                              type="button"
+                              class="slds-button slds-button_reset slds-text-link equipo-nombre"
+                              data-id={fila.activoId}
+                              onclick={handleActivo}
+                            >
+                              {fila.equipo}
+                            </button>
+                            <span class="equipo-detalle">
+                              {fila.detalleEquipo}
+                            </span>
+                          </div>
+                        </div>
+                      </th>
+                      <td class="celda-lectura">
+                        <template lwc:if={fila.esCamara}>
+                          <span class={fila.claseComunicacion}>
+                            <span
+                              class="comunicacion-punto"
+                              aria-hidden="true"
+                            ></span>
+                            {fila.textoLectura}
+                          </span>
+                        </template>
+                        <template lwc:else>
+                          <span class="valor">{fila.textoLectura}</span>
+                        </template>
+                        <span class="lectura-medicion">{fila.medicion}</span>
+                      </td>
+                      <td>
+                        <div class="severidad">
+                          <c-pastilla-severidad
+                            severidad={fila.severidad}
+                            etiqueta={fila.severidadEtiqueta}
+                          ></c-pastilla-severidad>
+                          <template lwc:if={fila.casoNormalizado}>
+                            <span
+                              class="insignia-normalizado"
+                              title="El equipo volvió a lo normal. El caso sigue abierto hasta que coordinación lo verifique y lo cierre."
+                            >
+                              Normalizado · caso abierto
+                            </span>
+                          </template>
+                        </div>
+                      </td>
+                      <td class="antiguedad">{fila.antiguedad}</td>
+                      <td class="celda-accion">
+                        <template lwc:if={fila.puedeIntervenir}>
+                          <lightning-button
+                            variant="neutral"
+                            data-estado={fila.estadoId}
+                            data-caso={fila.casoId}
+                            label={fila.etiquetaAccion}
+                            title={fila.tituloAccion}
+                            onclick={handleAccion}
+                          ></lightning-button>
+                        </template>
+                      </td>
+                    </tr>
+                  </template>
+                </tbody>
+              </template>
+            </table>
+          </div>
+        </template>
+      </div>
     </template>
   </div>
 </template>

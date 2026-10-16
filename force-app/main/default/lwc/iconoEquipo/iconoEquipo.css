@@ -1,0 +1,43 @@
+:host {
+  display: inline-flex;
+}
+
+.icono {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.5rem;
+  flex-shrink: 0;
+}
+
+.icono_bomba {
+  color: #0b5cab;
+  background: #e3f0fb;
+}
+
+.icono_agua {
+  color: #0b6b7f;
+  background: #def4f8;
+}
+
+.icono_energia {
+  color: #7a4f00;
+  background: #fdf1d3;
+}
+
+.icono_sala {
+  color: #a3361a;
+  background: #fde8e1;
+}
+
+.icono_camara {
+  color: #5a1ba9;
+  background: #efe8fb;
+}
+
+.icono_otro {
+  color: #444444;
+  background: #f0f0f0;
+}

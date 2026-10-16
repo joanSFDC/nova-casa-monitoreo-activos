@@ -1,0 +1,42 @@
+<template>
+  <span class={clase} aria-hidden="true">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      width="18"
+      height="18"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.8"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <template lwc:if={esBomba}>
+        <circle cx="12" cy="13" r="5.5"></circle>
+        <path d="M12 13l3.2-2.4M12 13l-3.2-2.4M12 13v4"></path>
+        <path d="M12 7.5V4h6M3 13h3.5M17.5 13H21"></path>
+      </template>
+      <template lwc:elseif={esAgua}>
+        <path
+          d="M12 3.5c-3.2 4.4-6 7.4-6 10.8a6 6 0 0 0 12 0c0-3.4-2.8-6.4-6-10.8z"
+        ></path>
+        <path d="M9.5 15a2.5 2.5 0 0 0 2.5 2.5"></path>
+      </template>
+      <template lwc:elseif={esEnergia}>
+        <path d="M13 2.5L5 13.5h6l-1 8 8-11h-6l1-8z"></path>
+      </template>
+      <template lwc:elseif={esSala}>
+        <path d="M14 14.5V5a2 2 0 0 0-4 0v9.5a4 4 0 1 0 4 0z"></path>
+        <path d="M12 9v7"></path>
+      </template>
+      <template lwc:elseif={esCamara}>
+        <rect x="2.5" y="7" width="12.5" height="10" rx="2"></rect>
+        <path d="M15 11l6-3v8l-6-3z"></path>
+      </template>
+      <template lwc:else>
+        <rect x="4.5" y="4.5" width="15" height="15" rx="3"></rect>
+        <path d="M9 12h6"></path>
+      </template>
+    </svg>
+  </span>
+</template>

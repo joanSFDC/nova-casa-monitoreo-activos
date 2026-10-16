@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>67.0</apiVersion>
+    <description>La severidad con su color, su punto y su nombre escrito. La usan el monitor y los resúmenes de las páginas.</description>
+    <isExposed>false</isExposed>
+    <masterLabel>Pastilla de severidad</masterLabel>
+</LightningComponentBundle>
