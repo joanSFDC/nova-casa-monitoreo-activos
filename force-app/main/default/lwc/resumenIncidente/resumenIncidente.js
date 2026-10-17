@@ -107,8 +107,8 @@ export default class ResumenIncidente extends NavigationMixin(
     const cuando = this.datos ? fecha(this.datos.normalizadoEn) : "";
     return (
       "El equipo volvió a lo normal" +
-      (cuando ? " el " + cuando : "") +
-      ". El caso sigue abierto hasta que coordinación lo verifique y lo cierre."
+      (cuando ? " (" + cuando + ")" : "") +
+      " y el caso sigue abierto hasta que coordinación lo verifique y lo cierre."
     );
   }
 
