@@ -630,6 +630,13 @@ No estaban en la especificación y conviene no redescubrirlas.
     `CaseStatus` si algún caso cambió de estado, que el procesamiento nunca
     hace. `SeguridadAccesosTest.shouldActualizarElCaso_WhenIntegracionLoNormaliza`
     lo prueba con el usuario de integración.
+61. **Cada página de registro abre con un resumen.** Caso, activo, edificio,
+    umbral y señal tienen arriba un componente que junta lo relacionado y
+    pinta la severidad con color: lo que abrió el caso, su último cambio y cómo
+    está ahora; las mediciones, casos y límites de un activo; los conteos,
+    equipos y casos de un edificio; las bandas de un umbral; y el resultado de
+    una señal en palabras. Leen con `ResumenRegistroControlador` (`with
+    sharing`, `USER_MODE`) o con LDS ([módulo 09](09-experiencia-del-operador.md)).
 
 ## Historial breve
 
@@ -677,3 +684,4 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-16 | Cada botón solo para quien puede usarlo: el gerente ya no ve «Abrir intervención» y el coordinador registra la intervención desde el caso. PR #82 fusionado. Cierra #81 |
 | 2026-10-16 | Monitor rediseñado: grupos por edificio, íconos por tipo, comunicación en la lectura, normalizado y filtros por tipo, orden y búsqueda. PR #84 fusionado. Cierra #83 |
 | 2026-10-16 | El disparador del cierre solo consulta `CaseStatus` si cambia el estado: las actualizaciones de integración fallaban. PR #86 fusionado. Cierra #85 |
+| 2026-10-16 | Resúmenes en las páginas de caso, activo, edificio, umbral y señal. PR #88 fusionado. Cierra #87 |

@@ -181,10 +181,36 @@ abrirse, lo mantiene dentro mientras está abierto y lo devuelve al botón al ce
 
 Es la página de registro del caso, `Caso_Registro`, a la que lleva el monitor al abrir una
 intervención o al ir a la que ya existe. Arriba, el asunto, el estado, la prioridad, el
-número y la ciudad, con Editar solo para quien puede editar el caso. Debajo, dos secciones:
-Incidente, con la descripción y el propietario, y Equipo, con el activo, la medición, la
-ciudad y lo que ata el caso a su señal (clave, episodio y origen). Al lado, la actividad
-con las intervenciones.
+número, la ciudad y la condición del equipo, con Editar solo para quien puede editar el
+caso y «Registrar intervención» solo para el coordinador. Debajo, el **resumen del
+incidente** y tres secciones: Incidente, con la descripción y el propietario; Lecturas, con
+los campos que guarda el caso; y Equipo, con el activo, la medición, la ciudad y lo que ata
+el caso a su señal (clave, episodio y origen). Al lado, la actividad con las intervenciones.
+
+### Los resúmenes de las páginas de registro
+
+Una página estándar muestra los campos de **su** registro; para saber cómo está el equipo
+de un caso había que ir al activo, de ahí al estado y de ahí al umbral. **Decisión: cada
+página que las personas visitan abre con un resumen en un componente propio**, que junta
+lo de los registros relacionados y pinta la severidad con color, cosa que un campo estándar
+no puede.
+
+| Página | Componente | Qué junta |
+| --- | --- | --- |
+| Caso | `resumenIncidente` | El equipo con su ícono, edificio y ciudad; tres tarjetas: **lo abrió**, **último cambio** y **ahora** (el estado actual en vivo), cada una con su severidad; y el aviso de normalizado si el equipo volvió y el caso sigue abierto |
+| Activo | `resumenActivo` | La severidad del equipo, cómo está cada medición, sus incidentes abiertos con su condición y la regla de bandas de los límites que se le aplican |
+| Edificio | `resumenEdificio` | Cuántos equipos hay en cada severidad, cada equipo con ícono, lectura y severidad, y los incidentes abiertos de todo el edificio con su última lectura |
+| Umbral | `bandasUmbral` | Las bandas dibujadas como una regla: crítico, advertencia, normal, advertencia y crítico con sus fronteras; en una cámara, los minutos sin señal |
+| Señal | `resultadoSenal` | El resultado en color, el motivo, si se puede reintentar, cuántas veces llegó y qué significa ese resultado |
+
+Los tres primeros leen con `ResumenRegistroControlador`, que es `with sharing` y consulta con
+`WITH USER_MODE`, igual que el monitor: si la persona no ve el registro, devuelve `null` y
+el componente no muestra nada. Los dos últimos leen con LDS (`getRecord`), que ya aplica
+los permisos de campo. Las secciones de campos de cada página siguen debajo, para quien
+necesite el dato exacto o editar.
+
+Se descartaron las fórmulas con `IMAGE()`: dan un semáforo también en las vistas de lista,
+pero con imágenes antiguas y sin texto, y no juntan registros relacionados.
 
 Se resolvió en una sola página, sin pestañas ni navegación intermedia, porque el operador
 llega aquí desde una alarma: quiere saber qué pasa y qué se está haciendo, y cada clic
