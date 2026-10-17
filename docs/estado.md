@@ -620,6 +620,16 @@ No estaban en la especificación y conviene no redescubrirlas.
     barra de filtros suma tipo de equipo, orden y búsqueda, en el navegador
     sobre filas ya autorizadas. Se quitó de la cabecera la hora y el
     indicador de actualización automática ([módulo 09](09-experiencia-del-operador.md)).
+60. **El disparador del cierre no puede consultar `CaseStatus` como
+    integración.** `CaseLiberarClave` lo consultaba en cada actualización de
+    un caso, y el usuario de integración, con licencia solo de API, no puede
+    leer ese objeto. Mientras el procesamiento solo actualizaba casos al
+    escalar, el fallo casi no se veía; al registrar las lecturas (punto 57)
+    cada cambio de severidad fallaba y su señal quedaba Fallido: más de 7.500
+    en una tarde, y ningún caso recibió sus lecturas. Ahora solo consulta
+    `CaseStatus` si algún caso cambió de estado, que el procesamiento nunca
+    hace. `SeguridadAccesosTest.shouldActualizarElCaso_WhenIntegracionLoNormaliza`
+    lo prueba con el usuario de integración.
 
 ## Historial breve
 
@@ -666,3 +676,4 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-16 | El caso guarda la lectura de apertura, la última que lo cambió y si el equipo se normalizó. PR #80 fusionado. Cierra #79 |
 | 2026-10-16 | Cada botón solo para quien puede usarlo: el gerente ya no ve «Abrir intervención» y el coordinador registra la intervención desde el caso. PR #82 fusionado. Cierra #81 |
 | 2026-10-16 | Monitor rediseñado: grupos por edificio, íconos por tipo, comunicación en la lectura, normalizado y filtros por tipo, orden y búsqueda. PR #84 fusionado. Cierra #83 |
+| 2026-10-16 | El disparador del cierre solo consulta `CaseStatus` si cambia el estado: las actualizaciones de integración fallaban. PR #86 fusionado. Cierra #85 |
