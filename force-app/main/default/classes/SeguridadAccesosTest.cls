@@ -477,6 +477,72 @@ private class SeguridadAccesosTest {
   }
 
   @isTest
+  static void shouldActualizarElCaso_WhenIntegracionLoNormaliza() {
+    User integracion;
+    System.runAs(new User(Id = UserInfo.getUserId())) {
+      integracion = TestDataFactory.usuarioDeIntegracion();
+    }
+    Activo__c bomba = activo(TestDataFactory.AST_PUMP);
+    insert new Case(
+      Subject = 'Lectura fuera de rango ' + CLAVE_BOMBA,
+      Status = 'New',
+      Origin = 'Web',
+      Priority = 'High',
+      Activo__c = bomba.Id,
+      Tipo_Medicion__c = 'WATER_PRESSURE',
+      Clave_Abierta__c = CLAVE_BOMBA,
+      Severidad_Ultima_Lectura__c = IngestaConstantes.SEV_CRITICO,
+      Condicion_Equipo__c = IncidentesServicio.CONDICION_EN_FALLA
+    );
+    Map<String, Object> mensaje = TestDataFactory.mensajePresion(
+      'msg_integ_ok',
+      'dlv_integ_ok',
+      2.76,
+      'BAR'
+    );
+    String ahoraIso = Datetime.now()
+      .addMinutes(-1)
+      .formatGmt('yyyy-MM-dd\'T\'HH:mm:ss.SSS\'Z\'');
+    mensaje.put('occurredAt', ahoraIso);
+    mensaje.put('publishedAt', ahoraIso);
+    String cuerpo = TestDataFactory.sobre(
+      new List<Map<String, Object>>{ mensaje },
+      'cur_integ_ok',
+      false
+    );
+
+    Test.startTest();
+    System.runAs(integracion) {
+      IngestaServicio.procesarPagina(cuerpo, Datetime.now());
+      ProcesamientoServicio.procesar(
+        new List<Aviso_de_Senal__e>{ TestDataFactory.avisoDe(mensaje) }
+      );
+    }
+    Test.stopTest();
+
+    Senal__c senal = [
+      SELECT Resultado__c, Detalle__c
+      FROM Senal__c
+      WHERE Message_Id__c = 'msg_integ_ok'
+    ];
+    Assert.areEqual(
+      IngestaConstantes.RESULTADO_APLICADO,
+      senal.Resultado__c,
+      'Actualizar el caso no puede tumbar la senal: ' + senal.Detalle__c
+    );
+    Assert.areEqual(
+      IncidentesServicio.CONDICION_NORMALIZADO,
+      [
+        SELECT Condicion_Equipo__c
+        FROM Case
+        WHERE Clave_Abierta__c = :CLAVE_BOMBA
+      ]
+      .Condicion_Equipo__c,
+      'Integracion normaliza el caso, aunque no pueda leer CaseStatus'
+    );
+  }
+
+  @isTest
   static void shouldSellarCiudadDelActivo_WhenCasoSeGuardaOCambia() {
     Case caso = [
       SELECT Id, Ciudad__c
