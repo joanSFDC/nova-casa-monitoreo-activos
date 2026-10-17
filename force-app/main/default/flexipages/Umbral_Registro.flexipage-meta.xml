@@ -269,6 +269,12 @@
     <flexiPageRegions>
         <itemInstances>
             <componentInstance>
+                <componentName>bandasUmbral</componentName>
+                <identifier>c_bandasUmbral</identifier>
+            </componentInstance>
+        </itemInstances>
+        <itemInstances>
+            <componentInstance>
                 <componentInstanceProperties>
                     <name>columns</name>
                     <value>Facet-Identidad-Columns</value>

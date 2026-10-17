@@ -419,6 +419,12 @@
     <flexiPageRegions>
         <itemInstances>
             <componentInstance>
+                <componentName>resultadoSenal</componentName>
+                <identifier>c_resultadoSenal</identifier>
+            </componentInstance>
+        </itemInstances>
+        <itemInstances>
+            <componentInstance>
                 <componentInstanceProperties>
                     <name>columns</name>
                     <value>Facet-Identidad-Columns</value>

@@ -215,6 +215,12 @@
     <flexiPageRegions>
         <itemInstances>
             <componentInstance>
+                <componentName>resumenActivo</componentName>
+                <identifier>c_resumenActivo</identifier>
+            </componentInstance>
+        </itemInstances>
+        <itemInstances>
+            <componentInstance>
                 <componentInstanceProperties>
                     <name>columns</name>
                     <value>Facet-Identidad-Columns</value>

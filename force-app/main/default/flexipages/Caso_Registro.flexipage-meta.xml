@@ -417,6 +417,12 @@
     <flexiPageRegions>
         <itemInstances>
             <componentInstance>
+                <componentName>resumenIncidente</componentName>
+                <identifier>c_resumenIncidente</identifier>
+            </componentInstance>
+        </itemInstances>
+        <itemInstances>
+            <componentInstance>
                 <componentInstanceProperties>
                     <name>columns</name>
                     <value>Facet-Incidente-Columns</value>

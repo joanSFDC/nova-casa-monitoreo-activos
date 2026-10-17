@@ -203,6 +203,10 @@ más, y el fallo sería completamente invisible sin esta prueba.
 | Normalizado | Un equipo normal con caso abierto muestra «Normalizado · caso abierto» y «Ver incidente»; la cámara sigue llevando al caso del corte cuando vuelve la comunicación |
 | Filtros del navegador | Tipo de equipo, búsqueda sin tildes, orden por antigüedad y la ficha sin comunicación filtran sobre filas ya autorizadas; sin resultados, ofrece quitar los filtros |
 | Pastilla de severidad | Pinta cada severidad con su color y su nombre, y «Sin datos» cuando falta |
+| Resumen del incidente | Muestra lo que lo abrió, su último cambio y cómo está ahora; avisa de normalizado si el caso sigue abierto, no si está cerrado; dice «Sin registro» en un caso anterior a las lecturas; no muestra nada si el servidor no deja ver el caso |
+| Resumen del activo y del edificio | Junta mediciones, casos y límites o conteos; «En falla» solo si el caso lo registra; el operador de Bogotá no recibe el resumen de Caribe (`ResumenRegistroControladorTest`) |
+| Bandas del umbral | Dibuja las cinco bandas con sus fronteras, omite la que falta y en una cámara cuenta minutos; en la página del umbral lee el registro |
+| Resultado de la señal | Pinta el resultado con su color, su motivo, si se puede reintentar y las entregas, y explica qué significa |
 
 La última se verifica en el componente comprobando que la carga del evento no llega a
 ninguna propiedad del estado visual. Es la prueba del riesgo R-07.

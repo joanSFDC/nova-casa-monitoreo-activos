@@ -1,0 +1,113 @@
+<template>
+  <template lwc:if={cargando}>
+    <div class="tarjeta">
+      <div class="slds-skeleton slds-skeleton_text"></div>
+    </div>
+  </template>
+  <template lwc:elseif={error}>
+    <div class="tarjeta" role="alert">{error}</div>
+  </template>
+  <template lwc:elseif={datos}>
+    <article class="tarjeta">
+      <header class="equipo">
+        <c-icono-equipo tipo={datos.equipo.tipo}></c-icono-equipo>
+        <div class="equipo-texto">
+          <h2 class="equipo-nombre">{datos.equipo.nombre}</h2>
+          <span class="equipo-detalle">{detalleEquipo}</span>
+        </div>
+        <c-pastilla-severidad
+          severidad={datos.severidad}
+          etiqueta={datos.severidadEtiqueta}
+        ></c-pastilla-severidad>
+        <button
+          type="button"
+          class="slds-button slds-button_reset slds-text-link edificio"
+          onclick={handleEdificio}
+        >
+          {lugar}
+        </button>
+      </header>
+
+      <section class="seccion">
+        <h3 class="seccion-titulo">Cómo está cada medición</h3>
+        <template lwc:if={hayMediciones}>
+          <ul class="lista">
+            <template for:each={mediciones} for:item="medicion">
+              <li key={medicion.estadoId} class="lista-fila">
+                <div class="lista-principal">
+                  <span class="lista-nombre">{medicion.medicion}</span>
+                  <span class="lista-detalle">{medicion.antiguedad}</span>
+                </div>
+                <template lwc:if={medicion.esCamara}>
+                  <span class={medicion.claseComunicacion}>
+                    <span class="comunicacion-punto" aria-hidden="true"></span>
+                    {medicion.lectura}
+                  </span>
+                </template>
+                <template lwc:else>
+                  <span class="valor">{medicion.lectura}</span>
+                </template>
+                <c-pastilla-severidad
+                  severidad={medicion.severidad}
+                  etiqueta={medicion.severidadEtiqueta}
+                ></c-pastilla-severidad>
+                <template lwc:if={medicion.casoNormalizado}>
+                  <span class="insignia-normalizado">
+                    Normalizado · caso abierto
+                  </span>
+                </template>
+              </li>
+            </template>
+          </ul>
+        </template>
+        <template lwc:else>
+          <p class="vacio">Este equipo todavía no tiene lecturas.</p>
+        </template>
+      </section>
+
+      <section class="seccion">
+        <h3 class="seccion-titulo">Incidentes abiertos</h3>
+        <template lwc:if={hayCasos}>
+          <ul class="lista">
+            <template for:each={casos} for:item="caso">
+              <li key={caso.id} class="lista-fila">
+                <div class="lista-principal">
+                  <button
+                    type="button"
+                    class="slds-button slds-button_reset slds-text-link lista-nombre"
+                    data-id={caso.id}
+                    onclick={handleCaso}
+                  >
+                    {caso.numero} · {caso.asunto}
+                  </button>
+                  <span class="lista-detalle">{caso.detalle}</span>
+                </div>
+                <template lwc:if={caso.normalizado}>
+                  <span class="insignia-normalizado">Normalizado</span>
+                </template>
+                <template lwc:elseif={caso.enFalla}>
+                  <span class="insignia-falla">En falla</span>
+                </template>
+              </li>
+            </template>
+          </ul>
+        </template>
+        <template lwc:else>
+          <p class="vacio">Sin incidentes abiertos.</p>
+        </template>
+      </section>
+
+      <template lwc:if={hayLimites}>
+        <section class="seccion">
+          <h3 class="seccion-titulo">Límites que se le aplican</h3>
+          <template for:each={limites} for:item="limite">
+            <div key={limite.clave} class="limite">
+              <span class="lista-nombre">{limite.medicion}</span>
+              <c-bandas-umbral limite={limite} compacto></c-bandas-umbral>
+            </div>
+          </template>
+        </section>
+      </template>
+    </article>
+  </template>
+</template>

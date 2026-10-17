@@ -1,0 +1,105 @@
+<template>
+  <template lwc:if={cargando}>
+    <div class="tarjeta">
+      <div class="slds-skeleton slds-skeleton_text"></div>
+    </div>
+  </template>
+  <template lwc:elseif={error}>
+    <div class="tarjeta" role="alert">{error}</div>
+  </template>
+  <template lwc:elseif={datos}>
+    <article class="tarjeta">
+      <header class="cabecera">
+        <div>
+          <h2 class="nombre">{datos.nombre}</h2>
+          <span class="lugar">{lugar}</span>
+        </div>
+        <ul class="conteos" aria-label="Equipos por severidad">
+          <template for:each={conteos} for:item="conteo">
+            <li key={conteo.clave} class={conteo.clase}>
+              <span class="conteo-punto" aria-hidden="true"></span>
+              {conteo.texto}
+            </li>
+          </template>
+        </ul>
+      </header>
+
+      <section class="seccion">
+        <h3 class="seccion-titulo">Sus equipos</h3>
+        <template lwc:if={hayEquipos}>
+          <ul class="lista">
+            <template for:each={equipos} for:item="equipo">
+              <li key={equipo.estadoId} class="lista-fila">
+                <c-icono-equipo tipo={equipo.tipoActivo}></c-icono-equipo>
+                <div class="lista-principal">
+                  <button
+                    type="button"
+                    class="slds-button slds-button_reset slds-text-link lista-nombre"
+                    data-id={equipo.activoId}
+                    onclick={handleActivo}
+                  >
+                    {equipo.equipo}
+                  </button>
+                  <span class="lista-detalle">{equipo.medicion}</span>
+                </div>
+                <template lwc:if={equipo.esCamara}>
+                  <span class={equipo.claseComunicacion}>
+                    <span class="comunicacion-punto" aria-hidden="true"></span>
+                    {equipo.lectura}
+                  </span>
+                </template>
+                <template lwc:else>
+                  <span class="valor">{equipo.lectura}</span>
+                </template>
+                <c-pastilla-severidad
+                  severidad={equipo.severidad}
+                  etiqueta={equipo.severidadEtiqueta}
+                ></c-pastilla-severidad>
+                <template lwc:if={equipo.casoNormalizado}>
+                  <span class="insignia-normalizado">
+                    Normalizado · caso abierto
+                  </span>
+                </template>
+              </li>
+            </template>
+          </ul>
+        </template>
+        <template lwc:else>
+          <p class="vacio">Los equipos de este edificio no tienen lecturas.</p>
+        </template>
+      </section>
+
+      <section class="seccion">
+        <h3 class="seccion-titulo">Incidentes abiertos</h3>
+        <template lwc:if={hayCasos}>
+          <ul class="lista">
+            <template for:each={casos} for:item="caso">
+              <li key={caso.id} class="lista-fila">
+                <div class="lista-principal">
+                  <button
+                    type="button"
+                    class="slds-button slds-button_reset slds-text-link lista-nombre"
+                    data-id={caso.id}
+                    onclick={handleCaso}
+                  >
+                    {caso.numero} · {caso.equipo}
+                  </button>
+                  <span class="lista-detalle">{caso.detalle}</span>
+                </div>
+                <template lwc:if={caso.normalizado}>
+                  <span class="insignia-normalizado">Normalizado</span>
+                </template>
+                <template lwc:elseif={caso.enFalla}>
+                  <span class="insignia-falla">En falla</span>
+                </template>
+              </li>
+            </template>
+          </ul>
+        </template>
+        <template lwc:else>
+          <p class="vacio">Sin incidentes abiertos.</p>
+        </template>
+      </section>
+    </article>
+  </template>
+</template>
