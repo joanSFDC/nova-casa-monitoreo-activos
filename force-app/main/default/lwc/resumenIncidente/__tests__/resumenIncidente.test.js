@@ -95,6 +95,9 @@ describe("c-resumen-incidente", () => {
     expect(aviso).not.toBeNull();
     expect(aviso.textContent).toContain("volvió a lo normal");
     expect(aviso.textContent).toContain("hasta que coordinación lo verifique");
+    expect(aviso.textContent).toMatch(
+      /volvió a lo normal \(.+\) y el caso sigue abierto/
+    );
   });
 
   it("no avisa de normalizado en un caso cerrado", async () => {
