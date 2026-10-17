@@ -1,0 +1,17 @@
+<template>
+  <template lwc:if={datos}>
+    <div class={claseContenedor}>
+      <template lwc:if={titulo}>
+        <h3 class="titulo">{titulo}</h3>
+      </template>
+      <ol class="regla" aria-label="Bandas de clasificación">
+        <template for:each={bandas} for:item="banda">
+          <li key={banda.clave} class={banda.clase}>
+            <span class="banda-nombre">{banda.nombre}</span>
+            <span class="banda-rango">{banda.rango}</span>
+          </li>
+        </template>
+      </ol>
+    </div>
+  </template>
+</template>

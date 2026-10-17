@@ -1,0 +1,94 @@
+.tarjeta {
+  background: var(--slds-g-color-neutral-base-100, #ffffff);
+  border: 1px solid var(--slds-g-color-border-base-1, #e5e5e5);
+  border-radius: 0.75rem;
+  padding: 0.875rem 1.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.fila {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+}
+
+.resultado {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.1875rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid #e5e5e5;
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.punto {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.resultado_aplicado {
+  color: #22683e;
+  background: #ebf7e6;
+  border-color: #bfe3c3;
+}
+
+.resultado_pendiente {
+  color: #0b5cab;
+  background: #eef4ff;
+  border-color: #b8d2f5;
+}
+
+.resultado_atrasado {
+  color: #444444;
+  background: #f3f3f3;
+  border-color: #dddbda;
+}
+
+.resultado_conflicto {
+  color: #5a1ba9;
+  background: #f4eefd;
+  border-color: #d9c6f7;
+}
+
+.resultado_rechazado {
+  color: #8c4b02;
+  background: #fef4e6;
+  border-color: #f9d8a6;
+}
+
+.resultado_fallido {
+  color: #ba0517;
+  background: #fef1ee;
+  border-color: #f8c6bf;
+}
+
+.motivo {
+  font-weight: 600;
+  color: #181818;
+}
+
+.insignia {
+  padding: 0.125rem 0.5rem;
+  border-radius: 0.375rem;
+  border: 1px solid #e5e5e5;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #5c5c5c;
+}
+
+.insignia_reintentable {
+  border-color: #b8d2f5;
+  background: #eef4ff;
+  color: #0b5cab;
+}
+
+.explicacion {
+  margin-top: 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--slds-g-color-neutral-base-30, #5c5c5c);
+}

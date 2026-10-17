@@ -384,6 +384,10 @@
         <apexClass>LecturaFormato</apexClass>
         <enabled>true</enabled>
     </classAccesses>
+    <classAccesses>
+        <apexClass>ResumenRegistroControlador</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
     <hasActivationRequired>false</hasActivationRequired>
     <label>Nova Casa · Operador</label>
     <userPermissions>

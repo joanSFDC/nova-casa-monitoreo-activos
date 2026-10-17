@@ -143,6 +143,12 @@
     <flexiPageRegions>
         <itemInstances>
             <componentInstance>
+                <componentName>resumenEdificio</componentName>
+                <identifier>c_resumenEdificio</identifier>
+            </componentInstance>
+        </itemInstances>
+        <itemInstances>
+            <componentInstance>
                 <componentInstanceProperties>
                     <name>columns</name>
                     <value>Facet-Identidad-Columns</value>

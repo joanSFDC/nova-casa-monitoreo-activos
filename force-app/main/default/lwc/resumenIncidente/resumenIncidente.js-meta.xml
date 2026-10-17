@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>67.0</apiVersion>
+    <description>El resumen del incidente: el equipo, la lectura que lo abrió, la última que lo cambió y cómo está ahora.</description>
+    <isExposed>true</isExposed>
+    <masterLabel>Resumen del incidente</masterLabel>
+    <targets>
+        <target>lightning__RecordPage</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightning__RecordPage">
+            <objects>
+                <object>Case</object>
+            </objects>
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

@@ -1,0 +1,24 @@
+<template>
+  <template lwc:if={datos}>
+    <div class="tarjeta">
+      <div class="fila">
+        <span class={claseResultado}>
+          <span class="punto" aria-hidden="true"></span>
+          {etiquetaResultado}
+        </span>
+        <template lwc:if={motivo}>
+          <span class="motivo">{motivo}</span>
+        </template>
+        <template lwc:if={reintentable}>
+          <span class="insignia insignia_reintentable"
+            >Se puede reintentar</span
+          >
+        </template>
+        <template lwc:if={entregas}>
+          <span class="insignia">{entregas}</span>
+        </template>
+      </div>
+      <p class="explicacion">{explicacion}</p>
+    </div>
+  </template>
+</template>

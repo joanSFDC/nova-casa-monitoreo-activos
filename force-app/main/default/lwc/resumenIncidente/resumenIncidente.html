@@ -1,0 +1,65 @@
+<template>
+  <template lwc:if={cargando}>
+    <div class="tarjeta">
+      <div class="slds-skeleton slds-skeleton_text"></div>
+    </div>
+  </template>
+  <template lwc:elseif={error}>
+    <div class="tarjeta" role="alert">{error}</div>
+  </template>
+  <template lwc:elseif={datos}>
+    <article class="tarjeta">
+      <template lwc:if={equipo}>
+        <header class="equipo">
+          <c-icono-equipo tipo={equipo.tipo}></c-icono-equipo>
+          <div class="equipo-texto">
+            <button
+              type="button"
+              class="slds-button slds-button_reset slds-text-link equipo-nombre"
+              onclick={handleEquipo}
+            >
+              {equipo.nombre}
+            </button>
+            <span class="equipo-detalle">
+              {datos.medicion} · {detalleEquipo}
+            </span>
+          </div>
+          <button
+            type="button"
+            class="slds-button slds-button_reset slds-text-link edificio"
+            onclick={handleEdificio}
+          >
+            {equipo.edificio}
+            <template lwc:if={equipo.ciudad}> · {equipo.ciudad}</template>
+          </button>
+        </header>
+      </template>
+      <template lwc:else>
+        <p class="sin-equipo">Este incidente no tiene un equipo asociado.</p>
+      </template>
+
+      <div class="lecturas">
+        <template for:each={columnas} for:item="columna">
+          <section key={columna.clave} class="lectura">
+            <h3 class="lectura-titulo">{columna.titulo}</h3>
+            <template lwc:if={columna.tiene}>
+              <p class="lectura-valor">{columna.texto}</p>
+              <c-pastilla-severidad
+                severidad={columna.severidad}
+                etiqueta={columna.severidadEtiqueta}
+              ></c-pastilla-severidad>
+              <p class="lectura-detalle">{columna.detalle}</p>
+            </template>
+            <template lwc:else>
+              <p class="lectura-vacia">Sin registro</p>
+            </template>
+          </section>
+        </template>
+      </div>
+
+      <template lwc:if={mostrarNormalizado}>
+        <div class="normalizado" role="status">{textoNormalizado}</div>
+      </template>
+    </article>
+  </template>
+</template>
