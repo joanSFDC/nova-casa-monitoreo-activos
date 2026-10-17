@@ -39,6 +39,11 @@ export default class ResumenActivo extends NavigationMixin(LightningElement) {
     return [equipo.tipoEtiqueta, equipo.codigo].filter(Boolean).join(" · ");
   }
 
+  get lugar() {
+    const equipo = this.datos.equipo;
+    return [equipo.edificio, equipo.ciudad].filter(Boolean).join(" · ");
+  }
+
   get mediciones() {
     return (this.datos.mediciones || []).map((medicion) => ({
       ...medicion,
@@ -53,7 +58,14 @@ export default class ResumenActivo extends NavigationMixin(LightningElement) {
   }
 
   get casos() {
-    return this.datos.casos || [];
+    return (this.datos.casos || []).map((caso) => ({
+      ...caso,
+      detalle: ["Prioridad " + caso.prioridad]
+        .concat(
+          caso.ultimaLectura ? ["última lectura " + caso.ultimaLectura] : []
+        )
+        .join(" · ")
+    }));
   }
 
   get hayCasos() {

@@ -91,7 +91,14 @@ export default class ResumenEdificio extends NavigationMixin(LightningElement) {
   }
 
   get casos() {
-    return this.datos.casos || [];
+    return (this.datos.casos || []).map((caso) => ({
+      ...caso,
+      detalle: ["Prioridad " + caso.prioridad]
+        .concat(
+          caso.ultimaLectura ? ["última lectura " + caso.ultimaLectura] : []
+        )
+        .join(" · ")
+    }));
   }
 
   get hayCasos() {

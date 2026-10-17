@@ -52,6 +52,7 @@ const RESUMEN = {
       equipo: "Sala técnica principal",
       prioridad: "Alta",
       normalizado: false,
+      enFalla: true,
       ultimaLectura: "37,3 °C"
     }
   ]
@@ -111,7 +112,9 @@ describe("c-resumen-edificio", () => {
     await flushPromises();
 
     expect(el.shadowRoot.textContent).toContain("00001210");
-    expect(el.shadowRoot.textContent).toContain("última lectura 37,3 °C");
+    expect(el.shadowRoot.textContent).toContain(
+      "Prioridad Alta · última lectura 37,3 °C"
+    );
     expect(el.shadowRoot.querySelector(".insignia-falla")).not.toBeNull();
   });
 });

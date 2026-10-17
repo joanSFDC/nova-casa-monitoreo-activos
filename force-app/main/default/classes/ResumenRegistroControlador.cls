@@ -82,6 +82,8 @@ public with sharing class ResumenRegistroControlador {
     @AuraEnabled
     public Boolean normalizado;
     @AuraEnabled
+    public Boolean enFalla;
+    @AuraEnabled
     public String ultimaLectura;
   }
 
@@ -431,6 +433,8 @@ public with sharing class ResumenRegistroControlador {
       dto.equipo = caso.Activo__r == null ? null : caso.Activo__r.Name;
       dto.normalizado =
         caso.Condicion_Equipo__c == IncidentesServicio.CONDICION_NORMALIZADO;
+      dto.enFalla =
+        caso.Condicion_Equipo__c == IncidentesServicio.CONDICION_EN_FALLA;
       dto.ultimaLectura = caso.Ultima_Lectura__c;
       lista.add(dto);
     }

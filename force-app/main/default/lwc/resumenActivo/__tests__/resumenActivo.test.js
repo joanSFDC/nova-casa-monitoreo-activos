@@ -45,6 +45,7 @@ const RESUMEN = {
       asunto: "Corte de comunicación EPI-1",
       prioridad: "Baja",
       normalizado: false,
+      enFalla: true,
       ultimaLectura: "Sin comunicación · 15 min"
     }
   ],
@@ -90,6 +91,12 @@ describe("c-resumen-activo", () => {
     expect(el.shadowRoot.textContent).toContain(
       "Cámara de seguridad · AST-BAQ-CAM-001"
     );
+    expect(el.shadowRoot.querySelector(".edificio").textContent).toContain(
+      "Edificio Nova Caribe · Barranquilla"
+    );
+    expect(el.shadowRoot.textContent).toContain(
+      "Prioridad Baja · última lectura Sin comunicación · 15 min"
+    );
     const corte = el.shadowRoot.querySelector(".comunicacion_perdida");
     expect(corte.textContent).toContain("Sin comunicación · 15 min");
     expect(el.shadowRoot.textContent).toContain("00001220");
@@ -110,6 +117,16 @@ describe("c-resumen-activo", () => {
     expect(
       el.shadowRoot.querySelectorAll(".insignia-normalizado")
     ).toHaveLength(2);
+  });
+
+  it("no dice en falla de un caso anterior a las lecturas", async () => {
+    const el = elemento();
+    activo.emit({
+      ...RESUMEN,
+      casos: [{ ...RESUMEN.casos[0], enFalla: false, normalizado: false }]
+    });
+    await flushPromises();
+    expect(el.shadowRoot.querySelector(".insignia-falla")).toBeNull();
   });
 
   it("explica cuando no hay lecturas ni casos", async () => {

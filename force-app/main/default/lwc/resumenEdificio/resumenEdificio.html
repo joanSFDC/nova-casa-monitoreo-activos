@@ -84,17 +84,12 @@
                   >
                     {caso.numero} · {caso.equipo}
                   </button>
-                  <span class="lista-detalle">
-                    Prioridad {caso.prioridad}
-                    <template lwc:if={caso.ultimaLectura}>
-                      · última lectura {caso.ultimaLectura}</template
-                    >
-                  </span>
+                  <span class="lista-detalle">{caso.detalle}</span>
                 </div>
                 <template lwc:if={caso.normalizado}>
                   <span class="insignia-normalizado">Normalizado</span>
                 </template>
-                <template lwc:else>
+                <template lwc:elseif={caso.enFalla}>
                   <span class="insignia-falla">En falla</span>
                 </template>
               </li>
