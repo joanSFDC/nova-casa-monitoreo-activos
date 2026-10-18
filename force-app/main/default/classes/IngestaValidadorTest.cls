@@ -46,6 +46,79 @@ private class IngestaValidadorTest {
   }
 
   @isTest
+  static void shouldRechazarFueraDeRango_WhenConsumoNegativo() {
+    IngestaValidador.Catalogo catalogo = IngestaValidador.cargarCatalogo();
+    Map<String, Object> agua = TestDataFactory.mensajePresion();
+    Map<String, Object> medicionAgua = (Map<String, Object>) agua.get(
+      'measurement'
+    );
+    medicionAgua.put('type', 'WATER_CONSUMPTION');
+    medicionAgua.put('value', -112);
+    Map<String, Object> energia = TestDataFactory.mensajePresion();
+    Map<String, Object> medicionEnergia = (Map<String, Object>) energia.get(
+      'measurement'
+    );
+    medicionEnergia.put('type', 'ENERGY_CONSUMPTION');
+    medicionEnergia.put('value', -0.5);
+    Test.startTest();
+    IngestaValidador.Dictamen dictamenAgua = IngestaValidador.validar(
+      agua,
+      catalogo
+    );
+    IngestaValidador.Dictamen dictamenEnergia = IngestaValidador.validar(
+      energia,
+      catalogo
+    );
+    Test.stopTest();
+    Assert.areEqual(
+      IngestaConstantes.MOTIVO_FUERA_DE_RANGO,
+      dictamenAgua.motivo,
+      'Un consumo de agua negativo no es una lectura'
+    );
+    Assert.areEqual(
+      IngestaConstantes.MOTIVO_FUERA_DE_RANGO,
+      dictamenEnergia.motivo,
+      'Un consumo de energia negativo no es una lectura'
+    );
+    Assert.isFalse(
+      IngestaConstantes.esReintentable(dictamenAgua.motivo),
+      'Reintentar daria lo mismo'
+    );
+  }
+
+  @isTest
+  static void shouldAceptarNegativo_WhenNoEsUnConsumo() {
+    IngestaValidador.Catalogo catalogo = IngestaValidador.cargarCatalogo();
+    Map<String, Object> frio = TestDataFactory.mensajeTemperaturaNula();
+    ((Map<String, Object>) frio.get('measurement')).put('value', -5);
+    Map<String, Object> agua = TestDataFactory.mensajePresion();
+    Map<String, Object> medicionAgua = (Map<String, Object>) agua.get(
+      'measurement'
+    );
+    medicionAgua.put('type', 'WATER_CONSUMPTION');
+    medicionAgua.put('value', 0);
+    Test.startTest();
+    IngestaValidador.Dictamen dictamenFrio = IngestaValidador.validar(
+      frio,
+      catalogo
+    );
+    IngestaValidador.Dictamen dictamenCero = IngestaValidador.validar(
+      agua,
+      catalogo
+    );
+    Test.stopTest();
+    Assert.isTrue(
+      dictamenFrio.esValido(),
+      'Una temperatura bajo cero es una lectura: ' + dictamenFrio.motivo
+    );
+    Assert.areNotEqual(
+      IngestaConstantes.MOTIVO_FUERA_DE_RANGO,
+      dictamenCero.motivo,
+      'Un consumo de cero esta en la banda normal'
+    );
+  }
+
+  @isTest
   static void shouldRechazarActivo_WhenNoExiste() {
     IngestaValidador.Catalogo catalogo = IngestaValidador.cargarCatalogo();
     Test.startTest();

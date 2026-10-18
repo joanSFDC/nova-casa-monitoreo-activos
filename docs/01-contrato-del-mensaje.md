@@ -269,6 +269,7 @@ y no impide que los demás de la misma página sigan su camino.
 | `occurredAt` no supera a `publishedAt` en más de la tolerancia | Fecha futura | No |
 | `measurement.type` en el catálogo | Tipo de medición desconocido | Sí |
 | `measurement.value` presente y numérico | Valor inválido | No |
+| Un consumo de agua o de energía no es negativo | Valor fuera del rango físico | No |
 | `measurement.unit` coincide con la del límite | Unidad no compatible | No |
 | Existe un `Umbral__c` vigente para ese tipo y medición | Sin límite configurado | Sí |
 | `communication.status` en `HEALTHY`/`LOST`/`RESTORED` | Estado de comunicación inválido | No |

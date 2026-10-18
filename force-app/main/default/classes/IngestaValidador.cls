@@ -167,14 +167,20 @@ public inherited sharing class IngestaValidador {
       dictamen.motivo = IngestaConstantes.MOTIVO_VALOR;
       return;
     }
+    Decimal valor;
     try {
-      Decimal valor = decimalDe(measurement.get('value'));
-      if (valor == null) {
-        dictamen.motivo = IngestaConstantes.MOTIVO_VALOR;
-        return;
-      }
+      valor = decimalDe(measurement.get('value'));
     } catch (Exception e) {
+      valor = null;
+    }
+    if (valor == null) {
       dictamen.motivo = IngestaConstantes.MOTIVO_VALOR;
+      return;
+    }
+    // Los consumos no tienen limite bajo: sin esta regla, un negativo seria Normal.
+    if (valor < 0 && IngestaConstantes.SIN_NEGATIVOS.contains(tipo)) {
+      dictamen.motivo = IngestaConstantes.MOTIVO_FUERA_DE_RANGO;
+      dictamen.detalle = 'Un consumo no puede ser negativo: ' + valor;
       return;
     }
 

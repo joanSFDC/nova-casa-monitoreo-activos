@@ -85,6 +85,11 @@
                 <default>false</default>
                 <label>Unidad no compatible</label>
             </value>
+            <value>
+                <fullName>Valor fuera del rango fisico</fullName>
+                <default>false</default>
+                <label>Valor fuera del rango físico</label>
+            </value>
         </valueSetDefinition>
     </valueSet>
 </CustomField>

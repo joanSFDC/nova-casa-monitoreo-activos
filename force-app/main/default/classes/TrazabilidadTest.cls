@@ -91,6 +91,10 @@ private class TrazabilidadTest {
       'Futura'
     );
     Assert.isFalse(
+      IngestaConstantes.esReintentable(IngestaConstantes.MOTIVO_FUERA_DE_RANGO),
+      'Fuera del rango fisico'
+    );
+    Assert.isFalse(
       IngestaConstantes.esReintentable(
         IngestaConstantes.MOTIVO_ACTIVO_EDIFICIO
       ),
