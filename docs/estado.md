@@ -685,3 +685,5 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-16 | Monitor rediseñado: grupos por edificio, íconos por tipo, comunicación en la lectura, normalizado y filtros por tipo, orden y búsqueda. PR #84 fusionado. Cierra #83 |
 | 2026-10-16 | El disparador del cierre solo consulta `CaseStatus` si cambia el estado: las actualizaciones de integración fallaban. PR #86 fusionado. Cierra #85 |
 | 2026-10-16 | Resúmenes en las páginas de caso, activo, edificio, umbral y señal. PR #88 fusionado. Cierra #87 |
+| 2026-10-16 | El modelo de datos muestra las lecturas del caso, la tarea y el timbre del monitor. PR #90 fusionado. Cierra #89 |
+| 2026-10-17 | El aviso de normalizado del caso ya no pega un punto a la hora («p. m..»). PR #92 fusionado. Cierra #91 |
