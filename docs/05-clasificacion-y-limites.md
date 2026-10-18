@@ -143,6 +143,13 @@ simulador, no una banda de clasificación nuestra. Una temperatura de 100 °C cl
 crítica por nuestra regla, no como inválida. Se descarta un valor por inválido cuando es
 nulo, no numérico o viene en una unidad incompatible, no por su magnitud.
 
+Hay una excepción, y no es de magnitud sino física: **un consumo negativo no puede
+ocurrir.** Los consumos no tienen límite bajo, así que sin una regla propia
+−112 L/15 min se clasificaría como normal, que es justo el falso normal que este módulo
+quiere evitar. `IngestaValidador` lo rechaza con «Valor fuera del rango físico», no
+reintentable: el mensaje está mal y reintentar daría lo mismo. La señal queda en la
+bitácora y no toca el estado actual. Una temperatura bajo cero sigue siendo una lectura.
+
 ## Configuración ausente o contradictoria
 
 US-204 pide que ambas situaciones produzcan un resultado explicable.

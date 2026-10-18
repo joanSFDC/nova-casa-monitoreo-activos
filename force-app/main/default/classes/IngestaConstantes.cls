@@ -43,12 +43,18 @@ public inherited sharing class IngestaConstantes {
   public static final String MOTIVO_ACTIVO_EDIFICIO = 'Activo no coincide con el edificio';
   public static final String MOTIVO_COMUNICACION = 'Estado de comunicacion invalido';
   public static final String MOTIVO_UNIDAD = 'Unidad no compatible';
+  public static final String MOTIVO_FUERA_DE_RANGO = 'Valor fuera del rango fisico';
 
   public static final Set<String> MEDICIONES = new Set<String>{
     'TEMPERATURE',
     'WATER_CONSUMPTION',
     'ENERGY_CONSUMPTION',
     'WATER_PRESSURE'
+  };
+
+  public static final Set<String> SIN_NEGATIVOS = new Set<String>{
+    'WATER_CONSUMPTION',
+    'ENERGY_CONSUMPTION'
   };
 
   public static final Set<String> ESTADOS_COMUNICACION = new Set<String>{

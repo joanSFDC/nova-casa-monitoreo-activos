@@ -637,6 +637,11 @@ No estaban en la especificación y conviene no redescubrirlas.
     equipos y casos de un edificio; las bandas de un umbral; y el resultado de
     una señal en palabras. Leen con `ResumenRegistroControlador` (`with
     sharing`, `USER_MODE`) o con LDS ([módulo 09](09-experiencia-del-operador.md)).
+62. **Un consumo negativo se rechaza.** Los consumos no tienen límite bajo, y el
+    monitor mostraba «−112 L/15 min · Normal». `IngestaValidador` lo rechaza con
+    «Valor fuera del rango físico», no reintentable, antes de publicar el aviso:
+    no toca el estado actual. Solo agua y energía; una temperatura bajo cero es
+    una lectura ([módulo 05](05-clasificacion-y-limites.md)).
 
 ## Historial breve
 
@@ -687,3 +692,4 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-16 | Resúmenes en las páginas de caso, activo, edificio, umbral y señal. PR #88 fusionado. Cierra #87 |
 | 2026-10-16 | El modelo de datos muestra las lecturas del caso, la tarea y el timbre del monitor. PR #90 fusionado. Cierra #89 |
 | 2026-10-17 | El aviso de normalizado del caso ya no pega un punto a la hora («p. m..»). PR #92 fusionado. Cierra #91 |
+| 2026-10-17 | Un consumo negativo se rechaza con «Valor fuera del rango físico». PR #96 fusionado. Cierra #95 |
