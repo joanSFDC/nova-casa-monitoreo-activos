@@ -15,6 +15,10 @@
 //
 // El correo de los humanos apunta a Joan para que lleguen la invitacion y los
 // codigos de verificacion. El Username es lo que se escribe en el login.
+//
+// El administrador tiene el perfil System Administrator: es el administrador de
+// Salesforce, con la configuracion incluida. Su conjunto le da los campos propios,
+// que un despliegue no concede. Si su perfil es otro, el script lo corrige.
 
 String correoHumano = 'jorduz@salesforce.com';
 
@@ -22,6 +26,12 @@ Profile perfilMinimo = [
     SELECT Id
     FROM Profile
     WHERE Name = 'Minimum Access - Salesforce'
+    LIMIT 1
+];
+Profile perfilAdmin = [
+    SELECT Id
+    FROM Profile
+    WHERE Name = 'System Administrator'
     LIMIT 1
 ];
 Profile perfilApi = [
@@ -68,7 +78,7 @@ List<String> filas = new List<String>{
     'operador.baq.novacasa.95b2e3a11aa777@salesforce.com|Operador|Barranquilla|opbaq|op-barranquilla|Operador de edificios|minimo|Nova_Casa_Operador|Operadores_Barranquilla|humano',
     'coordinador.novacasa.95b2e3a11aa777@salesforce.com|Coordinador|Mantenimiento|coordmt|coord-mto|Coordinador de mantenimiento|minimo|Nova_Casa_Coordinador|Operadores_Bogota,Operadores_Barranquilla,Coordinacion,Gerencia_y_Coordinacion|humano',
     'gerente.novacasa.95b2e3a11aa777@salesforce.com|Gerente|Regional|gerreg|gerente-reg|Gerente regional|minimo|Nova_Casa_Gerencia|Operadores_Bogota,Operadores_Barranquilla,Gerencia_y_Coordinacion|humano',
-    'admin.novacasa.95b2e3a11aa777@salesforce.com|Administrador|Plataforma|admplat|admin-plat|Administrador de la plataforma|minimo|Nova_Casa_Administracion||humano',
+    'admin.novacasa.95b2e3a11aa777@salesforce.com|Administrador|Plataforma|admplat|admin-plat|Administrador de la plataforma|admin|Nova_Casa_Administracion||humano',
     'integracion.novacasa.95b2e3a11aa777@salesforce.com|Usuario|Integración|integnc|usr-integracion|Usuario de integración|api|Nova_Casa_Integracion||sistema'
 };
 
@@ -79,7 +89,7 @@ for (String fila : filas) {
 
 Map<String, User> existentes = new Map<String, User>();
 for (User u : [
-    SELECT Id, Username, IsActive
+    SELECT Id, Username, IsActive, ProfileId
     FROM User
     WHERE Username IN :usernames
 ]) {
@@ -99,11 +109,15 @@ for (String fila : filas) {
     String title = c[5];
     String tipoPerfil = c[6];
     Boolean esHumano = c[9] == 'humano';
+    Id perfilId = tipoPerfil == 'api'
+        ? perfilApi.Id
+        : (tipoPerfil == 'admin' ? perfilAdmin.Id : perfilMinimo.Id);
 
     if (existentes.containsKey(username)) {
         User ya = existentes.get(username);
-        if (!ya.IsActive) {
+        if (!ya.IsActive || ya.ProfileId != perfilId) {
             ya.IsActive = true;
+            ya.ProfileId = perfilId;
             paraActivar.add(ya);
         }
         continue;
@@ -121,7 +135,7 @@ for (String fila : filas) {
     u.LocaleSidKey = 'es_CO';
     u.EmailEncodingKey = 'UTF-8';
     u.LanguageLocaleKey = 'es';
-    u.ProfileId = tipoPerfil == 'api' ? perfilApi.Id : perfilMinimo.Id;
+    u.ProfileId = perfilId;
     u.IsActive = true;
     paraInsertar.add(u);
 }

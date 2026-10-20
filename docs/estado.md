@@ -141,7 +141,8 @@ La regla `Resultado_obligatorio` impide guardar una señal sin resultado.
 
 ### Usuarios y accesos de la demo
 
-Cinco conjuntos de permisos. Los humanos parten de `Minimum Access - Salesforce`.
+Cinco conjuntos de permisos. Operadores, coordinador y gerente parten de
+`Minimum Access - Salesforce`; el administrador, de `System Administrator`.
 El usuario de integración usa el perfil `Salesforce API Only System Integrations`
 y la licencia Salesforce Integration: no inicia sesión.
 
@@ -151,7 +152,7 @@ y la licencia Salesforce Integration: no inicia sesión.
 | `operador.baq.novacasa.95b2e3a11aa777@salesforce.com` | Operador Barranquilla | `Nova_Casa_Operador` | Solo Caribe |
 | `coordinador.novacasa.95b2e3a11aa777@salesforce.com` | Coordinador | `Nova_Casa_Coordinador` | Las dos ciudades, edita umbrales, lee bitácora sin campos sensibles |
 | `gerente.novacasa.95b2e3a11aa777@salesforce.com` | Gerente | `Nova_Casa_Gerencia` | Las dos ciudades, no edita umbrales |
-| `admin.novacasa.95b2e3a11aa777@salesforce.com` | Administrador | `Nova_Casa_Administracion` | Todo, incluidos `Carga__c` y `Detalle__c` |
+| `admin.novacasa.95b2e3a11aa777@salesforce.com` | Administrador | `Nova_Casa_Administracion`, con el perfil System Administrator | Todo, incluida la configuración; corrige y borra la bitácora, con historial |
 | `integracion.novacasa.95b2e3a11aa777@salesforce.com` | Integración | `Nova_Casa_Integracion` | Proceso. Nadie inicia sesión con él |
 
 Q-10 quedó en **por ciudad**: regla sobre `Edificio__c.Ciudad__c` hacia los grupos
@@ -642,6 +643,13 @@ No estaban en la especificación y conviene no redescubrirlas.
     «Valor fuera del rango físico», no reintentable, antes de publicar el aviso:
     no toca el estado actual. Solo agua y energía; una temperatura bajo cero es
     una lectura ([módulo 05](05-clasificacion-y-limites.md)).
+63. **El administrador tiene todo, y la bitácora deja rastro.** El cliente aclaró
+    que el administrador de Salesforce no se limita a investigar señales: tiene el
+    mayor de los privilegios. Pasa al perfil System Administrator, conserva su
+    conjunto para los campos propios y tiene acceso total a la bitácora y al
+    control. `Resultado__c`, `Motivo__c` y `Detalle__c` guardan historial, y la
+    página de la señal lo muestra, para que una corrección manual se distinga del
+    procesamiento ([módulo 10](10-seguridad-y-accesos.md)).
 
 ## Historial breve
 
@@ -693,3 +701,4 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-16 | El modelo de datos muestra las lecturas del caso, la tarea y el timbre del monitor. PR #90 fusionado. Cierra #89 |
 | 2026-10-17 | El aviso de normalizado del caso ya no pega un punto a la hora («p. m..»). PR #92 fusionado. Cierra #91 |
 | 2026-10-17 | Un consumo negativo se rechaza con «Valor fuera del rango físico». PR #96 fusionado. Cierra #95 |
+| 2026-10-20 | El administrador pasa a System Administrator, con acceso total a la bitácora e historial en resultado, motivo y detalle. PR #98 fusionado. Cierra #97 |

@@ -4,6 +4,7 @@
     <inlineHelpText>Toda señal tiene exactamente uno. No hay señales sin resultado.</inlineHelpText>
     <label>Resultado</label>
     <required>false</required>
+    <trackHistory>true</trackHistory>
     <trackTrending>false</trackTrending>
     <type>Picklist</type>
     <valueSet>

@@ -256,7 +256,7 @@ private class SeguridadAccesosTest {
   }
 
   @isTest
-  static void shouldVerTodaSinEditarNiBorrar_WhenAdministradorSobreBitacora() {
+  static void shouldVerCorregirYBorrar_WhenAdministradorSobreBitacora() {
     insertarSenales();
     User administrador;
     System.runAs(new User(Id = UserInfo.getUserId())) {
@@ -266,25 +266,61 @@ private class SeguridadAccesosTest {
     }
 
     List<Senal__c> vistas;
-    Boolean edicionBloqueada;
-    Boolean borradoBloqueado;
+    Boolean corrigio;
+    Boolean borro;
     Test.startTest();
     System.runAs(administrador) {
       vistas = [SELECT Id, Carga__c, Detalle__c FROM Senal__c WITH USER_MODE];
-      Senal__c cambiada = new Senal__c(
-        Id = vistas[0].Id,
-        Detalle__c = 'Editado'
+      corrigio = guardar(
+        new Senal__c(
+          Id = vistas[0].Id,
+          Resultado__c = IngestaConstantes.RESULTADO_RECHAZADO,
+          Motivo__c = IngestaConstantes.MOTIVO_VALOR,
+          Detalle__c = 'Corregido a mano'
+        )
       );
-      edicionBloqueada = !guardar(cambiada);
-      borradoBloqueado = !borrar(new Senal__c(Id = vistas[0].Id));
+      borro = borrar(new Senal__c(Id = vistas[1].Id));
     }
     Test.stopTest();
 
     Assert.areEqual(2, vistas.size(), 'Ve todas, aunque no sean suyas');
     Assert.isNotNull(vistas[0].Carga__c, 'Con la carga');
     Assert.isNotNull(vistas[0].Detalle__c, 'Y el detalle');
-    Assert.isTrue(edicionBloqueada, 'La bitacora no se reescribe');
-    Assert.isTrue(borradoBloqueado, 'Ni se borra');
+    Assert.isTrue(corrigio, 'Corrige resultado, motivo y detalle');
+    Assert.isTrue(borro, 'Y puede borrar una senal');
+    Assert.areEqual(
+      'Corregido a mano',
+      [SELECT Detalle__c FROM Senal__c WHERE Id = :vistas[0].Id].Detalle__c,
+      'La correccion queda guardada'
+    );
+    Assert.areEqual(1, [SELECT COUNT() FROM Senal__c], 'Queda una');
+  }
+
+  @isTest
+  static void shouldNoCorregirNiBorrar_WhenCoordinadorSobreBitacora() {
+    insertarSenales();
+    User coordinador;
+    System.runAs(new User(Id = UserInfo.getUserId())) {
+      coordinador = TestDataFactory.usuarioConConjunto('Nova_Casa_Coordinador');
+    }
+    Id senalId = [SELECT Id FROM Senal__c LIMIT 1].Id;
+
+    Boolean corrigio;
+    Boolean borro;
+    Test.startTest();
+    System.runAs(coordinador) {
+      corrigio = guardar(
+        new Senal__c(
+          Id = senalId,
+          Resultado__c = IngestaConstantes.RESULTADO_RECHAZADO
+        )
+      );
+      borro = borrar(new Senal__c(Id = senalId));
+    }
+    Test.stopTest();
+
+    Assert.isFalse(corrigio, 'El coordinador investiga, no corrige');
+    Assert.isFalse(borro, 'Ni borra');
     Assert.areEqual(2, [SELECT COUNT() FROM Senal__c], 'Siguen las dos');
   }
 
