@@ -720,3 +720,4 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-20 | Un falso `DUPLICATE_VALUE` ya no deja en Fallido una señal guardada; las 627 afectadas se reprocesaron. PR #102 fusionado. Cierra #101 |
 | 2026-10-20 | Una cámara que vuelve a comunicarse normaliza todos sus cortes abiertos, aunque el episodio sea otro. PR #104 fusionado. Cierra #103 |
 | 2026-10-20 | La página del caso muestra «Señales del caso» a quien lee la bitácora, con una lista relacionada dinámica. PR #106 fusionado. Cierra #105 |
+| 2026-10-20 | «Señales del caso» va de la más reciente a la más vieja, por fecha de origen: el número de señal se ordena como texto. PR #108 fusionado. Cierra #107 |
