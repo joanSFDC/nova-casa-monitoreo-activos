@@ -177,8 +177,8 @@ permisos.
 | `Activo__c` | Leer | Leer | Leer | Todo | Leer |
 | `Estado_Actual__c` | Leer | Leer | Leer | Todo | Crear, leer, editar |
 | `Umbral__c` | Leer | Leer, editar | Leer | Todo | Leer |
-| `Senal__c` | — | Leer, sin `Carga__c` ni `Detalle__c` | — | Leer, entera | Crear, leer, editar |
-| `Control_de_Ingesta__c` | Solo la última consulta | Solo la última consulta | Solo la última consulta | Leer, editar | Leer, editar |
+| `Senal__c` | — | Leer, sin `Carga__c` ni `Detalle__c` | — | Todo, entera; resultado, motivo y detalle con historial | Crear, leer, editar |
+| `Control_de_Ingesta__c` | Solo la última consulta | Solo la última consulta | Solo la última consulta | Todo | Leer, editar |
 | `Case` | Leer, crear | Leer, crear, editar | Leer | Todo | Crear, leer, editar |
 | `Task` | Leer, crear, editar las suyas | Leer, crear, editar | Leer | Todo | — |
 | `Aviso_de_Senal__e` | — | — | — | Publicar, leer | Publicar, leer |
@@ -206,19 +206,27 @@ su experiencia y ampliaría la superficie de exposición sin ningún beneficio. 
 que pide el criterio de US-209 sobre restringir la vista de investigación a personas
 autorizadas.
 
-**Nadie borra la bitácora, ni el administrador.** La bitácora es un registro de auditoría y
-un registro de auditoría que se puede borrar no es un registro de auditoría. El
-administrador la lee entera, con carga y detalle, y no la edita: corregir una señal a mano
-borraría la prueba de lo que pasó. El control de ingesta sí lo edita (escenario, tanda,
-reactivarlo), pero no lo crea ni lo borra: es un registro único.
+**Solo el administrador corrige o borra la bitácora, y una corrección deja rastro.** La
+bitácora es un registro de auditoría: la escriben la ingesta y el procesamiento, y ninguna
+persona la toca, salvo el administrador de Salesforce, que tiene el mayor de los
+privilegios. Así lo aclaró el cliente: investigar señales es su necesidad principal, no su
+límite. Para que corregir una señal a mano no borre la prueba de lo que pasó,
+`Resultado__c`, `Motivo__c` y `Detalle__c` guardan historial de campos, y la página de la
+señal lo muestra: quién cambió qué y cuándo, y la diferencia entre el usuario de
+integración, que procesa, y una persona que corrige. Borrar no deja historial: es para
+depurar, no para corregir. El control de ingesta también lo administra entero, aunque la
+ingesta toma un solo control activo: tener dos sería un error de configuración.
 
 ### Acceso a la aplicación
 
 Los cuatro conjuntos humanos hacen **visible** la aplicación Nova Casa. Lo que un conjunto
 de permisos no puede hacer es marcarla como aplicación por defecto: eso solo lo admite el
-perfil, y el perfil de los humanos es `Minimum Access - Salesforce`, de fábrica, que deja
-ver un centenar de aplicaciones. Cambiar de perfil para eso contradiría la regla de que el
-acceso va en los conjuntos.
+perfil, y el perfil de operadores, coordinador y gerente es `Minimum Access - Salesforce`, de
+fábrica, que deja ver un centenar de aplicaciones. Cambiar de perfil para eso contradiría la
+regla de que el acceso va en los conjuntos. El administrador es la excepción deliberada:
+tiene `System Administrator`, porque administrar la org, incluida su configuración, es su
+trabajo. Su conjunto sigue haciendo falta, porque un despliegue no concede la seguridad de
+campo de los campos propios.
 
 La aplicación de entrada de cada persona es un registro `UserAppInfo`, el mismo que
 Salesforce guarda cuando alguien cambia de aplicación. `scripts/crear-usuarios-demo.sh` lo
@@ -233,7 +241,7 @@ script la devuelve a Nova Casa.
 | Operador | No | No | No |
 | Coordinador | Sí | Sí | Sí |
 | Gerente | Sí | Sí | Sí |
-| Administrador funcional | No | No | No |
+| Administrador | Sí | Sí | Sí |
 
 Hay tres capas, y hacen falta todas:
 
@@ -246,7 +254,8 @@ Hay tres capas, y hacen falta todas:
    quien lo abre. Una carpeta compartida no amplía lo que alguien ve: si mañana el operador
    de Bogotá recibiera el permiso, el informe de casos solo le contaría los de Bogotá.
 
-La pestaña Paneles va en la aplicación y la hacen visible los dos conjuntos. Informes no
+El administrador los tiene por su perfil, que además le deja ver todas las carpetas. La
+pestaña Paneles va en la aplicación y la hacen visible los dos conjuntos. Informes no
 va en la barra: el perfil mínimo la deja visible por defecto, así que el operador la vería
 sin poder ejecutar nada. Por qué el panel no admite suscripción está en el
 [módulo 09](09-experiencia-del-operador.md#el-tablero-de-la-gerencia).
@@ -374,7 +383,8 @@ Lo que cada prueba verifica. Salvo las dos primeras filas, están en `SeguridadA
 | Operador llamando a Apex | `shouldNegarCasoYEquipo_WhenOperadorLosPideDirectoAApex` | En modo usuario no le llega el caso de Caribe, y abrir intervención sobre su equipo falla; no se crea nada |
 | Operador sobre umbrales | `shouldLeerSinEditarNiAplicar_WhenOperadorSobreUmbrales` | Lee, **no** edita, y Aplicar límites lo rechaza |
 | Coordinador sobre umbrales | `shouldEditarYAplicar_WhenCoordinadorSobreUmbrales` | Edita y aplica: la bomba pasa a crítico |
-| Administrador sobre la bitácora | `shouldVerTodaSinEditarNiBorrar_WhenAdministradorSobreBitacora` | Ve todas, con carga y detalle; no edita ni borra |
+| Administrador sobre la bitácora | `shouldVerCorregirYBorrar_WhenAdministradorSobreBitacora` | Ve todas, con carga y detalle; corrige resultado, motivo y detalle, y borra |
+| Coordinador sobre la bitácora | `shouldNoCorregirNiBorrar_WhenCoordinadorSobreBitacora` | Lee, pero no corrige ni borra una señal |
 | Coordinador sobre `Carga__c` | `shouldOmitirCargaYDetalle_WhenCoordinadorLeeBitacora` | Lee la bitácora; `Carga__c` y `Detalle__c` no vienen |
 | Administrador sobre el control | `shouldEditarControlAjeno_WhenAdministradorYNoCoordinador` | Edita un control que no es suyo; el coordinador no |
 | Ingesta como integración | `shouldProcesarYEscribir_WhenUsuarioDeIntegracion` | Solo con su conjunto, guarda, aplica y abre el caso con ciudad |

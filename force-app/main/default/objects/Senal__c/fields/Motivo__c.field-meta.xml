@@ -4,6 +4,7 @@
     <inlineHelpText>Es lista y no texto libre porque los motivos hay que poder filtrarlos y contarlos. El texto libre va en Detalle.</inlineHelpText>
     <label>Motivo</label>
     <required>false</required>
+    <trackHistory>true</trackHistory>
     <trackTrending>false</trackTrending>
     <type>Picklist</type>
     <valueSet>
