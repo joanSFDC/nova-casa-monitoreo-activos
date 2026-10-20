@@ -657,6 +657,13 @@ No estaban en la especificación y conviene no redescubrirlas.
     octubre que nunca se procesaron. Ahora la ingesta relee la señal por su
     clave; si existe, no escribe rastro y publica su aviso si sigue Pendiente.
     Las 627 volvieron a Pendiente y se procesaron con `procesarPendientes`.
+65. **Una cámara que vuelve normaliza todos sus cortes abiertos.** En `MIXED` la
+    recuperación llega con otro episodio y el latido con `EPI-BAQ-hb`, así que los
+    casos de corte quedaban En falla con la cámara en línea: el monitor decía
+    Normalizado y la página del activo, En falla. Una lectura de conectividad
+    vigente que no sea `LOST` normaliza todos los cortes abiertos de esa cámara,
+    sin cerrarlos ([módulo 08](08-conectividad.md)). En la org, los ocho cortes
+    abiertos se normalizaron con el siguiente latido.
 
 ## Historial breve
 
@@ -711,3 +718,4 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-20 | El administrador pasa a System Administrator, con acceso total a la bitácora e historial en resultado, motivo y detalle. PR #98 fusionado. Cierra #97 |
 | 2026-10-20 | La página de la señal muestra su historial: el formato de página de `Senal__c` entra al repositorio con la lista de historial. PR #100 fusionado. Cierra #99 |
 | 2026-10-20 | Un falso `DUPLICATE_VALUE` ya no deja en Fallido una señal guardada; las 627 afectadas se reprocesaron. PR #102 fusionado. Cierra #101 |
+| 2026-10-20 | Una cámara que vuelve a comunicarse normaliza todos sus cortes abiertos, aunque el episodio sea otro. PR #104 fusionado. Cierra #103 |

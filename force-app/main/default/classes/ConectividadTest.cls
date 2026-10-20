@@ -368,6 +368,68 @@ private class ConectividadTest {
     Assert.areEqual(false, [SELECT IsClosed FROM Case].IsClosed);
   }
 
+  @isTest
+  static void shouldNormalizarSusCortes_WhenCamaraVuelveConOtroEpisodio() {
+    Activo__c camara = camara();
+    Map<String, Object> primero = TestDataFactory.mensajeCamara(
+      'msg_out0',
+      'LOST',
+      15 * 60,
+      'EPI-BOG-out-0'
+    );
+    primero.put('occurredAt', '2026-09-22T22:00:00.000Z');
+    Map<String, Object> segundo = TestDataFactory.mensajeCamara(
+      'msg_out2',
+      'LOST',
+      15 * 60,
+      'EPI-BOG-out-2'
+    );
+    segundo.put('occurredAt', '2026-09-22T23:00:00.000Z');
+    Map<String, Object> latido = TestDataFactory.mensajeCamara(
+      'msg_hb3',
+      'HEALTHY',
+      40,
+      'EPI-BOG-hb'
+    );
+    latido.put('occurredAt', '2026-09-22T23:30:00.000Z');
+    insert new List<Senal__c>{
+      TestDataFactory.senalPendiente(primero, camara.Id, camara.Edificio__c),
+      TestDataFactory.senalPendiente(segundo, camara.Id, camara.Edificio__c),
+      TestDataFactory.senalPendiente(latido, camara.Id, camara.Edificio__c)
+    };
+
+    Test.startTest();
+    ProcesamientoServicio.procesar(
+      new List<Aviso_de_Senal__e>{ TestDataFactory.avisoDe(primero) }
+    );
+    ProcesamientoServicio.procesar(
+      new List<Aviso_de_Senal__e>{ TestDataFactory.avisoDe(segundo) }
+    );
+    ProcesamientoServicio.procesar(
+      new List<Aviso_de_Senal__e>{ TestDataFactory.avisoDe(latido) }
+    );
+    Test.stopTest();
+
+    List<Case> cortes = [
+      SELECT IsClosed, Condicion_Equipo__c, Ultima_Lectura__c, Normalizado_En__c
+      FROM Case
+    ];
+    Assert.areEqual(2, cortes.size(), 'El latido no abre otro caso');
+    for (Case corte : cortes) {
+      Assert.isFalse(corte.IsClosed, 'Cerrar sigue siendo humano');
+      Assert.areEqual(
+        IncidentesServicio.CONDICION_NORMALIZADO,
+        corte.Condicion_Equipo__c,
+        'La camara volvio, aunque el episodio sea otro'
+      );
+      Assert.areEqual('En l\u00ednea', corte.Ultima_Lectura__c);
+      Assert.areEqual(
+        Datetime.newInstanceGmt(2026, 9, 22, 23, 30, 0),
+        corte.Normalizado_En__c
+      );
+    }
+  }
+
   private static Activo__c bomba() {
     return [
       SELECT Id, Edificio__c, Codigo_Externo__c

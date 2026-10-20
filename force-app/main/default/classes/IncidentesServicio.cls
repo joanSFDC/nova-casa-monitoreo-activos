@@ -248,6 +248,7 @@ public without sharing class IncidentesServicio {
     Map<Id, Case> aActualizar = new Map<Id, Case>();
     Map<Id, String> senalPorCaso = new Map<Id, String>();
     Set<String> clavesDuplicado = new Set<String>();
+    Map<Id, Decision> recuperaciones = new Map<Id, Decision>();
 
     for (Decision decision : decisiones.values()) {
       if (decision.clavesSenal == null) {
@@ -258,6 +259,13 @@ public without sharing class IncidentesServicio {
       }
       if (!depurarConAplicadas(decision, senales)) {
         continue;
+      }
+      if (
+        decision.activoId != null &&
+        decision.tipoMedicion == LecturaFormato.CONECTIVIDAD &&
+        lecturaDe(decision).normalizado
+      ) {
+        recuperaciones.put(decision.activoId, decision);
       }
       Case abierto = abiertos.get(decision.clave);
       if (abierto != null && abierto.IsClosed) {
@@ -294,6 +302,8 @@ public without sharing class IncidentesServicio {
       aInsertar.add(armarCaso(decision));
       senalesInsert.add(decision.clave);
     }
+
+    normalizarCortes(recuperaciones, aActualizar, ahora);
 
     if (!aInsertar.isEmpty()) {
       Database.SaveResult[] resultados = Database.insert(
@@ -342,6 +352,38 @@ public without sharing class IncidentesServicio {
           continue;
         }
         marcarFallidas(decision, senales, resultados[i], ahora);
+      }
+    }
+  }
+
+  /**
+   * Una camara que vuelve a comunicarse normaliza todos sus cortes abiertos. El
+   * proveedor no siempre repite el episodio del corte al recuperarse: con la clave
+   * del episodio sola, esos casos quedarian En falla con la camara en linea.
+   * La senal no se liga a esos casos: pertenece a otro episodio.
+   */
+  private static void normalizarCortes(
+    Map<Id, Decision> recuperaciones,
+    Map<Id, Case> aActualizar,
+    Datetime ahora
+  ) {
+    if (recuperaciones.isEmpty()) {
+      return;
+    }
+    for (Case corte : [
+      SELECT Id, Activo__c, Severidad_Ultima_Lectura__c, Condicion_Equipo__c
+      FROM Case
+      WHERE
+        IsClosed = FALSE
+        AND Activo__c IN :recuperaciones.keySet()
+        AND Tipo_Medicion__c = :LecturaFormato.CONECTIVIDAD
+      WITH SYSTEM_MODE
+    ]) {
+      if (aActualizar.containsKey(corte.Id)) {
+        continue;
+      }
+      if (registrarCambio(corte, recuperaciones.get(corte.Activo__c), ahora)) {
+        aActualizar.put(corte.Id, corte);
       }
     }
   }
