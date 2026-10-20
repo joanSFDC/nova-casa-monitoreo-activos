@@ -719,3 +719,4 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-20 | La página de la señal muestra su historial: el formato de página de `Senal__c` entra al repositorio con la lista de historial. PR #100 fusionado. Cierra #99 |
 | 2026-10-20 | Un falso `DUPLICATE_VALUE` ya no deja en Fallido una señal guardada; las 627 afectadas se reprocesaron. PR #102 fusionado. Cierra #101 |
 | 2026-10-20 | Una cámara que vuelve a comunicarse normaliza todos sus cortes abiertos, aunque el episodio sea otro. PR #104 fusionado. Cierra #103 |
+| 2026-10-20 | La página del caso muestra «Señales del caso» a quien lee la bitácora, con una lista relacionada dinámica. PR #106 fusionado. Cierra #105 |
