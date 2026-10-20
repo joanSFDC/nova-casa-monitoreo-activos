@@ -650,6 +650,13 @@ No estaban en la especificación y conviene no redescubrirlas.
     control. `Resultado__c`, `Motivo__c` y `Detalle__c` guardan historial, y la
     página de la señal lo muestra, para que una corrección manual se distinga del
     procesamiento ([módulo 10](10-seguridad-y-accesos.md)).
+64. **Un falso duplicado no marca Fallido una señal que sí se guardó.** El
+    `upsert` de una página reportaba a veces `DUPLICATE_VALUE` sobre `Clave__c`
+    para una señal nueva que quedó guardada, y el rastro de la decisión 45 la
+    sobrescribía con Fallido y le quitaba el aviso: 627 lecturas desde el 5 de
+    octubre que nunca se procesaron. Ahora la ingesta relee la señal por su
+    clave; si existe, no escribe rastro y publica su aviso si sigue Pendiente.
+    Las 627 volvieron a Pendiente y se procesaron con `procesarPendientes`.
 
 ## Historial breve
 
@@ -703,3 +710,4 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-17 | Un consumo negativo se rechaza con «Valor fuera del rango físico». PR #96 fusionado. Cierra #95 |
 | 2026-10-20 | El administrador pasa a System Administrator, con acceso total a la bitácora e historial en resultado, motivo y detalle. PR #98 fusionado. Cierra #97 |
 | 2026-10-20 | La página de la señal muestra su historial: el formato de página de `Senal__c` entra al repositorio con la lista de historial. PR #100 fusionado. Cierra #99 |
+| 2026-10-20 | Un falso `DUPLICATE_VALUE` ya no deja en Fallido una señal guardada; las 627 afectadas se reprocesaron. PR #102 fusionado. Cierra #101 |
