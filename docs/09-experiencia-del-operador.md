@@ -185,7 +185,13 @@ número, la ciudad y la condición del equipo, con Editar solo para quien puede 
 caso y «Registrar intervención» solo para el coordinador. Debajo, el **resumen del
 incidente** y tres secciones: Incidente, con la descripción y el propietario; Lecturas, con
 los campos que guarda el caso; y Equipo, con el activo, la medición, la ciudad y lo que ata
-el caso a su señal (clave, episodio y origen). Al lado, la actividad con las intervenciones.
+el caso a su señal (clave, episodio y origen). Al lado, la actividad con las intervenciones
+y, para quien lee la bitácora, «Señales del caso»: las últimas señales ligadas.
+
+Esa lista es una lista relacionada dinámica, no una lista del formato de página. El perfil
+de acceso mínimo no tiene formato de página asignado para Case, y una lista relacionada
+normal solo se pinta si está en el formato de página del perfil: al coordinador no le salía.
+La dinámica no depende del formato. Su encabezado cuenta lo que carga («5+»), no el total.
 
 ### Los resúmenes de las páginas de registro
 
