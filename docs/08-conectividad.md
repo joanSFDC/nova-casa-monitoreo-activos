@@ -185,6 +185,16 @@ en una tarde tiene un problema, aunque en ningún momento esté caída. Si el si
 cada episodio al recuperarse, ese patrón sería invisible. Dejando los casos abiertos, el
 coordinador ve tres casos de la misma cámara en el tablero y entiende que hay que mirarla.
 
+### Cuando la recuperación no trae el episodio del corte
+
+En el escenario `MIXED` el simulador no siempre repite el episodio: la recuperación llega
+con otro `episodeId` y el latido con el suyo fijo (`EPI-BAQ-hb`). Con la clave del episodio
+sola, ningún caso de corte se enteraba de que la cámara volvió, y quedaban En falla con la
+cámara en línea. **Decisión: una lectura de conectividad vigente que no sea `LOST` normaliza
+todos los cortes abiertos de esa cámara.** No los cierra ni les liga la señal, que es de
+otro episodio: solo registra la última lectura («En línea» o «Comunicación recuperada»),
+la condición Normalizado y cuándo volvió. Lo hace `IncidentesServicio.normalizarCortes`.
+
 ## Los latidos y la bitácora
 
 En una secuencia normal, la mayoría de los mensajes de conectividad son `HEALTHY`. Surge
