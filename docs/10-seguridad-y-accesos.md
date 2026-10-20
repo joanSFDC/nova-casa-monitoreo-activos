@@ -214,7 +214,10 @@ límite. Para que corregir una señal a mano no borre la prueba de lo que pasó,
 `Resultado__c`, `Motivo__c` y `Detalle__c` guardan historial de campos, y la página de la
 señal lo muestra: quién cambió qué y cuándo, y la diferencia entre el usuario de
 integración, que procesa, y una persona que corrige. Borrar no deja historial: es para
-depurar, no para corregir. El control de ingesta también lo administra entero, aunque la
+depurar, no para corregir. El perfil trae además «Editar campos de solo lectura», así que
+el administrador puede cambiar cualquier campo de la señal; solo esos tres llevan
+historial. La lista de historial de la página sale del formato de página del objeto, que
+tiene `RelatedEntityHistoryList`. El control de ingesta también lo administra entero, aunque la
 ingesta toma un solo control activo: tener dos sería un error de configuración.
 
 ### Acceso a la aplicación

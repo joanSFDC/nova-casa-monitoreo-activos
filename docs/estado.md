@@ -702,3 +702,4 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-17 | El aviso de normalizado del caso ya no pega un punto a la hora («p. m..»). PR #92 fusionado. Cierra #91 |
 | 2026-10-17 | Un consumo negativo se rechaza con «Valor fuera del rango físico». PR #96 fusionado. Cierra #95 |
 | 2026-10-20 | El administrador pasa a System Administrator, con acceso total a la bitácora e historial en resultado, motivo y detalle. PR #98 fusionado. Cierra #97 |
+| 2026-10-20 | La página de la señal muestra su historial: el formato de página de `Senal__c` entra al repositorio con la lista de historial. PR #100 fusionado. Cierra #99 |
