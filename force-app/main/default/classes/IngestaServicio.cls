@@ -11,6 +11,10 @@ public without sharing class IngestaServicio {
   @TestVisible
   static System.Callable antesDeGuardar;
 
+  // Claves que el upsert reporta como DUPLICATE_VALUE aunque se hayan guardado.
+  @TestVisible
+  static Set<String> simularDuplicado = new Set<String>();
+
   public class ResultadoCiclo {
     public Boolean encadenar;
     public Integer indiceSiguiente;
@@ -290,6 +294,12 @@ public without sharing class IngestaServicio {
     if (antesDeGuardar != null) {
       antesDeGuardar.call('antesDeGuardar', null);
     }
+    Set<String> nuevas = new Set<String>();
+    for (Senal__c senal : aGuardar) {
+      if (senal.Id == null) {
+        nuevas.add(senal.Clave__c);
+      }
+    }
     Database.UpsertResult[] resultados = Database.upsert(
       aGuardar,
       Senal__c.Clave__c,
@@ -302,7 +312,16 @@ public without sharing class IngestaServicio {
     List<Integer> indicesAviso = new List<Integer>();
     List<Senal__c> rastros = new List<Senal__c>();
     List<String> sinGuardar = new List<String>();
+    Map<String, Integer> repetidas = new Map<String, Integer>();
     for (Integer i = 0; i < aGuardar.size(); i++) {
+      Boolean repetida =
+        nuevas.contains(aGuardar[i].Clave__c) &&
+        (simularDuplicado.contains(aGuardar[i].Clave__c) ||
+        esDuplicado(resultados[i]));
+      if (repetida) {
+        repetidas.put(aGuardar[i].Clave__c, i);
+        continue;
+      }
       if (!resultados[i].isSuccess()) {
         publicar.remove(aGuardar[i].Clave__c);
         String error =
@@ -319,6 +338,46 @@ public without sharing class IngestaServicio {
       if (publicar.contains(aGuardar[i].Clave__c)) {
         avisos.add(avisoDe(aGuardar[i], originales.get(aGuardar[i].Clave__c)));
         indicesAviso.add(i);
+      }
+    }
+
+    // Un duplicado de una senal nueva puede ser ella misma ya guardada: escribirle
+    // un rastro la marcaria Fallido y su lectura no se procesaria nunca.
+    if (!repetidas.isEmpty()) {
+      Map<String, Senal__c> guardadas = new Map<String, Senal__c>();
+      for (Senal__c guardada : [
+        SELECT Id, Clave__c, Resultado__c
+        FROM Senal__c
+        WHERE Clave__c IN :repetidas.keySet()
+        WITH SYSTEM_MODE
+      ]) {
+        guardadas.put(guardada.Clave__c, guardada);
+      }
+      for (String clave : repetidas.keySet()) {
+        Integer i = repetidas.get(clave);
+        Senal__c guardada = guardadas.get(clave);
+        if (guardada == null) {
+          publicar.remove(clave);
+          rastros.add(
+            rastroDe(
+              aGuardar[i],
+              clave +
+                ': ' +
+                (resultados[i].isSuccess()
+                  ? 'duplicado sin registro'
+                  : resultados[i].getErrors()[0].getMessage())
+            )
+          );
+          continue;
+        }
+        aGuardar[i].Id = guardada.Id;
+        if (
+          guardada.Resultado__c == IngestaConstantes.RESULTADO_PENDIENTE &&
+          publicar.contains(clave)
+        ) {
+          avisos.add(avisoDe(aGuardar[i], originales.get(clave)));
+          indicesAviso.add(i);
+        }
       }
     }
 
@@ -369,6 +428,18 @@ public without sharing class IngestaServicio {
       }
     }
     return resultado;
+  }
+
+  private static Boolean esDuplicado(Database.UpsertResult resultado) {
+    if (resultado.isSuccess()) {
+      return false;
+    }
+    for (Database.Error error : resultado.getErrors()) {
+      if (error.getStatusCode() == StatusCode.DUPLICATE_VALUE) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private static Control_de_Ingesta__c bloquearControl() {

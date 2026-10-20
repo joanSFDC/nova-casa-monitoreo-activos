@@ -50,6 +50,11 @@ fechas y el error en `Detalle__c`, sin la carga, que puede ser justo lo que no c
 reintentable: un reenvío idéntico lo vuelve a intentar. Si tampoco entra el rastro, el
 error queda en `Control_de_Ingesta__c.Ultimo_Error__c`.
 
+Hay una excepción. A veces el `upsert` reporta `DUPLICATE_VALUE` sobre `Clave__c` para una
+señal nueva que sí quedó guardada. Escribirle el rastro la sobrescribiría con Fallido y le
+quitaría el aviso, así que la ingesta la relee por su clave: si existe, no hay rastro y,
+si sigue Pendiente, su aviso se publica. Solo sin registro queda el rastro.
+
 **Dónde se decidió** se lee en las fechas. La ingesta valida al recibir: lo que no pasa
 queda Rechazado, un contenido distinto bajo la misma clave queda Conflicto y una señal que
 no se puede guardar o avisar queda Fallido. Ninguna de las tres entra al bus, así que

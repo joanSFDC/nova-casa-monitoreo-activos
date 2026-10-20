@@ -518,6 +518,40 @@ private class IngestaServicioTest {
   }
 
   @isTest
+  static void shouldPublicarSinRastro_WhenUpsertReportaDuplicadoDeUnaGuardada() {
+    String clave = 'nova-casa-simulator|msg_000002';
+    IngestaServicio.simularDuplicado = new Set<String>{ clave };
+    Test.startTest();
+    IngestaServicio.ResultadoPagina r = IngestaServicio.procesarPagina(
+      TestDataFactory.sobre(
+        new List<Map<String, Object>>{ TestDataFactory.mensajePresion() },
+        'c',
+        true
+      ),
+      Datetime.newInstanceGmt(2026, 9, 22, 22, 0, 0)
+    );
+    Test.stopTest();
+    Senal__c senal = [
+      SELECT Resultado__c, Motivo__c, Detalle__c, Carga__c
+      FROM Senal__c
+      WHERE Clave__c = :clave
+    ];
+    Assert.areEqual(1, r.publicadas, 'Su aviso sale igual');
+    Assert.isNull(r.errorGuardado, 'No queda nada sin guardar');
+    Assert.areNotEqual(
+      IngestaConstantes.RESULTADO_FALLIDO,
+      senal.Resultado__c,
+      'Una senal guardada no se marca Fallido'
+    );
+    Assert.areNotEqual(
+      IngestaConstantes.MOTIVO_SISTEMA,
+      senal.Motivo__c,
+      'Ni con error del sistema'
+    );
+    Assert.isNotNull(senal.Carga__c, 'Conserva la carga');
+  }
+
+  @isTest
   static void shouldIncrementarEntregas_WhenReenvioEnOtraPagina() {
     Datetime ahora = Datetime.newInstanceGmt(2026, 9, 22, 22, 0, 0);
     Datetime sesion = Datetime.newInstanceGmt(2026, 9, 22, 21, 51, 49);
