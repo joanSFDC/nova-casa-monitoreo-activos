@@ -253,6 +253,14 @@ Se ejecuta dos veces: una con los estados ordenados por identificador de activo 
 ordenar, para documentar la diferencia. Es la evidencia de que la decisión de ordenar del
 [módulo 04](04-procesamiento.md) tiene efecto.
 
+**La prueba de volumen con críticos.** La prueba de cinco contra doscientos avisos usa
+lecturas normales y nunca pasa por los casos. Por eso hay una segunda,
+`ProcesamientoServicioTest.shouldUnCasoPorEquipoYConsumoConstante_WhenDoscientosCriticos`:
+quince bombas, una tanda de cinco críticos de cinco bombas y otra de doscientos críticos
+de las otras diez, veinte por bomba. Comprueba que la tanda grande no hace más consultas
+ni más escrituras que la chica, que hay un solo caso abierto por bomba, todos en prioridad
+alta, y que en cada bomba gana una lectura y las otras diecinueve quedan Atrasado.
+
 ## La cobertura
 
 Salesforce exige un 75 % para desplegar a producción. Es un mínimo administrativo, no un
