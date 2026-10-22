@@ -386,9 +386,9 @@ conservar.
 | `lightningExperienceThemes/Nova_Casa` | El tema, sobre SLDS 1, con su conjunto de marca por defecto |
 | `brandingSets/Nova_Casa` | Colores e imágenes del tema |
 | `settings/LightningExperience.settings` | Deja `Nova_Casa` como tema activo |
-| `contentassets/NovaCasaLogoHorizontal` | Logo de la barra, 438 × 120 |
+| `contentassets/NovaCasaLogoHorizontal` | Logo de la barra y de la pantalla de carga, 600 × 120: la proporción 5:1 de la caja de 200 × 40 donde Salesforce lo muestra; con otra proporción lo recorta |
 | `contentassets/NovaCasaFondoEncabezado` | Fondo del encabezado, 1800 × 360 |
-| `contentassets/NovaCasaLogoApp` | La casa sola, 128 × 128, para la aplicación |
+| `contentassets/NovaCasaLogoApp` | La casa sola, 256 × 256, sobre blanco y con un 15 % de margen, para la aplicación |
 | `applications/Nova_Casa` | Descripción, logo y orden de pestañas |
 
 Las imágenes salen de `recursos/logos/logo-novacasa.png` y el tema las referencia como
