@@ -5,7 +5,7 @@
  *
  * El caso guarda la lectura que lo abrio y la ultima que cambio su severidad,
  * y queda Normalizado cuando el equipo vuelve a lo normal. Una lectura que
- * repite la severidad no toca el caso.
+ * repite la severidad no toca el caso ni se liga a el.
  *
  * without sharing: proceso de sistema. Lo invoca el procesamiento, no una persona.
  */
@@ -291,8 +291,6 @@ public without sharing class IncidentesServicio {
         if (cambio) {
           aActualizar.put(abierto.Id, abierto);
           senalPorCaso.put(abierto.Id, decision.claveSenal);
-        } else if (decision.nivel >= 1) {
-          ligar(decision, senales, abierto.Id);
         }
         continue;
       }
@@ -414,13 +412,13 @@ public without sharing class IncidentesServicio {
       if (ganador == null || decision == null) {
         continue;
       }
-      ligar(decision, senales, ganador.Id);
       Boolean cambio = registrarCambio(ganador, decision, Datetime.now());
       if (debeEscalar(ganador, decision.nivel)) {
         escalar(ganador);
         cambio = true;
       }
       if (cambio) {
+        ligar(decision, senales, ganador.Id);
         aEscalar.add(ganador);
       }
     }
@@ -429,25 +427,30 @@ public without sharing class IncidentesServicio {
     }
   }
 
+  /**
+   * Solo la senal que cambia el caso: la que lo abre, lo escala, lo baja o lo
+   * normaliza. Las que repiten la severidad no se ligan, para que un caso largo
+   * no cargue miles de senales sobre un mismo registro.
+   */
   private static void ligar(
     Decision decision,
     Map<String, Senal__c> senales,
     Id casoId
   ) {
-    if (decision == null || senales == null || casoId == null) {
+    if (
+      decision == null ||
+      senales == null ||
+      casoId == null ||
+      String.isBlank(decision.claveSenal)
+    ) {
       return;
     }
-    if (decision.clavesSenal == null) {
-      return;
-    }
-    for (String claveSenal : decision.clavesSenal) {
-      Senal__c senal = senales.get(claveSenal);
-      if (
-        senal != null &&
-        senal.Resultado__c == IngestaConstantes.RESULTADO_APLICADO
-      ) {
-        senal.Incidente__c = casoId;
-      }
+    Senal__c senal = senales.get(decision.claveSenal);
+    if (
+      senal != null &&
+      senal.Resultado__c == IngestaConstantes.RESULTADO_APLICADO
+    ) {
+      senal.Incidente__c = casoId;
     }
   }
 

@@ -7,6 +7,8 @@
  * integracion (scripts/configurar-suscriptor.sh), que no ve por ciudad.
  */
 public without sharing class ProcesamientoServicio {
+  private static final Integer LARGO_LECTURA = 100;
+
   public class ResultadoTanda {
     public Integer senales;
     public Integer aplicadas;
@@ -233,6 +235,19 @@ public without sharing class ProcesamientoServicio {
 
     String tipoMedicion = tipoMedicionDe(aviso);
     Umbral__c umbral = umbrales.get(activo.Tipo__c + '|' + tipoMedicion);
+    Integer lugares = umbral == null ||
+      umbral.Decimales__c == null
+      ? 0
+      : Integer.valueOf(umbral.Decimales__c);
+    senal.Lectura__c = LecturaFormato.lectura(
+        tipoMedicion,
+        aviso.Valor__c,
+        aviso.Unidad__c,
+        lugares,
+        aviso.Estado_Comunicacion__c,
+        aviso.Gap_Segundos__c
+      )
+      ?.left(LARGO_LECTURA);
     ClasificacionServicio.Dictamen dictamen;
     if (tipoMensaje == IngestaConstantes.TIPO_MEDICION) {
       if (
@@ -339,10 +354,7 @@ public without sharing class ProcesamientoServicio {
       activo,
       tipoMedicion,
       dictamen,
-      umbral == null ||
-        umbral.Decimales__c == null
-        ? 0
-        : Integer.valueOf(umbral.Decimales__c)
+      lugares
     );
   }
 
