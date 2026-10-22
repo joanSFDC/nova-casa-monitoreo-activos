@@ -204,6 +204,7 @@ más, y el fallo sería completamente invisible sin esta prueba.
 | Filtros del navegador | Tipo de equipo, búsqueda sin tildes, orden por antigüedad y la ficha sin comunicación filtran sobre filas ya autorizadas; sin resultados, ofrece quitar los filtros |
 | Pastilla de severidad | Pinta cada severidad con su color y su nombre, y «Sin datos» cuando falta |
 | Resumen del incidente | Muestra lo que lo abrió, su último cambio y cómo está ahora; avisa de normalizado si el caso sigue abierto, no si está cerrado; dice «Sin registro» en un caso anterior a las lecturas; no muestra nada si el servidor no deja ver el caso |
+| Historia del incidente | Las intervenciones abiertas, primero la que vence antes; la línea de tiempo del más reciente al más viejo con la intervención completada, el cambio crítico, el cambio y la apertura; la integración se muestra como «Sistema»; diez eventos y «Ver toda la historia» hasta cien; un caso ajeno devuelve `null` (`HistoriaIncidenteControladorTest`); el texto «Prioridad: Baja a Alta» y un nombre para el lector de pantalla en cada punto (`historiaIncidente`) |
 | Resumen del activo y del edificio | Junta mediciones, casos y límites o conteos; «En falla» solo si el caso lo registra; el operador de Bogotá no recibe el resumen de Caribe (`ResumenRegistroControladorTest`) |
 | Bandas del umbral | Dibuja las cinco bandas con sus fronteras, omite la que falta y en una cámara cuenta minutos; en la página del umbral lee el registro |
 | Resultado de la señal | Pinta el resultado con su color, su motivo, si se puede reintentar y las entregas, y explica qué significa |
@@ -230,6 +231,7 @@ El panel de gerencia es metadato y no tiene prueba de Apex. Se comprueba en la o
 | Operador | La barra no muestra Paneles ni Informes |
 | Gerente, monitor | Ve «Ver incidente» y nunca «Abrir intervención» |
 | Coordinador, caso | La cabecera muestra «Registrar intervención» y crea la tarea; operador, gerente y administrador no la ven |
+| Operador, coordinador y gerente, caso | «Historia del incidente» muestra la intervención abierta de 00001149 en español y los cambios con «Sistema»; el operador de Bogotá no abre el caso de Barranquilla |
 
 ### US-209 · Trazabilidad
 

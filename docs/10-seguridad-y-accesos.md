@@ -130,8 +130,11 @@ edita umbrales, y solo sobre estados que ya leyó con su compartición.
 
 Descrita arriba: `with sharing` más `WITH USER_MODE`. Un equipo no autorizado no aparece,
 ni siquiera si alguien manipula la petición desde el navegador para pedir otro edificio.
-Los resúmenes de las páginas de registro (`ResumenRegistroControlador`) siguen la misma
-regla: un caso, activo o edificio que la persona no ve devuelve `null`, no un error.
+Los resúmenes de las páginas de registro (`ResumenRegistroControlador`) y la historia del
+incidente (`HistoriaIncidenteControlador`) siguen la misma regla: un caso, activo o
+edificio que la persona no ve devuelve `null`, no un error. La historia consulta en modo
+sistema una sola cosa: quiénes tienen el conjunto de integración, para mostrarlos como
+«Sistema»; solo devuelve identificadores de usuario.
 
 Es importante que el filtro esté en el servidor y no en el parámetro. El componente manda
 un identificador de edificio, pero **la consulta no confía en él**: `WITH USER_MODE` aplica

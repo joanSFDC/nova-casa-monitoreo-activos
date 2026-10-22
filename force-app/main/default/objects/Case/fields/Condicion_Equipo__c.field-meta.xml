@@ -4,6 +4,7 @@
     <inlineHelpText>En falla mientras la última lectura que cambió el caso es advertencia o crítico. Normalizado cuando el equipo volvió a lo normal: el caso sigue abierto hasta que alguien lo verifique y lo cierre.</inlineHelpText>
     <label>Condición del equipo</label>
     <required>false</required>
+    <trackHistory>true</trackHistory>
     <trackTrending>false</trackTrending>
     <type>Picklist</type>
     <valueSet>
