@@ -221,6 +221,111 @@ private class ProcesamientoServicioTest {
   }
 
   @isTest
+  static void shouldUnCasoPorEquipoYConsumoConstante_WhenDoscientosCriticos() {
+    Id edificio = activoDe(TestDataFactory.AST_PUMP).Edificio__c;
+    List<Activo__c> bombas = new List<Activo__c>();
+    for (Integer i = 1; i <= 15; i++) {
+      bombas.add(
+        new Activo__c(
+          Name = 'Bomba de volumen ' + i,
+          Codigo_Externo__c = 'AST-VOL-PUMP-' +
+            String.valueOf(i).leftPad(2, '0'),
+          Tipo__c = 'WATER_PUMP',
+          Edificio__c = edificio
+        )
+      );
+    }
+    insert bombas;
+
+    List<Senal__c> senales = new List<Senal__c>();
+    List<Aviso_de_Senal__e> cinco = new List<Aviso_de_Senal__e>();
+    List<Aviso_de_Senal__e> doscientos = new List<Aviso_de_Senal__e>();
+    Integer numero = 0;
+    for (Integer b = 0; b < bombas.size(); b++) {
+      Integer porBomba = b < 5 ? 1 : 20;
+      for (Integer k = 0; k < porBomba; k++) {
+        numero++;
+        String n = String.valueOf(numero).leftPad(6, '0');
+        Map<String, Object> mensaje = TestDataFactory.mensajePresion(
+          'msg_' + n,
+          'dlv_' + n,
+          0.9,
+          'BAR'
+        );
+        ((Map<String, Object>) mensaje.get('asset'))
+          .put('id', bombas[b].Codigo_Externo__c);
+        mensaje.put(
+          'occurredAt',
+          '2026-09-22T22:' + String.valueOf(k).leftPad(2, '0') + ':00.000Z'
+        );
+        senales.add(
+          TestDataFactory.senalPendiente(mensaje, bombas[b].Id, edificio)
+        );
+        Aviso_de_Senal__e aviso = TestDataFactory.avisoDe(mensaje);
+        if (b < 5) {
+          cinco.add(aviso);
+        } else {
+          doscientos.add(aviso);
+        }
+      }
+    }
+    insert senales;
+
+    Test.startTest();
+    Integer q0 = Limits.getQueries();
+    Integer d0 = Limits.getDmlStatements();
+    ProcesamientoServicio.procesar(cinco);
+    Integer q5 = Limits.getQueries() - q0;
+    Integer d5 = Limits.getDmlStatements() - d0;
+    q0 = Limits.getQueries();
+    d0 = Limits.getDmlStatements();
+    ProcesamientoServicio.ResultadoTanda r200 = ProcesamientoServicio.procesar(
+      doscientos
+    );
+    Integer q200 = Limits.getQueries() - q0;
+    Integer d200 = Limits.getDmlStatements() - d0;
+    Test.stopTest();
+
+    Assert.isTrue(
+      q200 <= q5,
+      'Las consultas no crecen con el volumen: ' + q5 + ' y ' + q200
+    );
+    Assert.isTrue(
+      d200 <= d5,
+      'Las escrituras no crecen con el volumen: ' + d5 + ' y ' + d200
+    );
+    Assert.areEqual(10, r200.aplicadas, 'Un ganador por bomba en la tanda');
+    Assert.areEqual(
+      190,
+      r200.atrasadas,
+      'El resto de cada bomba queda atrasado'
+    );
+    List<AggregateResult> porClave = [
+      SELECT Clave_Abierta__c clave, COUNT(Id) n
+      FROM Case
+      WHERE IsClosed = FALSE
+      GROUP BY Clave_Abierta__c
+    ];
+    Assert.areEqual(15, porClave.size(), 'Un caso abierto por bomba');
+    for (AggregateResult fila : porClave) {
+      Assert.areEqual(
+        1,
+        (Integer) fila.get('n'),
+        'Nunca dos casos por problema'
+      );
+    }
+    Assert.areEqual(
+      15,
+      [
+        SELECT COUNT()
+        FROM Case
+        WHERE IsClosed = FALSE AND Priority = :IncidentesServicio.PRIORIDAD_ALTA
+      ],
+      'Todos nacen en prioridad alta'
+    );
+  }
+
+  @isTest
   static void shouldMarcarFallido_WhenEscrituraDeEstadoFalla() {
     Activo__c bomba = activoDe(TestDataFactory.AST_PUMP);
     Activo__c camara = activoDe(TestDataFactory.AST_CAM);
