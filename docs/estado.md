@@ -664,6 +664,16 @@ No estaban en la especificación y conviene no redescubrirlas.
     vigente que no sea `LOST` normaliza todos los cortes abiertos de esa cámara,
     sin cerrarlos ([módulo 08](08-conectividad.md)). En la org, los ocho cortes
     abiertos se normalizaron con el siguiente latido.
+66. **El logo de la marca va en proporción 5:1.** Salesforce lo muestra en una caja
+    de unos 200 × 40 tanto en la pantalla de carga como en el encabezado: con la
+    imagen de 438 × 120 lo ajustaba al ancho y le cortaba las patas a la N. El
+    logo pasó a 600 × 120 con el mismo diseño centrado, y el ícono de la app a
+    256 × 256 con margen ([módulo 09](09-experiencia-del-operador.md)).
+67. **Caso se llama Incidente y Tarea se llama Intervención.** Con traducciones de
+    objeto (`objectTranslations/Case-es`, `Case-en_US`, `Task-es`, `Task-en_US`), que
+    renombran el objeto y su pestaña en español y en inglés. El español no admite
+    el atributo `startsWith`. Los campos estándar conservan su etiqueta. En el
+    código y en la API los objetos siguen siendo `Case` y `Task`.
 
 ## Historial breve
 
@@ -721,3 +731,5 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-20 | Una cámara que vuelve a comunicarse normaliza todos sus cortes abiertos, aunque el episodio sea otro. PR #104 fusionado. Cierra #103 |
 | 2026-10-20 | La página del caso muestra «Señales del caso» a quien lee la bitácora, con una lista relacionada dinámica. PR #106 fusionado. Cierra #105 |
 | 2026-10-20 | «Señales del caso» va de la más reciente a la más vieja, por fecha de origen: el número de señal se ordena como texto. PR #108 fusionado. Cierra #107 |
+| 2026-10-22 | El logo de la marca pasa a 5:1 y deja de cortarse en la pantalla de carga y en el encabezado; el ícono de la app, a 256 × 256 con margen. PR #112 fusionado. Cierra #111 |
+| 2026-10-22 | Caso se llama Incidente y Tarea se llama Intervención, en español y en inglés, con traducciones de objeto. |
