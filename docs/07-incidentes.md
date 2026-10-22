@@ -2,6 +2,10 @@
 
 Cubre **US-205 · Generar una sola intervención por mensaje crítico**.
 
+En la interfaz, `Case` se llama **Incidente** y `Task` se llama **Intervención**, en
+español y en inglés (decisión 67 de [estado](estado.md)). En el código y en este
+documento se sigue diciendo «caso» cuando se habla del objeto.
+
 ## El concepto de base: idempotencia bajo concurrencia
 
 «Un solo incidente por problema» parece una regla de negocio y es, en realidad, un
