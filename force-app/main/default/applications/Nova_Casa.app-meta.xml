@@ -3,7 +3,7 @@
     <brand>
         <headerColor>#122D4F</headerColor>
         <logo>NovaCasaLogoApp</logo>
-        <logoVersion>1</logoVersion>
+        <logoVersion>2</logoVersion>
         <shouldOverrideOrgTheme>false</shouldOverrideOrgTheme>
     </brand>
     <description>Monitoreo de activos de Nova Casa: el operador ve sus equipos, abre intervenciones y sigue los casos.</description>
