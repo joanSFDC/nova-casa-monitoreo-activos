@@ -367,8 +367,10 @@ sistema.
 
 ### `Task` como intervención
 
-La unidad de trabajo que el coordinador asigna y sigue. Vive en la línea de actividad del
-caso sin que haya que construir nada.
+La unidad de trabajo que el coordinador asigna y sigue. Se ve en la historia del incidente,
+en la página del caso: las abiertas arriba y las completadas en la línea de tiempo. El
+estado y la prioridad muestran etiquetas en español (`TaskStatus`, `TaskPriority`); los
+valores de API siguen en inglés.
 
 Queda pendiente verificar que la configuración de la organización admita los campos que
 necesita el modelo de intervención. Es el riesgo R-04 y se resuelve revisando la org, no

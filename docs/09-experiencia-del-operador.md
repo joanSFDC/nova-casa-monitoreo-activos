@@ -185,13 +185,42 @@ número, la ciudad y la condición del equipo, con Editar solo para quien puede 
 caso y «Registrar intervención» solo para el coordinador. Debajo, el **resumen del
 incidente** y tres secciones: Incidente, con la descripción y el propietario; Lecturas, con
 los campos que guarda el caso; y Equipo, con el activo, la medición, la ciudad y lo que ata
-el caso a su señal (clave, episodio y origen). Al lado, la actividad con las intervenciones
-y, para quien lee la bitácora, «Señales del caso»: las últimas señales ligadas.
+el caso a su señal (clave, episodio y origen). Al lado, la **historia del incidente**, con
+las intervenciones abiertas y lo que pasó, y, para quien lee la bitácora, «Señales del
+caso»: las últimas señales ligadas.
 
 Esa lista es una lista relacionada dinámica, no una lista del formato de página. El perfil
 de acceso mínimo no tiene formato de página asignado para Case, y una lista relacionada
 normal solo se pinta si está en el formato de página del perfil: al coordinador no le salía.
 La dinámica no depende del formato. Su encabezado cuenta lo que carga («5+»), no el total.
+
+### La historia del incidente
+
+El panel de actividad estándar mostraba «Upcoming & Overdue», en inglés, y no decía nada
+de los cambios del caso: para saber qué se había hecho había que abrir cada tarea, y para
+saber qué cambió, el historial. **Decisión: un componente propio, `historiaIncidente`, en
+lugar del panel**, con dos partes:
+
+- **Intervenciones abiertas**, primero la que vence antes, con su responsable, fecha
+  límite, prioridad y estado.
+- **Lo que pasó**, una línea de tiempo del más reciente al más viejo: la apertura, los
+  cambios de prioridad, estado, severidad de la última lectura y condición del equipo, y
+  las intervenciones completadas. Cada punto tiene su color (rojo si el cambio sube a
+  alta o a crítico, azul para un cambio, verde para una intervención completada y gris
+  para la apertura) y un texto para el lector de pantalla con el mismo dato, porque el
+  color solo no basta.
+
+Lo que escribe la integración o un flujo aparece como «Sistema»; lo que hace una persona,
+con su nombre. Muestra los diez eventos más recientes y «Ver toda la historia» trae hasta
+cien. Se recarga cuando la página se actualiza, por ejemplo al registrar una intervención.
+
+Lee con `HistoriaIncidenteControlador`, `with sharing` y `WITH USER_MODE` como los
+resúmenes: un caso que la persona no ve devuelve `null`. Los cambios salen del historial de
+campos del caso, que ya seguía el estado, la prioridad y el propietario; la severidad de la
+última lectura y la condición del equipo lo llevan desde el 22 de octubre de 2026, así que
+los incidentes anteriores no muestran esos cambios antes de esa fecha. El estado y la
+prioridad de las intervenciones muestran etiquetas en español (`TaskStatus` y
+`TaskPriority`), con los valores de API intactos, como los del caso.
 
 ### Los resúmenes de las páginas de registro
 
@@ -222,9 +251,9 @@ Se resolvió en una sola página, sin pestañas ni navegación intermedia, porqu
 llega aquí desde una alarma: quiere saber qué pasa y qué se está haciendo, y cada clic
 intermedio es tiempo entre el aviso y la acción.
 
-No hay componente propio para el detalle. La página de Lightning ya aplica la compartición
-por ciudad y los permisos de campo, y trae la actividad sin código. Por eso el servidor no
-expone una lectura del caso.
+No hay componente propio para los campos del caso. La página de Lightning ya aplica la
+compartición por ciudad y los permisos de campo. Por eso el servidor no expone una lectura
+del caso; la historia solo lee el historial y las intervenciones.
 
 ### Los tres estados de la pantalla
 

@@ -481,8 +481,8 @@
     <flexiPageRegions>
         <itemInstances>
             <componentInstance>
-                <componentName>runtime_sales_activities:activityPanel</componentName>
-                <identifier>runtime_sales_activities_activityPanel</identifier>
+                <componentName>historiaIncidente</componentName>
+                <identifier>c_historiaIncidente</identifier>
             </componentInstance>
         </itemInstances>
         <itemInstances>

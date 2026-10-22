@@ -674,6 +674,12 @@ No estaban en la especificación y conviene no redescubrirlas.
     renombran el objeto y su pestaña en español y en inglés. El español no admite
     el atributo `startsWith`. Los campos estándar conservan su etiqueta. En el
     código y en la API los objetos siguen siendo `Case` y `Task`.
+68. **La página del incidente cuenta su historia.** `historiaIncidente` reemplaza el
+    panel de actividad: intervenciones abiertas arriba y una línea de tiempo con los
+    cambios del caso y las intervenciones completadas, con la integración como
+    «Sistema» ([módulo 09](09-experiencia-del-operador.md)). La severidad de la última
+    lectura y la condición del equipo entran al historial de campos (12 de 20). El
+    estado y la prioridad de las tareas llevan etiquetas en español, como la decisión 39.
 
 ## Historial breve
 
@@ -732,4 +738,6 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-20 | La página del caso muestra «Señales del caso» a quien lee la bitácora, con una lista relacionada dinámica. PR #106 fusionado. Cierra #105 |
 | 2026-10-20 | «Señales del caso» va de la más reciente a la más vieja, por fecha de origen: el número de señal se ordena como texto. PR #108 fusionado. Cierra #107 |
 | 2026-10-22 | El logo de la marca pasa a 5:1 y deja de cortarse en la pantalla de carga y en el encabezado; el ícono de la app, a 256 × 256 con margen. PR #112 fusionado. Cierra #111 |
-| 2026-10-22 | Caso se llama Incidente y Tarea se llama Intervención, en español y en inglés, con traducciones de objeto. |
+| 2026-10-22 | Caso se llama Incidente y Tarea se llama Intervención, en español y en inglés, con traducciones de objeto. PR #114 fusionado. Cierra #113 |
+| 2026-10-22 | Prueba de volumen: 200 avisos críticos de 15 bombas abren 15 incidentes con el mismo consumo que 5. PR #116 fusionado. Cierra #115 |
+| 2026-10-22 | La página del incidente muestra su historia: intervenciones abiertas y lo que pasó, en lugar del panel de actividad. PR #118 fusionado. Cierra #117 |

@@ -1,0 +1,86 @@
+<template>
+  <template lwc:if={cargando}>
+    <div class="tarjeta" role="status">
+      <span class="slds-assistive-text"
+        >Cargando la historia del incidente</span
+      >
+      <div class="slds-skeleton slds-skeleton_text"></div>
+    </div>
+  </template>
+  <template lwc:elseif={error}>
+    <div class="tarjeta" role="alert">{error}</div>
+  </template>
+  <template lwc:elseif={datos}>
+    <article class="tarjeta" aria-labelledby="titulo-historia">
+      <h2 id="titulo-historia" class="titulo">Historia del incidente</h2>
+      <p class="subtitulo">
+        Intervenciones y cambios, del más reciente al más viejo.
+      </p>
+
+      <section aria-labelledby="titulo-abiertas">
+        <h3 id="titulo-abiertas" class="seccion">{tituloAbiertas}</h3>
+        <template lwc:if={hayAbiertas}>
+          <ul class="abiertas">
+            <template for:each={abiertas} for:item="intervencion">
+              <li key={intervencion.id} class="intervencion">
+                <p class="asunto">{intervencion.asunto}</p>
+                <dl class="meta">
+                  <dt>Responsable</dt>
+                  <dd>{intervencion.responsable}</dd>
+                  <dt>Fecha límite</dt>
+                  <dd>{intervencion.fechaLimite}</dd>
+                  <dt>Prioridad</dt>
+                  <dd>{intervencion.prioridad}</dd>
+                  <dt>Estado</dt>
+                  <dd><span class="estado">{intervencion.estado}</span></dd>
+                </dl>
+              </li>
+            </template>
+          </ul>
+        </template>
+        <template lwc:else>
+          <p class="vacio">No hay intervenciones abiertas.</p>
+        </template>
+      </section>
+
+      <section aria-labelledby="titulo-paso">
+        <h3 id="titulo-paso" class="seccion">Lo que pasó</h3>
+        <template lwc:if={hayEventos}>
+          <ul class="linea">
+            <template for:each={eventos} for:item="evento">
+              <li key={evento.clave} class={evento.clase}>
+                <span class="slds-assistive-text">{evento.tipo}:</span>
+                <p class="cuando">{evento.cuando}</p>
+                <p class="que">
+                  <template lwc:if={evento.esCambio}>
+                    {evento.campo}: <b>{evento.antes}</b>{conector}<b
+                      >{evento.despues}</b
+                    >
+                  </template>
+                  <template lwc:else>{evento.texto}</template>
+                </p>
+                <p class="quien">{evento.quien}</p>
+              </li>
+            </template>
+          </ul>
+        </template>
+        <template lwc:else>
+          <p class="vacio">Todavía no hay cambios registrados.</p>
+        </template>
+      </section>
+
+      <template lwc:if={puedeVerTodo}>
+        <button
+          type="button"
+          class="slds-button slds-button_reset slds-text-link ver-todo"
+          onclick={handleVerTodo}
+        >
+          Ver toda la historia
+        </button>
+      </template>
+      <template lwc:if={recortada}>
+        <p class="vacio">{textoRecortada}</p>
+      </template>
+    </article>
+  </template>
+</template>

@@ -4,6 +4,7 @@
     <inlineHelpText>La severidad de la última lectura que cambió el caso. Es con la que se compara la siguiente.</inlineHelpText>
     <label>Severidad de la última lectura</label>
     <required>false</required>
+    <trackHistory>true</trackHistory>
     <trackTrending>false</trackTrending>
     <type>Picklist</type>
     <valueSet>
