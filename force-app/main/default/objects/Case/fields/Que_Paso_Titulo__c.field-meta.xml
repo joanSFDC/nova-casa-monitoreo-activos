@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Que_Paso_Titulo__c</fullName>
+    <description>El título de la lectura en el correo: en una cámara no hay una lectura sino un corte.</description>
+    <externalId>false</externalId>
+    <formula>IF(ISPICKVAL(Tipo_Medicion__c, &quot;CAMERA_CONNECTIVITY&quot;), &quot;Qué pasó&quot;, &quot;La lectura que lo puso en rojo&quot;)</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <inlineHelpText>Lo usa el correo de caso crítico.</inlineHelpText>
+    <label>Título de lo que pasó</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

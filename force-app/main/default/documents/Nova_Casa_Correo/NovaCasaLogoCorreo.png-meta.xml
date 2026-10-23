@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>El logo de los correos de caso crítico. Es una imagen disponible externamente: un cliente de correo no puede leer los recursos internos de Salesforce.</description>
+    <internalUseOnly>false</internalUseOnly>
+    <name>Logo Nova Casa para correo</name>
+    <public>true</public>
+</Document>

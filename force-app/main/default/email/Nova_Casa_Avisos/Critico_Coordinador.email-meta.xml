@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EmailTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
+    <available>true</available>
+    <description>Correo al coordinador cuando un incidente pasa a rojo: los datos para decidir.</description>
+    <encodingKey>UTF-8</encodingKey>
+    <name>Crítico · coordinador</name>
+    <style>none</style>
+    <subject>Crítico · Incidente {!Case.CaseNumber} · {!Case.Equipo_Nombre__c} · {!Case.Ciudad__c}</subject>
+    <textOnly>CRÍTICO · Incidente {!Case.CaseNumber} · {!Case.Ciudad__c}
+{!Case.Equipo_Nombre__c} · {!Case.Edificio_Nombre__c}
+
+Cómo llegó a rojo: {!Case.Como_Llego_A_Rojo__c}
+Lo abrió: {!Case.Lectura_Apertura__c} · {!Case.Severidad_Apertura__c}
+Lo puso en rojo: {!Case.Ultima_Lectura__c} · {!Case.Severidad_Ultima_Lectura__c}
+Detectado el {!Case.Hora_Cambio_Texto__c} (hora de Bogotá).
+
+{!Case.Responsable_Texto__c}
+Abrir el incidente: {!Case.Link}
+Y desde ahí, «Registrar intervención».
+
+Recibes este aviso porque eres coordinador de Nova Casa.
+Nova Casa · Monitoreo de activos</textOnly>
+    <type>custom</type>
+    <uiType>Aloha</uiType>
+</EmailTemplate>

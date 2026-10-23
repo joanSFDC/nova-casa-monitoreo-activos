@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Group xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Reciben en la campana el aviso de un caso que sigue en rojo a las 2 horas: el gerente. Solo para avisos; la compartición no lo usa.</description>
+    <doesIncludeBosses>false</doesIncludeBosses>
+    <name>Avisos Gerencia</name>
+</Group>
