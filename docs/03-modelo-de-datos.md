@@ -360,6 +360,19 @@ Campos añadidos:
 | `Condicion_Equipo__c` | Picklist: En falla, Normalizado | Normalizado cuando el equipo volvió a lo normal con el caso abierto |
 | `Normalizado_En__c` | DateTime | La fecha de origen de la lectura que normalizó; se vacía si reincide |
 
+Siete fórmulas de texto solo para el correo de caso crítico ([módulo 07](07-incidentes.md)).
+No van en la página: la página ya muestra lo mismo con el resumen del incidente.
+
+| Campo | Fórmula, en palabras |
+| --- | --- |
+| `Equipo_Nombre__c` | El nombre del activo |
+| `Edificio_Nombre__c` | El nombre del edificio del activo |
+| `Como_Llego_A_Rojo__c` | «Nació en rojo» si lo abrió un crítico, «Escaló desde advertencia» si lo abrió una advertencia, «Se subió a alta» si no hay severidad de apertura |
+| `Que_Paso_Titulo__c` | «Qué pasó» en una cámara, «La lectura que lo puso en rojo» en lo demás |
+| `Que_Paso__c` | La última lectura; en una cámara, «Sin comunicación desde hace 62 min» en lugar de «Sin comunicación · 62 min» |
+| `Hora_Cambio_Texto__c` | La última modificación en hora de Bogotá (UTC−5), como «22/10/2026, 3:40 p. m.» |
+| `Responsable_Texto__c` | «Está en la cola de Coordinación, sin responsable.» o «Lo tiene» y el nombre de quien lo tomó |
+
 El mecanismo de `Clave_Abierta__c` y el de las lecturas están explicados en el
 [módulo 07](07-incidentes.md). Las lecturas se copian al caso, en lugar de leerse de la
 bitácora, porque el operador no tiene acceso a `Senal__c`: sin copia, no podría ver qué

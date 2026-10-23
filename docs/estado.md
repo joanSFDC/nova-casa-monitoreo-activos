@@ -298,6 +298,12 @@ Medido en la org: las parejas de texto y fondo que introduce el tema van de
 
 ## Cómo reconstruir el entorno
 
+Antes del despliegue completo, crea la dirección de la organización de los avisos
+(Configuración → Direcciones de toda la organización: «Nova Casa · Monitoreo», con el
+correo de Joan, para todos los perfiles) y abre el enlace de verificación que manda
+Salesforce, iniciando sesión con el administrador de la org. Sin una dirección
+verificada, el despliegue rechaza las alertas de `workflows/Case.workflow-meta.xml`.
+
 ```bash
 sf project deploy start --source-dir force-app -o novacasa2
 sf org assign permset -o novacasa2 -n Nova_Casa_Administracion
@@ -687,6 +693,16 @@ No estaban en la especificación y conviene no redescubrirlas.
     `Id`, y lee `Senal__c.Lectura__c`, que escriben el procesamiento y, en las rechazadas,
     la ingesta ([módulo 09](09-experiencia-del-operador.md), [módulo 07](07-incidentes.md)).
     La regla de `AGENTS.md` pasa a ser «El monitor nunca consulta `Senal__c`».
+70. **Un incidente que entra en rojo avisa una sola vez, por correo y, a las 2 horas, en
+    la campana.** El flujo `Avisar_Caso_Critico` corre al crear o actualizar «solo cuando
+    se cumple la condición», con las alertas en la ruta asíncrona para que un correo que
+    falla no deje sin guardar el incidente. Las alertas cuentan contra 61.125 al día, no
+    contra los 15 correos individuales. Los destinatarios son grupos propios de avisos,
+    sin tocar la compartición ([módulo 07](07-incidentes.md)).
+71. **El script de usuarios acepta el nombre del perfil en los dos idiomas.** Salesforce
+    traduce el nombre de los perfiles estándar al idioma de quien consulta: desde que el
+    usuario de Joan está en español, «System Administrator» se llama «Administrador del
+    sistema» y el script fallaba.
 
 ## Historial breve
 
@@ -749,3 +765,4 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-22 | Prueba de volumen: 200 avisos críticos de 15 bombas abren 15 incidentes con el mismo consumo que 5. PR #116 fusionado. Cierra #115 |
 | 2026-10-22 | La página del incidente muestra su historia: intervenciones abiertas y lo que pasó, en lugar del panel de actividad. PR #118 fusionado. Cierra #117 |
 | 2026-10-22 | «Lecturas del periodo» en la página del incidente y `ligar` solo ata la señal que cambia el caso. PR #120 fusionado. Cierra #119 |
+| 2026-10-23 | Aviso por correo y en la campana cuando un incidente entra en rojo; el script de usuarios acepta el perfil en español. PR #122 fusionado. Cierra #121 |

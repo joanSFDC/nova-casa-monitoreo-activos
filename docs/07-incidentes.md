@@ -278,10 +278,88 @@ Eso permite dos preguntas que el administrador va a hacer: «¿qué mensaje abri
 y «¿este mensaje produjo algún caso?». Sin los dos campos, la segunda exigiría recorrer
 todos los casos comparando claves.
 
+## El aviso cuando un incidente entra en rojo
+
+Hasta aquí, un incidente crítico esperaba a que alguien abriera el monitor o la cola.
+**Decisión: un flujo, `Avisar_Caso_Critico`, avisa en el momento en que el incidente pasa a
+prioridad alta**, por correo a quienes tienen que actuar y, si sigue en rojo, en la campana
+del gerente.
+
+```mermaid
+flowchart LR
+  caso["El incidente pasa a alta"] --> flujo["Avisar_Caso_Critico"]
+  flujo -->|"ruta asíncrona"| coord["Correo a coordinación"]
+  coord --> ciudad{"Ciudad del incidente"}
+  ciudad -->|"Bogotá"| opBog["Correo a los operadores de Bogotá"]
+  ciudad -->|"Barranquilla"| opBaq["Correo a los operadores de Barranquilla"]
+  flujo -->|"a las 2 horas"| leer["Lee el incidente como está ahora"]
+  leer --> sigue{"¿Sigue abierto y en alta?"}
+  sigue -->|"sí"| campana["Campana del gerente: «Caso crítico sin atender»"]
+```
+
+**Cuándo se dispara.** Es un flujo desencadenado por registro sobre `Case`, después de
+guardar, al crear o al actualizar, con la condición «prioridad alta» y «solo cuando el
+registro se actualiza para cumplir la condición». Así cubre los incidentes que nacen en
+rojo, que son la mayoría, y los que escalan desde advertencia, y sale **un solo aviso por
+incidente**: las lecturas siguientes que mantienen el rojo no lo repiten. Una advertencia
+nunca avisa. En la org llegan unos tres incidentes en alta por semana.
+
+| Alternativa | Por qué no |
+| --- | --- |
+| Apex en `IncidentesServicio` con `Messaging.sendEmail` | Cuenta contra el límite de 15 correos individuales por día de esta org; las alertas cuentan contra el de 61.125. Además ata el correo al procesamiento, que no debe fallar por un correo |
+| Solo al actualizar | Dejaría sin aviso a los que nacen en rojo |
+| Avisar en cada lectura crítica | Decenas de correos por el mismo incidente; el aviso es por incidente, como el caso |
+
+**La ruta asíncrona.** Las alertas no van en la transacción que guarda el incidente, sino en
+la ruta asíncrona del flujo, que corre después de confirmarla. El procesamiento crea los
+incidentes con guardado parcial: si la alerta fuera en la misma transacción y fallara, el
+incidente no se guardaría y su señal quedaría Fallido. Así, si un correo falla, el
+incidente ya existe.
+
+**A quién.** Tres alertas de correo, `Critico_Coordinacion`, `Critico_Operadores_Bogota` y
+`Critico_Operadores_Barranquilla`, cada una a un grupo nuevo solo para avisos: Avisos
+Coordinación, Avisos Bogotá y Avisos Barranquilla. El flujo elige la de operadores por
+`Ciudad__c`; un incidente sin ciudad solo avisa a coordinación. Los grupos de la
+compartición (Operadores Bogotá y los demás) no sirven para esto, porque incluyen al
+coordinador y al gerente, que recibirían el correo del operador. Los llena
+`scripts/apex/crear-usuarios-demo.apex`, y la compartición no cambia.
+
+**A las 2 horas.** La ruta programada lee el incidente de nuevo y avisa al grupo Avisos
+Gerencia con la notificación personalizada «Caso crítico sin atender» solo si sigue
+abierto y en alta. Lo comprueba ahí porque cerrar un incidente no le baja la prioridad.
+Al tocar la notificación se abre el incidente.
+
+**Las plantillas.** Dos plantillas HTML clásicas, en la carpeta «Nova Casa · Avisos»:
+
+- `Critico_Operador`: qué pasa y dónde. El equipo, el edificio y la ciudad, la lectura que
+  lo puso en rojo (en una cámara, el corte), la hora y quién lo tiene, con el botón «Ver el
+  incidente».
+- `Critico_Coordinador`: los datos para decidir. Cómo llegó a rojo, la lectura que lo abrió
+  y la que lo puso en rojo con su severidad, la hora y quién lo tiene, con el botón «Abrir
+  el incidente».
+
+Llevan el logo sobre blanco con la franja azul de la marca debajo, la palabra «CRÍTICO» en
+una pastilla roja y no solo el color, texto alternativo en el logo, una versión de texto
+plano y `lang="es"`. El logo es un Documento con imagen disponible externamente
+(`documents/Nova_Casa_Correo`), recortado a su contenido para que se alinee con el texto:
+un cliente de correo no puede leer los recursos internos de Salesforce, y un recurso de
+contenido de la marca exige sesión. Son plantillas clásicas porque las alertas de correo
+las usan con campos de combinación del caso, sin código.
+
+**La hora.** El correo muestra la hora en que Salesforce guardó el cambio, en hora de
+Bogotá, desde la fórmula `Hora_Cambio_Texto__c` sobre la última modificación. La hora del
+sensor viene del reloj del simulador («12/06/2030») y en un correo confunde; se ve dentro
+del incidente. La fórmula toma la fecha del texto en GMT y le resta cinco horas: `DATEVALUE`
+la pasaría a la zona de quien envía y cambiaría el día cerca de la medianoche.
+
+**El remitente** es la dirección de la organización «Nova Casa · Monitoreo», no el usuario
+de integración ni quien guardó el caso. Salesforce exige que esté verificada antes de
+desplegar una alerta que la use.
+
 ## La intervención
 
-El incidente es un `Case`. La **intervención** es una `Task` en su línea de actividad, y la
-crea el coordinador manualmente al decidir qué hay que hacer.
+El incidente es un `Case`. La **intervención** es una `Task`, que se ve en la historia del
+incidente, y la crea el coordinador manualmente al decidir qué hay que hacer.
 
 **No se crean tareas automáticamente.** El sistema detecta y prioriza; asignar trabajo es
 una decisión humana que depende de quién está disponible, qué más hay en curso y qué
