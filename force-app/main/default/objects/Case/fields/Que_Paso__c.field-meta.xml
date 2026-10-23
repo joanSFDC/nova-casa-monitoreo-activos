@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Que_Paso__c</fullName>
+    <description>La última lectura en palabras para el correo. En una cámara dice el corte, para que el correo no muestre un valor que no existe.</description>
+    <externalId>false</externalId>
+    <formula>IF(ISPICKVAL(Tipo_Medicion__c, &quot;CAMERA_CONNECTIVITY&quot;), SUBSTITUTE(Ultima_Lectura__c, &quot;Sin comunicación · &quot;, &quot;Sin comunicación desde hace &quot;), Ultima_Lectura__c)</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <inlineHelpText>La lectura del equipo, o «Sin comunicación desde hace…» en una cámara.</inlineHelpText>
+    <label>Qué pasó</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

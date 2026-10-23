@@ -145,6 +145,13 @@ sobre `ClosedDate`, y en modo usuario la consulta fallaba en vez de devolver la 
 `Lectura__c` es la lectura en palabras, no la carga: el coordinador la lee y sigue sin ver
 `Carga__c`.
 
+Los avisos de caso crítico van a cuatro grupos propios (Avisos Bogotá, Avisos
+Barranquilla, Avisos Coordinación y Avisos Gerencia) que no dan acceso a nada: ninguna
+regla de compartición los usa. Un correo de alerta muestra los campos del caso sin mirar
+los permisos de quien lo recibe, así que solo lleva lo que esa persona ya ve en su página:
+el operador recibe solo los de su ciudad. Los siete campos fórmula del correo solo tienen
+permiso de lectura en Administración, porque las personas no los necesitan en pantalla.
+
 Es importante que el filtro esté en el servidor y no en el parámetro. El componente manda
 un identificador de edificio, pero **la consulta no confía en él**: `WITH USER_MODE` aplica
 la compartición por encima de cualquier filtro que venga del cliente. Si el operador pide

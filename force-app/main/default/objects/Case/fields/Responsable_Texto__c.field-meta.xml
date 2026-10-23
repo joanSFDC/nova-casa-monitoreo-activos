@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Responsable_Texto__c</fullName>
+    <description>En una frase, si el incidente está en una cola o quién lo tomó. Lo usan los correos de caso crítico.</description>
+    <externalId>false</externalId>
+    <formula>IF(BEGINS(OwnerId, &quot;00G&quot;), &quot;Está en la cola de &quot; &amp; Owner:Queue.Name &amp; &quot;, sin responsable.&quot;, &quot;Lo tiene &quot; &amp; Owner:User.FirstName &amp; &quot; &quot; &amp; Owner:User.LastName &amp; &quot;.&quot;)</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <inlineHelpText>Lo usan los avisos por correo.</inlineHelpText>
+    <label>Quién lo tiene</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

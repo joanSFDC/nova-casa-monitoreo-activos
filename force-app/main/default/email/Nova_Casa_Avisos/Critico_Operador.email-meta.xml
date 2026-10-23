@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EmailTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
+    <available>true</available>
+    <description>Correo al operador de la ciudad cuando un incidente pasa a rojo: qué pasa y dónde.</description>
+    <encodingKey>UTF-8</encodingKey>
+    <name>Crítico · operador</name>
+    <style>none</style>
+    <subject>Crítico · {!Case.Equipo_Nombre__c} · {!Case.Edificio_Nombre__c}</subject>
+    <textOnly>CRÍTICO · {!Case.Equipo_Nombre__c}
+{!Case.Edificio_Nombre__c} · {!Case.Ciudad__c}
+
+{!Case.Que_Paso_Titulo__c}: {!Case.Que_Paso__c}
+Detectado el {!Case.Hora_Cambio_Texto__c} (hora de Bogotá).
+
+Incidente {!Case.CaseNumber}. {!Case.Responsable_Texto__c}
+Ver el incidente: {!Case.Link}
+
+Recibes este aviso porque eres operador de {!Case.Ciudad__c}.
+Nova Casa · Monitoreo de activos</textOnly>
+    <type>custom</type>
+    <uiType>Aloha</uiType>
+</EmailTemplate>

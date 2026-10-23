@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Hora_Cambio_Texto__c</fullName>
+    <description>La hora real en que Salesforce guardó el último cambio, en hora de Bogotá (UTC-5, sin horario de verano), tomada del texto de la fecha en GMT: DATEVALUE la pasaría a la zona de quien envía. El correo la muestra en vez de la hora del sensor, que viene del reloj del simulador.</description>
+    <externalId>false</externalId>
+    <formula>MID(TEXT((LastModifiedDate - 5/24)), 9, 2) &amp; &quot;/&quot; &amp; MID(TEXT((LastModifiedDate - 5/24)), 6, 2) &amp; &quot;/&quot; &amp; LEFT(TEXT((LastModifiedDate - 5/24)), 4) &amp; &quot;, &quot; &amp; TEXT(IF(MOD(VALUE(MID(TEXT((LastModifiedDate - 5/24)), 12, 2)), 12) = 0, 12, MOD(VALUE(MID(TEXT((LastModifiedDate - 5/24)), 12, 2)), 12))) &amp; &quot;:&quot; &amp; MID(TEXT((LastModifiedDate - 5/24)), 15, 2) &amp; IF(VALUE(MID(TEXT((LastModifiedDate - 5/24)), 12, 2)) &lt; 12, &quot; a. m.&quot;, &quot; p. m.&quot;)</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <inlineHelpText>Hora de Bogotá de la última modificación del incidente. La usa el correo de caso crítico.</inlineHelpText>
+    <label>Hora del cambio (Bogotá)</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

@@ -223,6 +223,13 @@ los incidentes anteriores no muestran esos cambios antes de esa fecha. El estado
 prioridad de las intervenciones muestran etiquetas en español (`TaskStatus` y
 `TaskPriority`), con los valores de API intactos, como los del caso.
 
+### El aviso de caso crítico
+
+Cuando un incidente pasa a rojo, el operador de su ciudad y el coordinador reciben un
+correo, y si a las 2 horas sigue abierto y en alta, el gerente recibe «Caso crítico sin
+atender» en la campana. El botón del correo y la notificación abren la página del
+incidente. Cómo se decide y a quién llega está en el [módulo 07](07-incidentes.md).
+
 ### Las lecturas del periodo
 
 «Señales del caso» muestra solo las señales que cambiaron el incidente. Para ver todo lo
