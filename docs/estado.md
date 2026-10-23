@@ -781,3 +781,4 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-23 | Una señal en conflicto antes de procesarse guarda la lectura de la primera afirmación: «Lecturas del periodo» ya no la muestra con «—». PR #124 fusionado. Cierra #123 |
 | 2026-10-23 | El timbre suena como mucho cada 30 segundos, el monitor no escucha con la pestaña oculta y cerrar un incidente toca el timbre. PR #126 fusionado. Cierra #125 |
 | 2026-10-23 | Aviso al administrador cuando la ingesta se cae y cuando vuelve, con un vigía propio cada 10 minutos. PR #128 fusionado. Cierra #127 |
+| 2026-10-23 | El aviso de ingesta caída usa dos flujos: con una vuelta rápida, la ruta asíncrona veía la caída ya cerrada y avisaba dos veces la vuelta. PR #130 fusionado. Cierra #129 |

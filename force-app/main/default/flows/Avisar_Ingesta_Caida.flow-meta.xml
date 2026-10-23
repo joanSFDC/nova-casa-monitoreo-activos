@@ -42,46 +42,6 @@
         <nameSegment>customNotificationAction</nameSegment>
     </actionCalls>
     <actionCalls>
-        <name>Campana_de_vuelta</name>
-        <label>Avisar la vuelta en la campana</label>
-        <locationX>0</locationX>
-        <locationY>0</locationY>
-        <actionName>customNotificationAction</actionName>
-        <actionType>customNotificationAction</actionType>
-        <flowTransactionModel>CurrentTransaction</flowTransactionModel>
-        <inputParameters>
-            <name>customNotifTypeId</name>
-            <value>
-                <elementReference>Leer_tipo_de_aviso.Id</elementReference>
-            </value>
-        </inputParameters>
-        <inputParameters>
-            <name>recipientIds</name>
-            <value>
-                <elementReference>Destinatarios</elementReference>
-            </value>
-        </inputParameters>
-        <inputParameters>
-            <name>title</name>
-            <value>
-                <stringValue>La ingesta volvió</stringValue>
-            </value>
-        </inputParameters>
-        <inputParameters>
-            <name>body</name>
-            <value>
-                <elementReference>Cuerpo_de_vuelta</elementReference>
-            </value>
-        </inputParameters>
-        <inputParameters>
-            <name>targetId</name>
-            <value>
-                <elementReference>$Record.Id</elementReference>
-            </value>
-        </inputParameters>
-        <nameSegment>customNotificationAction</nameSegment>
-    </actionCalls>
-    <actionCalls>
         <name>Correo_de_caida</name>
         <label>Avisar la caída por correo</label>
         <locationX>0</locationX>
@@ -100,25 +60,6 @@
         </inputParameters>
         <nameSegment>Control_de_Ingesta__c.Ingesta_Caida</nameSegment>
     </actionCalls>
-    <actionCalls>
-        <name>Correo_de_vuelta</name>
-        <label>Avisar la vuelta por correo</label>
-        <locationX>0</locationX>
-        <locationY>0</locationY>
-        <actionName>Control_de_Ingesta__c.Ingesta_Volvio</actionName>
-        <actionType>emailAlert</actionType>
-        <connector>
-            <targetReference>Campana_de_vuelta</targetReference>
-        </connector>
-        <flowTransactionModel>CurrentTransaction</flowTransactionModel>
-        <inputParameters>
-            <name>SObjectRowId</name>
-            <value>
-                <elementReference>$Record.Id</elementReference>
-            </value>
-        </inputParameters>
-        <nameSegment>Control_de_Ingesta__c.Ingesta_Volvio</nameSegment>
-    </actionCalls>
     <assignments>
         <name>Sumar_grupo_de_administracion</name>
         <label>Sumar el grupo de administración</label>
@@ -132,35 +73,10 @@
             </value>
         </assignmentItems>
         <connector>
-            <targetReference>Cayo_o_volvio</targetReference>
+            <targetReference>Correo_de_caida</targetReference>
         </connector>
     </assignments>
-    <decisions>
-        <name>Cayo_o_volvio</name>
-        <label>¿Se cayó o volvió?</label>
-        <locationX>0</locationX>
-        <locationY>0</locationY>
-        <defaultConnector>
-            <targetReference>Correo_de_vuelta</targetReference>
-        </defaultConnector>
-        <defaultConnectorLabel>Volvió</defaultConnectorLabel>
-        <rules>
-            <name>Se_cayo</name>
-            <conditionLogic>and</conditionLogic>
-            <conditions>
-                <leftValueReference>$Record.Caida_Desde__c</leftValueReference>
-                <operator>IsNull</operator>
-                <rightValue>
-                    <booleanValue>false</booleanValue>
-                </rightValue>
-            </conditions>
-            <connector>
-                <targetReference>Correo_de_caida</targetReference>
-            </connector>
-            <label>Se cayó</label>
-        </rules>
-    </decisions>
-    <description>Cuando cambia Caida_Desde__c en el control de ingesta: si se marcó, avisa al administrador que la ingesta está caída; si se vació, que volvió. Va en la ruta asíncrona para que un correo que falla no deshaga el guardado del control, que es parte de la ingesta.</description>
+    <description>Cuando se marca Caida_Desde__c en el control de ingesta, avisa al administrador que la ingesta está caída. La condición de entrada se evalúa al guardar; la ruta asíncrona lee el registro al correr, y con una vuelta rápida ya lo vería vacío. Va en la ruta asíncrona para que un correo que falla no deshaga el guardado del control.</description>
     <environments>Default</environments>
     <interviewLabel>Aviso de ingesta {!$Flow.CurrentDateTime}</interviewLabel>
     <label>Avisar ingesta caída</label>
@@ -239,6 +155,13 @@
                 <booleanValue>true</booleanValue>
             </value>
         </filters>
+        <filters>
+            <field>Caida_Desde__c</field>
+            <operator>IsNull</operator>
+            <value>
+                <booleanValue>false</booleanValue>
+            </value>
+        </filters>
         <object>Control_de_Ingesta__c</object>
         <recordTriggerType>Update</recordTriggerType>
         <scheduledPaths>
@@ -250,11 +173,6 @@
         <triggerType>RecordAfterSave</triggerType>
     </start>
     <status>Active</status>
-    <textTemplates>
-        <name>Cuerpo_de_vuelta</name>
-        <isViewedAsPlainText>true</isViewedAsPlainText>
-        <text>Estuvo {!$Record.Minutos_Ultima_Caida__c} min sin consultas exitosas.</text>
-    </textTemplates>
     <variables>
         <name>Destinatarios</name>
         <dataType>String</dataType>
