@@ -6,7 +6,10 @@
  * recorrer todas las senales del activo; por eso el desempate va en el filtro.
  *
  * with sharing y USER_MODE: la usan el coordinador y el administrador, que leen
- * la bitacora. Un caso que no se ve devuelve null.
+ * la bitacora. Un caso que no se ve, o una persona sin acceso a la bitacora,
+ * devuelve null. Los limites del periodo (fechas, activo y senal de origen) se
+ * leen en modo sistema una vez comprobado que el caso se ve: no se muestran, y
+ * no todos los roles tienen permiso de campo sobre ClosedDate.
  */
 public with sharing class LecturasPeriodoControlador {
   public static final Integer TAMANO_PAGINA = 50;
@@ -29,6 +32,8 @@ public with sharing class LecturasPeriodoControlador {
     public String resultado;
     @AuraEnabled
     public String resultadoEtiqueta;
+    @AuraEnabled
+    public String motivo;
   }
 
   public class PaginaDTO {
@@ -56,14 +61,17 @@ public with sharing class LecturasPeriodoControlador {
    */
   @AuraEnabled
   public static PaginaDTO pagina(Id casoId, Datetime hasta, List<Id> vistos) {
-    if (casoId == null) {
+    if (casoId == null || !Schema.SObjectType.Senal__c.isAccessible()) {
       return null;
     }
     Set<Id> excluidos = vistos == null ? new Set<Id>() : new Set<Id>(vistos);
     if (excluidos.size() > TOPE_VISTOS) {
       throw new AuraHandledException('La posición de la página no es válida.');
     }
-    List<Case> casos = [
+    if ([SELECT COUNT() FROM Case WHERE Id = :casoId WITH USER_MODE] == 0) {
+      return null;
+    }
+    Case caso = [
       SELECT
         Id,
         Activo__c,
@@ -75,13 +83,9 @@ public with sharing class LecturasPeriodoControlador {
         IsClosed
       FROM Case
       WHERE Id = :casoId
-      WITH USER_MODE
+      WITH SYSTEM_MODE
       LIMIT 1
     ];
-    if (casos.isEmpty()) {
-      return null;
-    }
-    Case caso = casos[0];
     PaginaDTO dto = new PaginaDTO();
     dto.equipo = caso.Activo__r?.Name;
     dto.cerrado = caso.IsClosed;
@@ -103,7 +107,14 @@ public with sharing class LecturasPeriodoControlador {
     Integer conUnaMas = TAMANO_PAGINA + 1;
 
     List<Senal__c> senales = [
-      SELECT Id, Name, Fecha_Origen__c, CreatedDate, Lectura__c, Resultado__c
+      SELECT
+        Id,
+        Name,
+        Fecha_Origen__c,
+        CreatedDate,
+        Lectura__c,
+        Resultado__c,
+        toLabel(Motivo__c)
       FROM Senal__c
       WHERE
         Activo__c = :caso.Activo__c
@@ -173,6 +184,7 @@ public with sharing class LecturasPeriodoControlador {
     fila.resultadoEtiqueta = etiquetas.containsKey(senal.Resultado__c)
       ? etiquetas.get(senal.Resultado__c)
       : senal.Resultado__c;
+    fila.motivo = senal.Motivo__c;
     return fila;
   }
 

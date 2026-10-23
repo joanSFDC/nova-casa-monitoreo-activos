@@ -183,7 +183,8 @@ Es la página de registro del caso, `Caso_Registro`, a la que lleva el monitor a
 intervención o al ir a la que ya existe. Arriba, el asunto, el estado, la prioridad, el
 número, la ciudad y la condición del equipo, con Editar solo para quien puede editar el
 caso y «Registrar intervención» solo para el coordinador. Debajo, el **resumen del
-incidente** y tres secciones: Incidente, con la descripción y el propietario; Lecturas, con
+incidente**, «Lecturas del periodo» para quien lee la bitácora y tres secciones: Incidente,
+con la descripción y el propietario; Lecturas, con
 los campos que guarda el caso; y Equipo, con el activo, la medición, la ciudad y lo que ata
 el caso a su señal (clave, episodio y origen). Al lado, la **historia del incidente**, con
 las intervenciones abiertas y lo que pasó, y, para quien lee la bitácora, «Señales del
@@ -221,6 +222,38 @@ campos del caso, que ya seguía el estado, la prioridad y el propietario; la sev
 los incidentes anteriores no muestran esos cambios antes de esa fecha. El estado y la
 prioridad de las intervenciones muestran etiquetas en español (`TaskStatus` y
 `TaskPriority`), con los valores de API intactos, como los del caso.
+
+### Las lecturas del periodo
+
+«Señales del caso» muestra solo las señales que cambiaron el incidente. Para ver todo lo
+que midió el equipo mientras estuvo abierto, el coordinador y el administrador tienen
+**«Lecturas del periodo»** (`lecturasPeriodo`), debajo del resumen:
+
+- **Bajo demanda.** Entra cerrada y no consulta nada hasta que se pulsa «Ver lecturas».
+- **Páginas de 50**, de la más nueva a la más vieja, con Primera, Anterior y Siguiente y el
+  rango a la vista («Lecturas 51 a 100»). Una página ya vista no se vuelve a pedir.
+- **Columnas:** la señal, con enlace a su registro; la hora del sensor; cuándo se recibió;
+  la lectura; y el resultado en color, con el motivo debajo si lo hay.
+- **Todas las señales** del activo y de su tipo de mensaje entre la señal que abrió el
+  incidente y su cierre (o ahora): aplicadas, atrasadas, rechazadas y las demás.
+- Si el incidente empezó hace más de siete días, una línea recuerda que la bitácora guarda
+  siete días de lecturas aplicadas y atrasadas, y que las que lo cambiaron siguen en
+  «Señales del caso».
+
+Quien no lee la bitácora (operador y gerente) no ve la tarjeta: el componente pregunta por
+el objeto `Senal__c` con `getObjectInfo` y, si no tiene acceso, no se pinta.
+
+La consulta va por el índice de `CreatedDate` y pagina por posición, sin `OFFSET`: la fecha
+de creación de la última fila y los identificadores de ese mismo segundo que ya se
+mostraron. El plan de consulta mostró por qué no se desempata con `ORDER BY CreatedDate,
+Id`: con el segundo campo la plataforma deja el índice de fecha y recorre unas 222.000
+señales del activo. Medido en la org con 2,28 millones de señales, una página tarda entre
+59 y 92 ms en el servidor (851 ms una página de hace una semana), y en pantalla 0,9 s la
+primera y 0,7 s la siguiente.
+
+La lectura sale de `Senal__c.Lectura__c`, que escribe el procesamiento con los decimales
+del umbral; una señal rechazada al recibir la guarda tal como llegó, con su unidad. Las
+señales anteriores al 22 de octubre de 2026 no la tienen y muestran «—».
 
 ### Los resúmenes de las páginas de registro
 

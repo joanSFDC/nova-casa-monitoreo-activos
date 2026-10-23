@@ -680,6 +680,13 @@ No estaban en la especificación y conviene no redescubrirlas.
     «Sistema» ([módulo 09](09-experiencia-del-operador.md)). La severidad de la última
     lectura y la condición del equipo entran al historial de campos (12 de 20). El
     estado y la prioridad de las tareas llevan etiquetas en español, como la decisión 39.
+69. **Al caso solo se liga la señal que lo cambia, y el resto se ve en «Lecturas del
+    periodo».** `ligar` deja de atar las lecturas que repiten la severidad, que llevaron un
+    caso a 42.602 señales; las 202.115 ya ligadas se conservan. La tarjeta nueva del caso
+    pagina por posición sobre el índice de `CreatedDate`, sin `OFFSET` ni desempate por
+    `Id`, y lee `Senal__c.Lectura__c`, que escriben el procesamiento y, en las rechazadas,
+    la ingesta ([módulo 09](09-experiencia-del-operador.md), [módulo 07](07-incidentes.md)).
+    La regla de `AGENTS.md` pasa a ser «El monitor nunca consulta `Senal__c`».
 
 ## Historial breve
 
@@ -741,3 +748,4 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-22 | Caso se llama Incidente y Tarea se llama Intervención, en español y en inglés, con traducciones de objeto. PR #114 fusionado. Cierra #113 |
 | 2026-10-22 | Prueba de volumen: 200 avisos críticos de 15 bombas abren 15 incidentes con el mismo consumo que 5. PR #116 fusionado. Cierra #115 |
 | 2026-10-22 | La página del incidente muestra su historia: intervenciones abiertas y lo que pasó, en lugar del panel de actividad. PR #118 fusionado. Cierra #117 |
+| 2026-10-22 | «Lecturas del periodo» en la página del incidente y `ligar` solo ata la señal que cambia el caso. PR #120 fusionado. Cierra #119 |

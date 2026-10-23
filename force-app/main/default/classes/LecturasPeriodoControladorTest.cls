@@ -174,7 +174,7 @@ private class LecturasPeriodoControladorTest {
   }
 
   @isTest
-  static void shouldDevolverNull_WhenNoPuedeVerElCaso() {
+  static void shouldDevolverNull_WhenNoLeeLaBitacora() {
     User operador = TestDataFactory.usuarioConConjunto('Nova_Casa_Operador');
     Case caso;
     System.runAs(new User(Id = UserInfo.getUserId())) {
@@ -188,11 +188,38 @@ private class LecturasPeriodoControladorTest {
     }
     Test.stopTest();
 
-    Assert.isNull(pagina, 'Un caso ajeno no delata que existe');
+    Assert.isNull(pagina, 'Sin acceso a la bitacora no hay lecturas');
     Assert.isNull(
       LecturasPeriodoControlador.pagina(null, null, null),
       'Sin caso no hay pagina'
     );
+  }
+
+  @isTest
+  static void shouldTraerLasLecturas_WhenLasPideElCoordinador() {
+    User coordinador = TestDataFactory.usuarioConConjunto(
+      'Nova_Casa_Coordinador'
+    );
+    Case caso;
+    Senal__c propia;
+    System.runAs(new User(Id = UserInfo.getUserId())) {
+      Activo__c bomba = bomba();
+      caso = caso(bomba, APERTURA);
+      propia = senal(bomba, 'del-coordinador', IngestaConstantes.TIPO_MEDICION);
+      insert propia;
+      Test.setCreatedDate(propia.Id, APERTURA.addMinutes(1));
+    }
+
+    LecturasPeriodoControlador.PaginaDTO pagina;
+    Test.startTest();
+    System.runAs(coordinador) {
+      pagina = LecturasPeriodoControlador.pagina(caso.Id, null, null);
+    }
+    Test.stopTest();
+
+    Assert.isNotNull(pagina, 'El coordinador ve todos los casos');
+    Assert.areEqual(1, pagina.filas.size(), 'Y sus lecturas');
+    Assert.areEqual('4,50 bar', pagina.filas[0].lectura);
   }
 
   private static Case caso(Activo__c activo, Datetime creado) {

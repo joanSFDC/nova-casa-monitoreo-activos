@@ -63,6 +63,9 @@
                         <span class={fila.claseResultado}
                           >{fila.resultadoEtiqueta}</span
                         >
+                        <template lwc:if={fila.motivo}>
+                          <span class="motivo">{fila.motivo}</span>
+                        </template>
                       </td>
                     </tr>
                   </template>

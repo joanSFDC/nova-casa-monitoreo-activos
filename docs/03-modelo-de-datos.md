@@ -242,7 +242,8 @@ La bitácora. Cada mensaje recibido queda aquí con su resultado.
 | `Horas_Desde_Recepcion__c` | Fórmula, Number(17,1) | `(NOW() - Fecha_Recepcion__c) * 24`. Lo usan las vistas que filtran por horas |
 | `Edificio__c` | Lookup(Edificio__c) | Vacío si el edificio no se resolvió |
 | `Activo__c` | Lookup(Activo__c) | Vacío si el activo no se resolvió |
-| `Incidente__c` | Lookup(Case) | El caso que abrió o escaló, si hubo |
+| `Lectura__c` | Text(100) | La lectura en palabras, como en el monitor. La escribe el procesamiento con los decimales del umbral; una rechazada al recibir la guarda tal como llegó. Vacía en las señales anteriores al 22 de octubre de 2026 |
+| `Incidente__c` | Lookup(Case) | El caso que abrió, escaló, bajó o normalizó, si hubo. Una lectura que repite la severidad no se liga |
 
 ### Las cuatro fechas
 

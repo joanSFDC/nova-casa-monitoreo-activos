@@ -121,6 +121,14 @@
   border-color: #f8c6bf;
 }
 
+.motivo {
+  display: block;
+  margin-top: 0.125rem;
+  font-size: 0.75rem;
+  color: var(--slds-g-color-neutral-base-30, #5c5c5c);
+  white-space: normal;
+}
+
 .pie {
   display: flex;
   align-items: center;

@@ -225,9 +225,16 @@ justo el caso que más necesitamos registrar.
 automático solo opera sobre números, y el orden 0 < 1 < 2 es lo que hace que `MAX`
 signifique lo peor.
 
-**La pantalla nunca consulta `Senal__c`.** Es la única tabla que crece sin techo. El
+**El monitor nunca consulta `Senal__c`.** Es la única tabla que crece sin techo. El
 operador consulta `Estado_Actual__c`, cuyo tamaño está acotado por el número de equipos y
-no por el tiempo.
+no por el tiempo. Las páginas de registro del coordinador y del administrador sí leen la
+bitácora, pero siempre por un índice y con `LIMIT`: «Señales del caso» por el caso, y
+«Lecturas del periodo» por el activo y la fecha de creación, con paginación por posición y
+sin `OFFSET`. Antes de agregar una consulta a `Senal__c`, mira su plan de consulta:
+ordenar por un segundo campo, aunque sea `Id`, le quita el índice de `CreatedDate`.
+
+**Al caso solo se liga la señal que lo cambia.** La que lo abre, lo escala, lo baja o lo
+normaliza. Ligar cada lectura cargaba decenas de miles de señales sobre un solo caso.
 
 ### Interfaz
 

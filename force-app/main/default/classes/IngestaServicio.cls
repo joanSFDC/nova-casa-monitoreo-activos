@@ -7,6 +7,8 @@
 public without sharing class IngestaServicio {
   private static final String PREFIJO_SIN_ID =
     IngestaConstantes.ORIGEN + '|sin-id-';
+  private static final Integer LARGO_LECTURA = 100;
+  private static final Integer DECIMALES_RECIBIDOS = 4;
 
   @TestVisible
   static System.Callable antesDeGuardar;
@@ -593,8 +595,57 @@ public without sharing class IngestaServicio {
         dictamen.motivo
       );
       senal.Detalle__c = recortar(dictamen.detalle);
+      senal.Lectura__c = lecturaRecibida(mensaje);
     }
     return senal;
+  }
+
+  /**
+   * Una senal rechazada al recibir no pasa por el procesamiento, que es el que
+   * escribe la lectura con los decimales del umbral: guarda la lectura tal como
+   * llego, con sus decimales y su unidad. Sin un valor que se pueda leer, nada.
+   */
+  @TestVisible
+  private static String lecturaRecibida(Map<String, Object> mensaje) {
+    String texto;
+    if (
+      IngestaValidador.texto(mensaje, 'messageType') ==
+      IngestaConstantes.TIPO_CONECTIVIDAD
+    ) {
+      Map<String, Object> comunicacion = IngestaValidador.mapa(
+        mensaje,
+        'communication'
+      );
+      texto = LecturaFormato.corte(
+        IngestaValidador.texto(comunicacion, 'status'),
+        numeroDe(comunicacion, 'gapSeconds')
+      );
+    } else {
+      Map<String, Object> medicion = IngestaValidador.mapa(
+        mensaje,
+        'measurement'
+      );
+      Decimal valor = numeroDe(medicion, 'value');
+      if (valor != null) {
+        texto = LecturaFormato.valor(
+          valor,
+          IngestaValidador.texto(medicion, 'unit'),
+          Math.min(Math.max(valor.scale(), 0), DECIMALES_RECIBIDOS)
+        );
+      }
+    }
+    return texto == null ? null : texto.left(LARGO_LECTURA);
+  }
+
+  private static Decimal numeroDe(Map<String, Object> bloque, String campo) {
+    if (bloque == null) {
+      return null;
+    }
+    try {
+      return IngestaValidador.decimalDe(bloque.get(campo));
+    } catch (TypeException error) {
+      return null;
+    }
   }
 
   private static Senal__c nuevaSenal(

@@ -32,7 +32,19 @@ const PRIMERA = {
 };
 
 const SEGUNDA = {
-  filas: filas(50, 3),
+  filas: [
+    ...filas(50, 2),
+    {
+      id: "a07xx0000000052",
+      nombre: "SEN-2259848",
+      origen: "2030-06-13T10:52:00.000Z",
+      recibida: "2026-10-22T20:35:00.000Z",
+      lectura: "72,5 PSI",
+      resultado: "Rechazado",
+      resultadoEtiqueta: "Rechazado",
+      motivo: "Unidad no compatible"
+    }
+  ],
   hayMas: false,
   siguienteHasta: "2026-10-22T20:30:00.000Z",
   siguienteVistos: [],
@@ -132,6 +144,19 @@ describe("c-lecturas-periodo", () => {
     expect(elemento.shadowRoot.querySelector(".rango").textContent).toBe(
       "Lecturas 51 a 53"
     );
+    const rechazada = elemento.shadowRoot.querySelectorAll("tbody tr")[2];
+    expect(rechazada.querySelector(".lectura").textContent).toBe("72,5 PSI");
+    expect(rechazada.querySelector(".resultado").classList).toContain(
+      "resultado_rechazado"
+    );
+    expect(rechazada.querySelector(".motivo").textContent).toBe(
+      "Unidad no compatible"
+    );
+    expect(
+      elemento.shadowRoot
+        .querySelectorAll("tbody tr")[0]
+        .querySelector(".motivo")
+    ).toBeNull();
     expect(boton(elemento, "siguiente").disabled).toBe(true);
 
     boton(elemento, "anterior").click();

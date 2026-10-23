@@ -121,7 +121,7 @@ ocultaría el cambio que importa.
 
 | Lectura sobre un caso abierto | Qué cambia en el caso |
 | --- | --- |
-| Misma severidad, mismo estado | Nada; la señal se liga al caso como antes |
+| Misma severidad, mismo estado | Nada, y la señal no se liga al caso |
 | Otra severidad de falla (sube o baja) | Última lectura, severidad, fecha y señal |
 | Normal, o `RESTORED` en una cámara | Lo mismo, y **Condición del equipo** pasa a «Normalizado» con su fecha |
 | Falla después de normalizado | Vuelve a «En falla» y se borra la fecha de normalización |
@@ -264,8 +264,15 @@ huérfanos.
 
 Cada caso guarda en `Origen_Senal__c` la clave de la señal que lo abrió y en
 `Ultima_Senal__c` la del último cambio, y cada señal guarda en `Incidente__c` el caso que
-abrió, escaló o normalizó, o al que se sumó con la misma severidad. La relación es
-navegable en los dos sentidos.
+abrió, escaló, bajó o normalizó. La relación es navegable en los dos sentidos.
+
+**Decisión: una lectura que repite la severidad no se liga al caso.** Antes se ligaba, y
+con el simulador mandando cientos de lecturas por minuto un caso llegó a tener 42.602
+señales: mucha carga sobre un solo registro (sesgo de datos), que frena cada escritura y
+cada consulta que lo toca. Las lecturas que no cambiaron nada se ven en «Lecturas del
+periodo», que las busca por el activo y las fechas del caso, no por la relación. Las
+202.115 señales que ya estaban ligadas se conservan: la limpieza guarda las ligadas a
+cualquier caso, y a esos casos ya no les llegan señales nuevas por repetición.
 
 Eso permite dos preguntas que el administrador va a hacer: «¿qué mensaje abrió este caso?»
 y «¿este mensaje produjo algún caso?». Sin los dos campos, la segunda exigiría recorrer

@@ -136,6 +136,15 @@ edificio que la persona no ve devuelve `null`, no un error. La historia consulta
 sistema una sola cosa: quiénes tienen el conjunto de integración, para mostrarlos como
 «Sistema»; solo devuelve identificadores de usuario.
 
+«Lecturas del periodo» (`LecturasPeriodoControlador`) también es `with sharing` y lee la
+bitácora con `WITH USER_MODE`. Devuelve `null` si el caso no se ve o si la persona no lee
+`Senal__c`, y solo el coordinador y el administrador tienen acceso a la clase. Comprueba
+en modo usuario que el caso se ve y después lee en modo sistema los límites del periodo
+(activo, fechas y señal de origen), que no se muestran: ningún rol tiene permiso de campo
+sobre `ClosedDate`, y en modo usuario la consulta fallaba en vez de devolver la página.
+`Lectura__c` es la lectura en palabras, no la carga: el coordinador la lee y sigue sin ver
+`Carga__c`.
+
 Es importante que el filtro esté en el servidor y no en el parámetro. El componente manda
 un identificador de edificio, pero **la consulta no confía en él**: `WITH USER_MODE` aplica
 la compartición por encima de cualquier filtro que venga del cliente. Si el operador pide
@@ -180,7 +189,7 @@ permisos.
 | `Activo__c` | Leer | Leer | Leer | Todo | Leer |
 | `Estado_Actual__c` | Leer | Leer | Leer | Todo | Crear, leer, editar |
 | `Umbral__c` | Leer | Leer, editar | Leer | Todo | Leer |
-| `Senal__c` | — | Leer, sin `Carga__c` ni `Detalle__c` | — | Todo, entera; resultado, motivo y detalle con historial | Crear, leer, editar |
+| `Senal__c` | — | Leer, sin `Carga__c` ni `Detalle__c` (sí `Lectura__c`) | — | Todo, entera; resultado, motivo y detalle con historial | Crear, leer, editar |
 | `Control_de_Ingesta__c` | Solo la última consulta | Solo la última consulta | Solo la última consulta | Todo | Leer, editar |
 | `Case` | Leer, crear | Leer, crear, editar | Leer | Todo | Crear, leer, editar |
 | `Task` | Leer, crear, editar las suyas | Leer, crear, editar | Leer | Todo | — |
