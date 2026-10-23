@@ -254,10 +254,13 @@ y otro cuando vuelve.** Una caída es una de dos cosas:
   55) y marca la caída si la ingesta está activa y no hubo una consulta exitosa en los
   últimos 10 minutos. Así la detecta entre 10 y 20 minutos después de la última consulta.
 
-La marca es `Caida_Desde__c` en el control, con su motivo en `Motivo_Caida__c`. El flujo
-`Avisar_Ingesta_Caida` avisa al grupo Avisos Administración cuando esa fecha cambia: si se
-marcó, «La ingesta está caída»; si se vació, «La ingesta volvió», con los minutos que
-estuvo caída. La vacía la primera consulta exitosa después de la caída, y guarda en
+La marca es `Caida_Desde__c` en el control, con su motivo en `Motivo_Caida__c`. Dos flujos
+avisan al grupo Avisos Administración: `Avisar_Ingesta_Caida` cuando esa fecha se marca
+(«La ingesta está caída») y `Avisar_Ingesta_Volvio` cuando se vacía («La ingesta volvió»,
+con los minutos que estuvo caída). Son dos y no uno con una decisión porque la ruta
+asíncrona lee el registro cuando corre: con una vuelta en menos de un minuto, un solo flujo
+veía la fecha ya vacía y avisaba dos veces la vuelta. La condición de entrada, en cambio, se
+evalúa al guardar. La vacía la primera consulta exitosa después de la caída, y guarda en
 `Minutos_Ultima_Caida__c` el tiempo desde la consulta anterior. Sale un aviso por caída, no
 uno por minuto. Una ingesta apagada a propósito (`Activo__c` sin marcar) no es una caída.
 
