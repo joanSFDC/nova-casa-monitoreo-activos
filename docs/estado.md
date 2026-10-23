@@ -766,3 +766,4 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-22 | La página del incidente muestra su historia: intervenciones abiertas y lo que pasó, en lugar del panel de actividad. PR #118 fusionado. Cierra #117 |
 | 2026-10-22 | «Lecturas del periodo» en la página del incidente y `ligar` solo ata la señal que cambia el caso. PR #120 fusionado. Cierra #119 |
 | 2026-10-23 | Aviso por correo y en la campana cuando un incidente entra en rojo; el script de usuarios acepta el perfil en español. PR #122 fusionado. Cierra #121 |
+| 2026-10-23 | Una señal en conflicto antes de procesarse guarda la lectura de la primera afirmación: «Lecturas del periodo» ya no la muestra con «—». PR #124 fusionado. Cierra #123 |
