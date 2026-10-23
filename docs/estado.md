@@ -310,6 +310,8 @@ sf org assign permset -o novacasa2 -n Nova_Casa_Administracion
 ./scripts/sembrar-catalogo.sh novacasa2
 ./scripts/crear-usuarios-demo.sh novacasa2
 ./scripts/configurar-suscriptor.sh novacasa2
+./scripts/programar-ingesta.sh novacasa2
+./scripts/programar-vigia.sh novacasa2
 ```
 
 `crear-usuarios-demo.sh` se puede volver a correr: solo manda el correo de
@@ -708,6 +710,11 @@ No estaban en la especificación y conviene no redescubrirlas.
     con la pestaña oculta, y cerrar un incidente toca el timbre con un flujo. Las 75.000
     entregas diarias pasan de alcanzar para unos 8 monitores abiertos a unos 26
     ([módulo 09](09-experiencia-del-operador.md)).
+73. **El administrador se entera de una ingesta caída aunque nadie mire el monitor.** Un
+    disparador marca el corte por fallos al instante, y un vigía propio, cada 10 minutos y
+    aparte de los 60 trabajos de la ingesta, marca 10 minutos sin consultas exitosas. Un
+    flujo avisa en la campana y por correo al caer y al volver, una vez por caída. Cierra
+    el riesgo R-15 en lo que toca a la ingesta ([módulo 02](02-ingesta.md)).
 
 ## Historial breve
 
@@ -773,3 +780,4 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-23 | Aviso por correo y en la campana cuando un incidente entra en rojo; el script de usuarios acepta el perfil en español. PR #122 fusionado. Cierra #121 |
 | 2026-10-23 | Una señal en conflicto antes de procesarse guarda la lectura de la primera afirmación: «Lecturas del periodo» ya no la muestra con «—». PR #124 fusionado. Cierra #123 |
 | 2026-10-23 | El timbre suena como mucho cada 30 segundos, el monitor no escucha con la pestaña oculta y cerrar un incidente toca el timbre. PR #126 fusionado. Cierra #125 |
+| 2026-10-23 | Aviso al administrador cuando la ingesta se cae y cuando vuelve, con un vigía propio cada 10 minutos. PR #128 fusionado. Cierra #127 |

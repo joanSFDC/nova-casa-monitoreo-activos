@@ -57,6 +57,26 @@
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
+        <editable>false</editable>
+        <field>Control_de_Ingesta__c.Caida_Desde__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Control_de_Ingesta__c.Hora_Ultima_Consulta_Texto__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Control_de_Ingesta__c.Minutos_Ultima_Caida__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Control_de_Ingesta__c.Motivo_Caida__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
         <editable>true</editable>
         <field>Control_de_Ingesta__c.Activo__c</field>
         <readable>true</readable>

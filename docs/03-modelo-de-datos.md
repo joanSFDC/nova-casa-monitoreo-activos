@@ -335,6 +335,11 @@ También va con `PublishAfterCommit`: si la tanda no se guarda, no hay timbre.
 Descrito en detalle en el [módulo 02](02-ingesta.md). Registro único, con el cursor en un
 `Long Text Area` porque supera los 255 caracteres que admite un campo de texto normal.
 
+Cuatro campos sirven al aviso de ingesta caída: `Caida_Desde__c` (DateTime, cuándo se
+avisó; vacío mientras funciona), `Motivo_Caida__c` (Text(255)), `Minutos_Ultima_Caida__c`
+(Number, cuánto duró la última) y `Hora_Ultima_Consulta_Texto__c` (fórmula con la última
+consulta exitosa en hora de Bogotá, para el correo).
+
 ## Los objetos estándar
 
 ### `Case` como incidente

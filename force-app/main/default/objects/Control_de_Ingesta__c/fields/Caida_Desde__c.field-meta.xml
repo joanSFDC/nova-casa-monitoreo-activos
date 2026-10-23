@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Caida_Desde__c</fullName>
+    <description>Cuándo se avisó que la ingesta está caída: cortada por fallos o sin consultas exitosas en 10 minutos. Vacío mientras funciona. Lo escriben el disparador del control y el vigía; su cambio dispara el aviso al administrador.</description>
+    <externalId>false</externalId>
+    <inlineHelpText>Si tiene fecha, la ingesta está caída desde entonces y el administrador ya recibió el aviso. Se vacía sola con la siguiente consulta exitosa.</inlineHelpText>
+    <label>Caída avisada el</label>
+    <required>false</required>
+    <trackHistory>true</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>DateTime</type>
+</CustomField>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>La ingesta está caída</title>
+</head>
+<body style="margin:0;padding:0;background:#f3f2f2;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f3f2f2;">
+<tr><td align="center" style="padding:24px 12px;">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:600px;background:#ffffff;border:1px solid #dddbda;border-radius:8px;font-family:Arial,Helvetica,sans-serif;color:#181818;">
+<tr><td style="padding:20px 28px 16px 28px;"><img src="https://trailsignup-95b2e3a11aa777.file.force.com/servlet/servlet.ImageServer?id=015gL00000EE26j&oid=00DgL00000eaAzV" width="161" height="40" alt="Nova Casa" style="display:block;border:0;width:161px;height:40px;"></td></tr>
+<tr><td style="height:6px;line-height:6px;font-size:0;background:#122d4f;">&nbsp;</td></tr>
+<tr><td style="padding:24px 28px 0 28px;">
+<span style="display:inline-block;padding:3px 10px;border-radius:12px;background:#ba0517;color:#ffffff;font-size:13px;font-weight:bold;letter-spacing:0.04em;">INGESTA CAÍDA</span>
+<h1 style="margin:14px 0 4px 0;font-size:24px;line-height:30px;color:#122d4f;">La ingesta está caída</h1>
+<p style="margin:0;font-size:15px;line-height:22px;">{!Control_de_Ingesta__c.Motivo_Caida__c}</p>
+</td></tr>
+<tr><td style="padding:16px 28px 0 28px;">
+<table role="table" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #dddbda;border-radius:6px;border-collapse:separate;font-size:15px;line-height:21px;">
+<tr><th scope="row" align="left" style="padding:10px 14px;width:40%;background:#f8f8f8;color:#5c5c5c;font-weight:bold;border-bottom:1px solid #dddbda;">Última consulta exitosa</th><td style="padding:10px 14px;border-bottom:1px solid #dddbda;">{!Control_de_Ingesta__c.Hora_Ultima_Consulta_Texto__c} (hora de Bogotá)</td></tr>
+<tr><th scope="row" align="left" style="padding:10px 14px;width:40%;background:#f8f8f8;color:#5c5c5c;font-weight:bold;">Último error</th><td style="padding:10px 14px;">{!Control_de_Ingesta__c.Ultimo_Error__c}</td></tr>
+</table>
+</td></tr>
+<tr><td style="padding:16px 28px 0 28px;font-size:15px;line-height:22px;">Mientras siga caída, el monitor no se actualiza y no se abren incidentes nuevos.</td></tr>
+<tr><td style="padding:12px 28px 0 28px;font-size:13px;line-height:19px;color:#5c5c5c;">Si el simulador respondió con error, la ingesta sigue sola en cuanto responda. Si se cortó por fallos, corrige la causa y pon «Fallos consecutivos» en 0: sigue sola al minuto siguiente.</td></tr>
+<tr><td style="padding:20px 28px 28px 28px;"><table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td style="border-radius:6px;background:#122d4f;"><a href="{!Control_de_Ingesta__c.Link}" style="display:inline-block;padding:12px 22px;font-size:15px;font-weight:bold;color:#ffffff;text-decoration:none;border-radius:6px;">Abrir el control de ingesta</a></td></tr></table></td></tr>
+<tr><td style="padding:16px 28px 20px 28px;border-top:1px solid #dddbda;font-size:13px;line-height:19px;color:#5c5c5c;">Recibes este aviso porque administras la plataforma Nova Casa.<br>Nova Casa · Monitoreo de activos</td></tr>
+</table>
+</td></tr>
+</table>
+</body>
+</html>
