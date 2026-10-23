@@ -89,6 +89,73 @@ private class IngestaServicioTest {
   }
 
   @isTest
+  static void shouldGuardarLaLecturaRecibida_WhenSeRechazaAlRecibir() {
+    Map<String, Object> mensaje = TestDataFactory.mensajePresion(
+      'msg_psi',
+      'dlv_psi',
+      72.5,
+      'PSI'
+    );
+    Test.startTest();
+    IngestaServicio.procesarPagina(
+      TestDataFactory.sobre(
+        new List<Map<String, Object>>{ mensaje },
+        'c',
+        false
+      ),
+      Datetime.newInstanceGmt(2026, 9, 22, 22, 0, 0)
+    );
+    Test.stopTest();
+    Senal__c senal = [
+      SELECT Resultado__c, Motivo__c, Lectura__c
+      FROM Senal__c
+      WHERE Message_Id__c = 'msg_psi'
+    ];
+    Assert.areEqual(
+      IngestaConstantes.RESULTADO_RECHAZADO,
+      senal.Resultado__c,
+      'Una unidad que no es la del umbral se rechaza al recibir'
+    );
+    Assert.areEqual(
+      '72,5 PSI',
+      senal.Lectura__c.replace('.', ','),
+      'Guarda la lectura tal como llego'
+    );
+  }
+
+  @isTest
+  static void shouldGuardarElCorteRecibido_WhenSeRechazaUnaCamara() {
+    Map<String, Object> mensaje = TestDataFactory.mensajeCamara(
+      'msg_cam_futura',
+      'LOST',
+      15 * 60,
+      'EPI-futura'
+    );
+    mensaje.put('occurredAt', '2099-01-01T00:00:00Z');
+    Test.startTest();
+    IngestaServicio.procesarPagina(
+      TestDataFactory.sobre(
+        new List<Map<String, Object>>{ mensaje },
+        'c',
+        false
+      ),
+      Datetime.newInstanceGmt(2026, 9, 22, 22, 0, 0)
+    );
+    Test.stopTest();
+    Senal__c senal = [
+      SELECT Resultado__c, Lectura__c
+      FROM Senal__c
+      WHERE Message_Id__c = 'msg_cam_futura'
+    ];
+    Assert.areEqual(IngestaConstantes.RESULTADO_RECHAZADO, senal.Resultado__c);
+    Assert.areEqual(
+      LecturaFormato.corte('LOST', 15 * 60),
+      senal.Lectura__c,
+      'Una camara rechazada dice su corte'
+    );
+  }
+
+  @isTest
   static void shouldRechazarSinPublicar_WhenValorNulo() {
     String cuerpo = TestDataFactory.sobre(
       new List<Map<String, Object>>{ TestDataFactory.mensajeTemperaturaNula() },
@@ -103,10 +170,11 @@ private class IngestaServicioTest {
     Test.stopTest();
     Assert.areEqual(0, r.publicadas, 'Rechazado no se publica');
     Senal__c senal = [
-      SELECT Resultado__c, Motivo__c, Reintentable__c, Carga__c
+      SELECT Resultado__c, Motivo__c, Reintentable__c, Carga__c, Lectura__c
       FROM Senal__c
       WHERE Clave__c = 'nova-casa-simulator|msg_000001'
     ];
+    Assert.isNull(senal.Lectura__c, 'Sin valor no hay lectura que guardar');
     Assert.areEqual(
       IngestaConstantes.RESULTADO_RECHAZADO,
       senal.Resultado__c,

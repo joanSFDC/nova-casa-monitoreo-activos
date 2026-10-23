@@ -253,6 +253,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>Senal__c.Lectura__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>Senal__c.Motivo__c</field>
         <readable>true</readable>
     </fieldPermissions>
@@ -583,6 +588,10 @@
     </classAccesses>
     <classAccesses>
         <apexClass>IncidentesServicio</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>LecturasPeriodoControlador</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>

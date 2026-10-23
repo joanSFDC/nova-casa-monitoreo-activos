@@ -423,6 +423,12 @@
         </itemInstances>
         <itemInstances>
             <componentInstance>
+                <componentName>lecturasPeriodo</componentName>
+                <identifier>c_lecturasPeriodo</identifier>
+            </componentInstance>
+        </itemInstances>
+        <itemInstances>
+            <componentInstance>
                 <componentInstanceProperties>
                     <name>columns</name>
                     <value>Facet-Incidente-Columns</value>

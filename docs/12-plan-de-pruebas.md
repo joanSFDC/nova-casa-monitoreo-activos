@@ -156,7 +156,7 @@ inventados.
 | Caso ya tomado | Escala a alta y conserva a la persona que lo tomó |
 | Lectura de apertura | El caso guarda la lectura que lo abrió con su unidad, su severidad y su fecha de origen; al abrir, la última lectura es la misma |
 | Escalada con lecturas | La apertura sigue siendo la advertencia y la última lectura pasa a ser el crítico, con su señal |
-| Severidad repetida | Otro crítico no reescribe el caso, pero su señal se liga |
+| Severidad repetida | Otro crítico no reescribe el caso ni se liga a él, y guarda su lectura con los decimales del umbral |
 | Bajada | De crítico a advertencia cambia la última lectura y no baja la prioridad |
 | Normalización | Una lectura normal deja el caso abierto, «Normalizado», con la fecha de origen; la señal queda ligada y la prioridad no baja |
 | Reincidencia | Falla después de normalizado: vuelve a «En falla», se borra la fecha y no se abre otro caso |
@@ -205,6 +205,9 @@ más, y el fallo sería completamente invisible sin esta prueba.
 | Pastilla de severidad | Pinta cada severidad con su color y su nombre, y «Sin datos» cuando falta |
 | Resumen del incidente | Muestra lo que lo abrió, su último cambio y cómo está ahora; avisa de normalizado si el caso sigue abierto, no si está cerrado; dice «Sin registro» en un caso anterior a las lecturas; no muestra nada si el servidor no deja ver el caso |
 | Historia del incidente | Las intervenciones abiertas, primero la que vence antes; la línea de tiempo del más reciente al más viejo con la intervención completada, el cambio crítico, el cambio y la apertura; la integración se muestra como «Sistema»; diez eventos y «Ver toda la historia» hasta cien; un caso ajeno devuelve `null` (`HistoriaIncidenteControladorTest`); el texto «Prioridad: Baja a Alta» y un nombre para el lector de pantalla en cada punto (`historiaIncidente`) |
+| Lecturas del periodo | Recorre 120 señales en páginas de 50, 50 y 20 sin repetir ni saltar ninguna, aunque cinco compartan el segundo del borde; solo el activo, su tipo de mensaje y el periodo del caso; empieza en la señal que lo abrió; avisa la ventana de siete días; el coordinador recibe la página; quien no lee la bitácora recibe `null`; una posición con demasiados identificadores se rechaza (`LecturasPeriodoControladorTest`) |
+| Tarjeta de lecturas | No aparece sin acceso a la bitácora; entra cerrada sin consultar; trae la primera página con su rango y la nota de la ventana; pide la siguiente con la posición y vuelve sin pedir otra vez; muestra la rechazada con su lectura, su color y su motivo; vacío, error y caso ajeno; tabla con encabezados y tarjeta con nombre (`lecturasPeriodo`) |
+| Lectura recibida | Una unidad que no es la del umbral se rechaza al recibir y guarda «72,5 PSI»; una cámara rechazada guarda su corte; un valor nulo no guarda lectura (`IngestaServicioTest`) |
 | Resumen del activo y del edificio | Junta mediciones, casos y límites o conteos; «En falla» solo si el caso lo registra; el operador de Bogotá no recibe el resumen de Caribe (`ResumenRegistroControladorTest`) |
 | Bandas del umbral | Dibuja las cinco bandas con sus fronteras, omite la que falta y en una cámara cuenta minutos; en la página del umbral lee el registro |
 | Resultado de la señal | Pinta el resultado con su color, su motivo, si se puede reintentar y las entregas, y explica qué significa |
@@ -232,6 +235,8 @@ El panel de gerencia es metadato y no tiene prueba de Apex. Se comprueba en la o
 | Gerente, monitor | Ve «Ver incidente» y nunca «Abrir intervención» |
 | Coordinador, caso | La cabecera muestra «Registrar intervención» y crea la tarea; operador, gerente y administrador no la ven |
 | Operador, coordinador y gerente, caso | «Historia del incidente» muestra la intervención abierta de 00001149 en español y los cambios con «Sistema»; el operador de Bogotá no abre el caso de Barranquilla |
+| Coordinador, caso | «Lecturas del periodo» entra cerrada; al abrirla trae 50 lecturas en menos de un segundo, la siguiente página dice «Lecturas 51 a 100» y volver no consulta; el operador no ve la tarjeta |
+| Bitácora en la org | Después de desplegar, toda aplicada, atrasada y rechazada nueva tiene lectura, y cada señal ligada nueva corresponde a un cambio del caso en su historial |
 
 ### US-209 · Trazabilidad
 

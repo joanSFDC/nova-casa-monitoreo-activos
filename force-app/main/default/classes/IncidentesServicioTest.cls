@@ -252,14 +252,23 @@ private class IncidentesServicioTest {
       incidente.Fecha_Ultima_Lectura__c
     );
     Senal__c segundaSenal = [
-      SELECT Incidente__c
+      SELECT Incidente__c, Lectura__c, Resultado__c
       FROM Senal__c
       WHERE Clave__c = 'nova-casa-simulator|msg_dos'
     ];
     Assert.areEqual(
-      incidente.Id,
+      IngestaConstantes.RESULTADO_APLICADO,
+      segundaSenal.Resultado__c,
+      'La lectura se aplica al estado'
+    );
+    Assert.isNull(
       segundaSenal.Incidente__c,
-      'La lectura se sigue ligando al caso abierto'
+      'Una lectura que no cambia el caso no se liga a el'
+    );
+    Assert.areEqual(
+      '5,90 bar',
+      segundaSenal.Lectura__c.replace('.', ','),
+      'La senal guarda su lectura con los decimales del umbral'
     );
   }
 
@@ -570,7 +579,7 @@ private class IncidentesServicioTest {
     Assert.areEqual(
       ganador.Id,
       senal.Incidente__c,
-      'La senal perdedora queda ligada'
+      'La senal que escala al ganador queda ligada'
     );
   }
 

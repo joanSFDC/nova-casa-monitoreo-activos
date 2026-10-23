@@ -1,0 +1,149 @@
+.tarjeta {
+  background: var(--slds-g-color-neutral-base-100, #ffffff);
+  border: 1px solid var(--slds-g-color-border-base-1, #e5e5e5);
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.acordeon {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.titulo {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #122d4f;
+}
+
+.subtitulo {
+  margin-top: 0.125rem;
+  font-size: 0.8125rem;
+  color: var(--slds-g-color-neutral-base-30, #5c5c5c);
+}
+
+.cuerpo {
+  margin-top: 0.75rem;
+}
+
+.estado,
+.vacio,
+.rango {
+  font-size: 0.8125rem;
+  color: var(--slds-g-color-neutral-base-30, #5c5c5c);
+}
+
+.error {
+  color: #ba0517;
+  font-size: 0.8125rem;
+}
+
+.desplazable {
+  overflow-x: auto;
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+}
+
+.tabla th,
+.tabla td {
+  padding: 0.4375rem 0.625rem;
+  border-bottom: 1px solid var(--slds-g-color-border-base-1, #e5e5e5);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.tabla thead th {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--slds-g-color-neutral-base-30, #5c5c5c);
+  background: var(--slds-g-color-neutral-base-95, #f8f8f8);
+}
+
+.tabla tbody th {
+  font-weight: 400;
+}
+
+.lectura {
+  font-weight: 700;
+  color: #122d4f;
+}
+
+.resultado {
+  display: inline-block;
+  padding: 0 0.5rem;
+  border-radius: 999px;
+  border: 1px solid #e5e5e5;
+  font-weight: 600;
+}
+
+.resultado_aplicado {
+  color: #22683e;
+  background: #ebf7e6;
+  border-color: #bfe3c3;
+}
+
+.resultado_pendiente {
+  color: #0b5cab;
+  background: #eef4ff;
+  border-color: #b8d2f5;
+}
+
+.resultado_atrasado {
+  color: #444444;
+  background: #f3f3f3;
+  border-color: #dddbda;
+}
+
+.resultado_conflicto {
+  color: #5a1ba9;
+  background: #f4eefd;
+  border-color: #d9c6f7;
+}
+
+.resultado_rechazado {
+  color: #8c4b02;
+  background: #fef4e6;
+  border-color: #f9d8a6;
+}
+
+.resultado_fallido {
+  color: #ba0517;
+  background: #fef1ee;
+  border-color: #f8c6bf;
+}
+
+.motivo {
+  display: block;
+  margin-top: 0.125rem;
+  font-size: 0.75rem;
+  color: var(--slds-g-color-neutral-base-30, #5c5c5c);
+  white-space: normal;
+}
+
+.pie {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.625rem;
+}
+
+.nota {
+  margin-top: 0.75rem;
+  padding: 0.625rem 0.875rem;
+  border-radius: 0.5rem;
+  border: 1px solid #b8d2f5;
+  background: #eef4ff;
+  color: #0b5cab;
+  font-size: 0.8125rem;
+}

@@ -1,0 +1,117 @@
+<template>
+  <template lwc:if={visible}>
+    <article class="tarjeta" aria-labelledby="titulo-lecturas">
+      <header class="acordeon">
+        <div>
+          <h2 id="titulo-lecturas" class="titulo">Lecturas del periodo</h2>
+          <p class="subtitulo">
+            Todas las lecturas del equipo desde que se abrió el incidente.
+          </p>
+        </div>
+        <button
+          type="button"
+          class="slds-button slds-button_neutral alternar"
+          aria-expanded={expandida}
+          aria-controls="cuerpo-lecturas"
+          onclick={handleAlternar}
+        >
+          {textoBoton}
+        </button>
+      </header>
+
+      <div id="cuerpo-lecturas" class="cuerpo" hidden={sinAbrir}>
+        <template lwc:if={abierta}>
+          <div class="estado" aria-live="polite">
+            <template lwc:if={cargando}>Cargando lecturas…</template>
+          </div>
+          <template lwc:if={error}>
+            <p class="error" role="alert">{error}</p>
+          </template>
+          <template lwc:if={hayFilas}>
+            <div class="desplazable">
+              <table class="tabla">
+                <caption class="slds-assistive-text">
+                  Lecturas del equipo durante el incidente, de la más nueva a la
+                  más vieja
+                </caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Señal</th>
+                    <th scope="col">Hora del sensor</th>
+                    <th scope="col">Recibida</th>
+                    <th scope="col">Lectura</th>
+                    <th scope="col">Resultado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <template for:each={filas} for:item="fila">
+                    <tr key={fila.id}>
+                      <th scope="row">
+                        <button
+                          type="button"
+                          class="slds-button slds-button_reset slds-text-link senal"
+                          data-id={fila.id}
+                          onclick={handleSenal}
+                        >
+                          {fila.nombre}
+                        </button>
+                      </th>
+                      <td>{fila.origen}</td>
+                      <td>{fila.recibida}</td>
+                      <td class="lectura">{fila.lectura}</td>
+                      <td>
+                        <span class={fila.claseResultado}
+                          >{fila.resultadoEtiqueta}</span
+                        >
+                        <template lwc:if={fila.motivo}>
+                          <span class="motivo">{fila.motivo}</span>
+                        </template>
+                      </td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </div>
+            <div class="pie">
+              <span class="rango" aria-live="polite">{rango}</span>
+              <span class="botones">
+                <button
+                  type="button"
+                  class="slds-button slds-button_neutral primera"
+                  disabled={sinAnterior}
+                  onclick={handlePrimera}
+                >
+                  Primera
+                </button>
+                <button
+                  type="button"
+                  class="slds-button slds-button_neutral anterior"
+                  disabled={sinAnterior}
+                  onclick={handleAnterior}
+                >
+                  Anterior
+                </button>
+                <button
+                  type="button"
+                  class="slds-button slds-button_neutral siguiente"
+                  disabled={sinSiguiente}
+                  onclick={handleSiguiente}
+                >
+                  Siguiente
+                </button>
+              </span>
+            </div>
+          </template>
+          <template lwc:if={sinFilas}>
+            <p class="vacio">
+              No hay lecturas de este equipo en el periodo del incidente.
+            </p>
+          </template>
+          <template lwc:if={fueraDeVentana}>
+            <p class="nota">{textoVentana}</p>
+          </template>
+        </template>
+      </div>
+    </article>
+  </template>
+</template>

@@ -137,6 +137,10 @@ Por cada aviso, y sin tocar la base de datos:
 5. Se clasifica la severidad, según el [módulo 05](05-clasificacion-y-limites.md).
 6. Se acumula el estado actual a escribir y, si procede, la decisión sobre el incidente.
 
+Desde el paso 2, la señal guarda en `Lectura__c` su lectura en palabras, con los decimales
+del umbral: la misma frase que el monitor y el caso. Va en la misma actualización de la
+señal del paso 5, sin una escritura más.
+
 Al final de este paso hay tres listas en memoria: estados a guardar, decisiones de
 incidente, y señales a actualizar con su resultado.
 

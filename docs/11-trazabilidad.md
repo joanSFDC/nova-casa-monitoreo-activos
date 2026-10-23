@@ -133,7 +133,8 @@ bitácora responde directamente:
 | ¿Hay conflictos sin resolver? | Filtrar por resultado conflicto |
 | ¿Algo se quedó atascado? | Filtrar pendientes con más de una hora desde la recepción |
 | ¿Qué mensaje abrió este caso? | Desde el caso, `Origen_Senal__c` |
-| ¿Este mensaje generó un caso? | Desde la señal, `Incidente__c` |
+| ¿Este mensaje generó un caso? | Desde la señal, `Incidente__c`: el caso que abrió o cambió |
+| ¿Qué midió el equipo durante el incidente? | Desde el caso, «Lecturas del periodo» |
 | ¿Dónde está la demora? | Comparar las cuatro fechas |
 
 ## Cómo se accede
