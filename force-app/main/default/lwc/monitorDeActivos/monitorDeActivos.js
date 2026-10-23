@@ -117,17 +117,65 @@ export default class MonitorDeActivos extends NavigationMixin(
     onError(() => {
       this.avisarSinTiempoReal();
     });
+    this.suscribir();
+    this.vigilar();
+    this.alCambiarVisibilidad = () => this.cambiarVisibilidad();
+    document.addEventListener("visibilitychange", this.alCambiarVisibilidad);
+  }
+
+  suscribir() {
     subscribe(CANAL_TIMBRE, -1, () => {
       this.tiempoRealCaido = false;
       this.programarConsulta();
     })
       .then((respuesta) => {
+        if (this.pausado) {
+          unsubscribe(respuesta);
+          return;
+        }
         this.suscripcion = respuesta;
       })
       .catch(() => {
         this.avisarSinTiempoReal();
       });
-    this.vigilar();
+  }
+
+  /**
+   * Cada monitor abierto recibe cada timbre, y las entregas del día son un límite
+   * de la org: con la pestaña oculta no escucha ni consulta. Al volver se pone al
+   * día solo.
+   */
+  cambiarVisibilidad() {
+    if (document.visibilityState === "hidden") {
+      this.pausar();
+      return;
+    }
+    if (!this.pausado) {
+      return;
+    }
+    this.pausado = false;
+    this.suscribir();
+    this.consultar(POR_VIGILANCIA);
+  }
+
+  pausar() {
+    this.pausado = true;
+    this.detener();
+  }
+
+  detener() {
+    if (this.temporizador) {
+      clearTimeout(this.temporizador);
+      this.temporizador = undefined;
+    }
+    if (this.vigilancia) {
+      clearTimeout(this.vigilancia);
+      this.vigilancia = undefined;
+    }
+    if (this.suscripcion) {
+      unsubscribe(this.suscripcion);
+      this.suscripcion = undefined;
+    }
   }
 
   avisarSinTiempoReal() {
@@ -139,17 +187,8 @@ export default class MonitorDeActivos extends NavigationMixin(
   }
 
   disconnectedCallback() {
-    if (this.temporizador) {
-      clearTimeout(this.temporizador);
-    }
-    if (this.vigilancia) {
-      clearTimeout(this.vigilancia);
-      this.vigilancia = undefined;
-    }
-    if (this.suscripcion) {
-      unsubscribe(this.suscripcion);
-      this.suscripcion = undefined;
-    }
+    document.removeEventListener("visibilitychange", this.alCambiarVisibilidad);
+    this.detener();
   }
 
   get panel() {
@@ -391,6 +430,10 @@ export default class MonitorDeActivos extends NavigationMixin(
   vigilar() {
     if (this.vigilancia) {
       clearTimeout(this.vigilancia);
+    }
+    if (this.pausado) {
+      this.vigilancia = undefined;
+      return;
     }
     // eslint-disable-next-line @lwc/lwc/no-async-operation -- la ingesta parada no manda timbres
     this.vigilancia = setTimeout(() => {

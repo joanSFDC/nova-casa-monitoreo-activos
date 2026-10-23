@@ -1,13 +1,16 @@
 /**
  * Orquesta una tanda de avisos: consulta, resuelve en memoria, escribe estado,
- * incidente y bitacora. Orden: estado, caso, senal. Si escribio estados,
- * publica el timbre del monitor, Panel_Actualizado__e.
+ * incidente y bitacora. Orden: estado, caso, senal. Si escribio estados y es la
+ * primera tanda de su ventana fija de 30 segundos, publica el timbre del monitor,
+ * Panel_Actualizado__e.
  *
  * without sharing: proceso de sistema. El disparador corre como el usuario de
  * integracion (scripts/configurar-suscriptor.sh), que no ve por ciudad.
  */
 public without sharing class ProcesamientoServicio {
   private static final Integer LARGO_LECTURA = 100;
+  @TestVisible
+  static final Long VENTANA_TIMBRE_MS = 30000;
 
   public class ResultadoTanda {
     public Integer senales;
@@ -99,6 +102,9 @@ public without sharing class ProcesamientoServicio {
     }
 
     List<Estado_Actual__c> listaEstados = ordenarPorActivo(aUpsertar.values());
+    Datetime ultimaPrevia = listaEstados.isEmpty()
+      ? null
+      : ultimaModificacionDeEstados();
     if (inyectarFalloDeEscritura && !listaEstados.isEmpty()) {
       listaEstados[0].Activo__c = null;
     }
@@ -164,12 +170,37 @@ public without sharing class ProcesamientoServicio {
       }
     }
 
-    if (!listaEstados.isEmpty()) {
+    if (!listaEstados.isEmpty() && debeTocarTimbre(ultimaPrevia, ahora)) {
       avisarAlMonitor();
     }
 
     marcarReanudacion(avisos);
     return resultado;
+  }
+
+  /**
+   * Toca la primera tanda de cada ventana fija de 30 s: si la ultima escritura de
+   * estados cayo en otra ventana, nadie toco todavia en esta. Con «hace menos de
+   * 30 s» y la ingesta continua no tocaria nunca. Lo que cambie despues en la
+   * misma ventana lo recoge la siguiente o la vigilancia de un minuto del monitor.
+   */
+  @TestVisible
+  static Boolean debeTocarTimbre(Datetime ultimaPrevia, Datetime ahora) {
+    if (ultimaPrevia == null || ahora == null) {
+      return true;
+    }
+    return ultimaPrevia.getTime() / VENTANA_TIMBRE_MS !=
+      ahora.getTime() / VENTANA_TIMBRE_MS;
+  }
+
+  // Unas 20 filas, una por equipo y medicion: leerlas no cuesta casi nada.
+  private static Datetime ultimaModificacionDeEstados() {
+    AggregateResult[] fila = [
+      SELECT MAX(SystemModstamp) ultima
+      FROM Estado_Actual__c
+      WITH SYSTEM_MODE
+    ];
+    return fila.isEmpty() ? null : (Datetime) fila[0].get('ultima');
   }
 
   /**

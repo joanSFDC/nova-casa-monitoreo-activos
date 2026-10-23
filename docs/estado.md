@@ -703,6 +703,11 @@ No estaban en la especificación y conviene no redescubrirlas.
     traduce el nombre de los perfiles estándar al idioma de quien consulta: desde que el
     usuario de Joan está en español, «System Administrator» se llama «Administrador del
     sistema» y el script fallaba.
+72. **El timbre del monitor suena como mucho una vez cada 30 segundos.** Por ventanas fijas,
+    con la última modificación de los estados y sin escrituras nuevas; el monitor no escucha
+    con la pestaña oculta, y cerrar un incidente toca el timbre con un flujo. Las 75.000
+    entregas diarias pasan de alcanzar para unos 8 monitores abiertos a unos 26
+    ([módulo 09](09-experiencia-del-operador.md)).
 
 ## Historial breve
 
@@ -767,3 +772,4 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-22 | «Lecturas del periodo» en la página del incidente y `ligar` solo ata la señal que cambia el caso. PR #120 fusionado. Cierra #119 |
 | 2026-10-23 | Aviso por correo y en la campana cuando un incidente entra en rojo; el script de usuarios acepta el perfil en español. PR #122 fusionado. Cierra #121 |
 | 2026-10-23 | Una señal en conflicto antes de procesarse guarda la lectura de la primera afirmación: «Lecturas del periodo» ya no la muestra con «—». PR #124 fusionado. Cierra #123 |
+| 2026-10-23 | El timbre suena como mucho cada 30 segundos, el monitor no escucha con la pestaña oculta y cerrar un incidente toca el timbre. PR #126 fusionado. Cierra #125 |

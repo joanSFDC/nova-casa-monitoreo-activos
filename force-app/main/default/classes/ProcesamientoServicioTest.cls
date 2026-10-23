@@ -188,7 +188,10 @@ private class ProcesamientoServicioTest {
     Test.stopTest();
 
     Assert.areEqual(q5, q200, 'Las consultas no crecen con el volumen');
-    Assert.areEqual(d5, d200, 'Las escrituras no crecen con el volumen');
+    Assert.isTrue(
+      d200 <= d5,
+      'Las escrituras no crecen con el volumen; el timbre solo toca la primera tanda de su ventana'
+    );
     Assert.areEqual(1, r200.aplicadas, 'Un solo ganador por clave en la tanda');
     Assert.areEqual(
       199,
@@ -412,6 +415,33 @@ private class ProcesamientoServicioTest {
       1,
       ProcesamientoServicio.timbresPublicados,
       'Un timbre por tanda, no uno por estado'
+    );
+  }
+
+  @isTest
+  static void shouldTocarUnaVezPorVentana_WhenVariasTandasEnTreintaSegundos() {
+    Datetime inicio = Datetime.newInstanceGmt(2026, 10, 23, 15, 0, 0);
+    Assert.isTrue(
+      ProcesamientoServicio.debeTocarTimbre(null, inicio),
+      'Sin estados previos toca'
+    );
+    Assert.isFalse(
+      ProcesamientoServicio.debeTocarTimbre(
+        inicio.addSeconds(5),
+        inicio.addSeconds(29)
+      ),
+      'En la misma ventana ya toco la primera tanda'
+    );
+    Assert.isTrue(
+      ProcesamientoServicio.debeTocarTimbre(
+        inicio.addSeconds(29),
+        inicio.addSeconds(30)
+      ),
+      'La primera tanda de la ventana siguiente toca'
+    );
+    Assert.isTrue(
+      ProcesamientoServicio.debeTocarTimbre(inicio, inicio.addMinutes(5)),
+      'Despues de un silencio toca'
     );
   }
 
