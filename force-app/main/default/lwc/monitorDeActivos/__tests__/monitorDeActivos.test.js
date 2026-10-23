@@ -3,7 +3,7 @@ import MonitorDeActivos from "c/monitorDeActivos";
 import obtenerPanel from "@salesforce/apex/MonitorControlador.obtenerPanel";
 import abrirIntervencion from "@salesforce/apex/MonitorControlador.abrirIntervencion";
 import NotaIntervencion from "c/notaIntervencion";
-import { subscribe, onError } from "lightning/empApi";
+import { subscribe, unsubscribe, onError } from "lightning/empApi";
 import { refreshApex } from "@salesforce/apex";
 
 jest.mock(
@@ -483,6 +483,35 @@ describe("c-monitor-de-activos", () => {
       await microtareas();
       return el;
     }
+
+    function cambiarVisibilidad(estado) {
+      Object.defineProperty(document, "visibilityState", {
+        configurable: true,
+        get: () => estado
+      });
+      document.dispatchEvent(new CustomEvent("visibilitychange"));
+    }
+
+    it("con la pestaña oculta no escucha ni consulta, y al volver se pone al día", async () => {
+      await montado();
+      cambiarVisibilidad("hidden");
+      await microtareas();
+      expect(unsubscribe).toHaveBeenCalledWith({ id: "sub" });
+
+      jest.advanceTimersByTime(180000);
+      await microtareas();
+      expect(refreshApex).not.toHaveBeenCalled();
+
+      cambiarVisibilidad("visible");
+      await microtareas();
+      expect(subscribe).toHaveBeenCalledTimes(2);
+      expect(refreshApex).toHaveBeenCalledTimes(1);
+
+      jest.advanceTimersByTime(60000);
+      await microtareas();
+      expect(refreshApex).toHaveBeenCalledTimes(2);
+      cambiarVisibilidad("visible");
+    });
 
     it("vuelve a consultar sola si pasa un minuto sin consultas", async () => {
       await montado();

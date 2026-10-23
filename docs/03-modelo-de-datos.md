@@ -321,8 +321,10 @@ juntos, que es preferible a un aviso huérfano.
 
 ## `Panel_Actualizado__e`
 
-El timbre del monitor. **No tiene campos.** El procesamiento lo publica una vez por tanda,
-cuando escribe estados, y el componente del operador lo usa para volver a consultar. Está
+El timbre del monitor. **No tiene campos.** El procesamiento lo publica cuando una tanda
+escribe estados y es la primera de su ventana de 30 segundos, y el flujo
+`Avisar_Monitor_Al_Cerrar` lo publica al cerrar un incidente. El componente del operador lo
+usa para volver a consultar. Está
 separado de `Aviso_de_Senal__e` porque suscribirse exige leer el evento y el canal no filtra
 por permisos: con el aviso, un operador recibiría la telemetría de las dos ciudades. El
 [módulo 09](09-experiencia-del-operador.md#la-actualización-automática) cuenta la decisión.

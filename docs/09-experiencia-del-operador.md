@@ -325,9 +325,9 @@ sigue siendo usable.
 ### La actualización automática
 
 El componente se suscribe, mediante la biblioteca de mensajería empresarial del navegador,
-a un evento de plataforma propio: `Panel_Actualizado__e`. El procesamiento lo publica una
-vez por tanda, cuando escribe estados. **No lleva ningún campo: solo dice «hay estados
-nuevos».** El componente lo usa como señal para volver a pedir los datos al servidor.
+a un evento de plataforma propio: `Panel_Actualizado__e`. El procesamiento lo publica
+cuando una tanda escribe estados, como mucho una vez cada 30 segundos, y también suena al
+cerrar un incidente. **No lleva ningún campo: solo dice «hay estados nuevos».** El componente lo usa como señal para volver a pedir los datos al servidor.
 
 Y aquí está la decisión más importante del módulo: **la pantalla nunca recibe datos por el
 canal de eventos.** El motivo es una frontera de seguridad. **El canal de eventos de
@@ -348,6 +348,30 @@ tandas que llegan seguidas: el componente hace una sola consulta por ventana.
 
 La suscripción se cancela al desmontar el componente, para no dejar conexiones abiertas
 cuando el operador navega a otra parte.
+
+### Cuidar las entregas del timbre
+
+Cada monitor abierto recibe cada timbre, y la org tiene un límite de **75.000 entregas de
+eventos por día**. Con un timbre por tanda sonaba hasta 6 veces por minuto (8.640 al día):
+alcanzaba para unos 8 monitores abiertos todo el día. **Decisión: como mucho un timbre cada
+30 segundos, por ventanas fijas, y ninguna entrega a una pestaña oculta.**
+
+- **Ventanas fijas de 30 s.** Antes de guardar los estados de la tanda, el procesamiento lee
+  la última modificación de `Estado_Actual__c` (unas 20 filas, una por equipo y medición).
+  Si cayó en otra ventana de 30 segundos, la tanda toca el timbre; si cayó en la misma, ya
+  tocó otra antes. Así suena la primera tanda de cada ventana: 2.880 timbres al día como
+  máximo, que alcanzan para unos 26 monitores. Lo que cambie después dentro de la misma
+  ventana lo recoge el timbre siguiente o la vigilancia de un minuto.
+- **Pestaña oculta.** Con la pestaña oculta el monitor cancela la suscripción y la
+  vigilancia; al volver se suscribe otra vez y se pone al día con una consulta.
+- **Al cerrar un incidente.** El flujo `Avisar_Monitor_Al_Cerrar` publica el timbre, para
+  que «Ver incidente» y «Normalizado · caso abierto» desaparezcan en segundos.
+
+| Alternativa | Por qué no |
+|---|---|
+| «Hace menos de 30 s» desde el último timbre | Con la ingesta continua siempre hay una tanda reciente: no tocaría nunca |
+| Guardar la hora del último timbre (caché de plataforma, configuración o el control de ingesta) | Una escritura o una partición de caché más; el control además lo bloquea la ingesta cada minuto |
+| Seguir con un timbre por tanda | Agota el límite de entregas con unos 8 monitores abiertos |
 
 Si la suscripción falla, el monitor lo dice. Cuando la biblioteca informa un error o la
 suscripción no se completa, aparece bajo el título una línea discreta: la actualización
