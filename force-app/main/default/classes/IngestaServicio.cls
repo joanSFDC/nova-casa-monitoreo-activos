@@ -246,7 +246,9 @@ public without sharing class IngestaServicio {
           Hash_Contenido__c,
           Entregas__c,
           Reintentable__c,
-          Fecha_Recepcion__c
+          Fecha_Recepcion__c,
+          Lectura__c,
+          Carga__c
         FROM Senal__c
         WHERE Clave__c IN :clavesReales
         WITH SYSTEM_MODE
@@ -637,6 +639,24 @@ public without sharing class IngestaServicio {
     return texto == null ? null : texto.left(LARGO_LECTURA);
   }
 
+  /**
+   * Una senal que entra en conflicto antes de procesarse ya no pasa por el
+   * procesamiento: guarda la lectura de la primera afirmacion, la que conserva.
+   */
+  private static String lecturaDeLaCarga(String carga) {
+    if (String.isBlank(carga)) {
+      return null;
+    }
+    try {
+      Object crudo = JSON.deserializeUntyped(carga);
+      return crudo instanceof Map<String, Object>
+        ? lecturaRecibida((Map<String, Object>) crudo)
+        : null;
+    } catch (JSONException error) {
+      return null;
+    }
+  }
+
   private static Decimal numeroDe(Map<String, Object> bloque, String campo) {
     if (bloque == null) {
       return null;
@@ -702,6 +722,9 @@ public without sharing class IngestaServicio {
   ) {
     Senal__c conflicto = entregaSobre(previa, entrega);
     conflicto.Detalle__c = detalle;
+    if (String.isBlank(previa.Lectura__c)) {
+      conflicto.Lectura__c = lecturaDeLaCarga(previa.Carga__c);
+    }
     IngestaConstantes.aplicar(
       conflicto,
       IngestaConstantes.RESULTADO_CONFLICTO,

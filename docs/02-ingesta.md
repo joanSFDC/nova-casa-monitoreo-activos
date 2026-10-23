@@ -510,7 +510,8 @@ sequenceDiagram
 - Una señal rechazada al recibir no pasa por el procesamiento, que es el que escribe
   `Lectura__c`: la ingesta la guarda tal como llegó, con sus decimales (hasta cuatro) y su
   unidad, para que «Lecturas del periodo» diga qué mandó el equipo. Sin un valor que se
-  pueda leer, queda vacía.
+  pueda leer, queda vacía. Una señal que entra en conflicto antes de procesarse tampoco
+  pasa por el procesamiento: guarda la lectura de la primera afirmación, la que conserva.
 - Una clave repetida en la misma pagina no se manda al upsert: si se mandara, fallaria entero.
 
 ### 3. Credenciales: el token no entra a Apex

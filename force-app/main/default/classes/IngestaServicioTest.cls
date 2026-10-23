@@ -294,6 +294,44 @@ private class IngestaServicioTest {
   }
 
   @isTest
+  static void shouldGuardarLaLecturaDeLaPrimera_WhenConflictoAntesDeProcesarse() {
+    Datetime ahora = Datetime.newInstanceGmt(2026, 9, 22, 22, 0, 0);
+    IngestaServicio.procesarPagina(
+      TestDataFactory.sobre(
+        new List<Map<String, Object>>{ TestDataFactory.mensajePresion() },
+        'c1',
+        true
+      ),
+      ahora
+    );
+
+    Test.startTest();
+    IngestaServicio.procesarPagina(
+      TestDataFactory.sobre(
+        new List<Map<String, Object>>{
+          TestDataFactory.mensajePresion('msg_000002', 'dlv_000051', 3.9, 'BAR')
+        },
+        'c2',
+        true
+      ),
+      ahora.addMinutes(1)
+    );
+    Test.stopTest();
+
+    Senal__c senal = [
+      SELECT Resultado__c, Lectura__c
+      FROM Senal__c
+      WHERE Clave__c = 'nova-casa-simulator|msg_000002'
+    ];
+    Assert.areEqual(IngestaConstantes.RESULTADO_CONFLICTO, senal.Resultado__c);
+    Assert.areEqual(
+      '2,76 bar',
+      senal.Lectura__c.replace('.', ','),
+      'Guarda la lectura de la primera afirmacion, la que se conserva'
+    );
+  }
+
+  @isTest
   static void shouldConservarPrimeraAfirmacion_WhenConflictoEnOtraPagina() {
     Datetime ahora = Datetime.newInstanceGmt(2026, 9, 22, 22, 0, 0);
     IngestaServicio.procesarPagina(
