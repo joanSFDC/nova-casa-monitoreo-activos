@@ -242,6 +242,36 @@ entre un operador que sabe que está mirando datos viejos y uno que no.
 Que el `Schedulable` corra cada minuto es parte de la misma defensa: aunque la cadena se
 rompa, el siguiente minuto la vuelve a arrancar desde el cursor guardado.
 
+### El aviso de ingesta caída
+
+El aviso del monitor solo lo ve quien lo está mirando. **Decisión: el administrador recibe
+un aviso en la campana y por correo cuando la ingesta se cae, aunque nadie mire el monitor,
+y otro cuando vuelve.** Una caída es una de dos cosas:
+
+- **El corte por fallos.** El disparador `ControlAvisoCaida` marca la caída en el mismo
+  guardado en que `Fallos_Consecutivos__c` pasa de tres, con el último error en el motivo.
+- **El silencio.** El vigía `VigiaIngestaSchedulable` corre cada 10 minutos (minutos 05 a
+  55) y marca la caída si la ingesta está activa y no hubo una consulta exitosa en los
+  últimos 10 minutos. Así la detecta entre 10 y 20 minutos después de la última consulta.
+
+La marca es `Caida_Desde__c` en el control, con su motivo en `Motivo_Caida__c`. El flujo
+`Avisar_Ingesta_Caida` avisa al grupo Avisos Administración cuando esa fecha cambia: si se
+marcó, «La ingesta está caída»; si se vació, «La ingesta volvió», con los minutos que
+estuvo caída. La vacía la primera consulta exitosa después de la caída, y guarda en
+`Minutos_Ultima_Caida__c` el tiempo desde la consulta anterior. Sale un aviso por caída, no
+uno por minuto. Una ingesta apagada a propósito (`Activo__c` sin marcar) no es una caída.
+
+| Alternativa | Por qué no |
+|---|---|
+| Que la misma cadena de la ingesta vigile | Si los 60 trabajos se borran o se atascan, la alarma se va con ellos |
+| Una ruta programada de flujo que cada consulta exitosa aplaza | Habría que confiar en que Salesforce reprograme la ruta al cambiar la fecha, y el flujo se evaluaría en cada consulta |
+| Avisar solo el corte por fallos | Un proveedor que no responde o una cadena que se detiene sin error no se verían |
+
+El vigía no cubre que se caiga toda la plataforma asíncrona de Salesforce, que avisa por su
+cuenta en su página de estado. Se programa con `./scripts/programar-vigia.sh novacasa2` y se
+quita con `--abortar`. Con él, la org tiene 66 trabajos programados propios de los 100 que
+permite.
+
 ## El tratamiento de los errores
 
 | Código | Qué hacemos | Por qué |

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Minutos_Ultima_Caida__c</fullName>
+    <description>Cuántos minutos pasaron sin consultas exitosas en la última caída, desde la consulta anterior hasta la que la cerró. Lo usa el aviso de vuelta.</description>
+    <externalId>false</externalId>
+    <label>Minutos de la última caída</label>
+    <precision>8</precision>
+    <required>false</required>
+    <scale>0</scale>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Number</type>
+    <unique>false</unique>
+</CustomField>

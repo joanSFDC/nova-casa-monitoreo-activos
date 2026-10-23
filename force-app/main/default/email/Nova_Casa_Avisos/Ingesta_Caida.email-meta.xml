@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EmailTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
+    <available>true</available>
+    <description>Correo al administrador cuando la ingesta se corta por fallos o lleva 10 minutos sin consultas exitosas.</description>
+    <encodingKey>UTF-8</encodingKey>
+    <name>Ingesta caída</name>
+    <style>none</style>
+    <subject>Ingesta caída · {!Control_de_Ingesta__c.Motivo_Caida__c}</subject>
+    <textOnly>INGESTA CAÍDA
+La ingesta está caída.
+{!Control_de_Ingesta__c.Motivo_Caida__c}
+
+Última consulta exitosa: {!Control_de_Ingesta__c.Hora_Ultima_Consulta_Texto__c} (hora de Bogotá)
+Último error: {!Control_de_Ingesta__c.Ultimo_Error__c}
+
+Mientras siga caída, el monitor no se actualiza y no se abren incidentes nuevos.
+Si el simulador respondió con error, la ingesta sigue sola en cuanto responda. Si se cortó por fallos, corrige la causa y pon «Fallos consecutivos» en 0: sigue sola al minuto siguiente.
+Abrir el control de ingesta: {!Control_de_Ingesta__c.Link}
+
+Recibes este aviso porque administras la plataforma Nova Casa.
+Nova Casa · Monitoreo de activos</textOnly>
+    <type>custom</type>
+    <uiType>Aloha</uiType>
+</EmailTemplate>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomNotificationType xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customNotifTypeName>Ingesta caída</customNotifTypeName>
+    <description>Avisa en la campana al administrador cuando la ingesta se cae y cuando vuelve.</description>
+    <desktop>true</desktop>
+    <masterLabel>Ingesta caída</masterLabel>
+    <mobile>true</mobile>
+</CustomNotificationType>

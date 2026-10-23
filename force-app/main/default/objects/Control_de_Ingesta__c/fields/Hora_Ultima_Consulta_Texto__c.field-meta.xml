@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Hora_Ultima_Consulta_Texto__c</fullName>
+    <description>La última consulta exitosa en hora de Bogotá (UTC-5), tomada del texto de la fecha en GMT. La usan los avisos de ingesta caída.</description>
+    <externalId>false</externalId>
+    <formula>IF(ISBLANK(Ultima_Consulta_Exitosa__c), &quot;Nunca&quot;, MID(TEXT((Ultima_Consulta_Exitosa__c - 5/24)), 9, 2) &amp; &quot;/&quot; &amp; MID(TEXT((Ultima_Consulta_Exitosa__c - 5/24)), 6, 2) &amp; &quot;/&quot; &amp; LEFT(TEXT((Ultima_Consulta_Exitosa__c - 5/24)), 4) &amp; &quot;, &quot; &amp; TEXT(IF(MOD(VALUE(MID(TEXT((Ultima_Consulta_Exitosa__c - 5/24)), 12, 2)), 12) = 0, 12, MOD(VALUE(MID(TEXT((Ultima_Consulta_Exitosa__c - 5/24)), 12, 2)), 12))) &amp; &quot;:&quot; &amp; MID(TEXT((Ultima_Consulta_Exitosa__c - 5/24)), 15, 2) &amp; IF(VALUE(MID(TEXT((Ultima_Consulta_Exitosa__c - 5/24)), 12, 2)) &lt; 12, &quot; a. m.&quot;, &quot; p. m.&quot;))</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <label>Última consulta exitosa (Bogotá)</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

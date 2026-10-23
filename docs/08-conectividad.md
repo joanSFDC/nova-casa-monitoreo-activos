@@ -227,14 +227,17 @@ no tiene forma de enterarse.** El aviso venía justamente de él. Todos los sens
 aparecerían con su último estado conocido, que probablemente sea `HEALTHY`, y la pantalla
 mostraría todo en orden.
 
-La única defensa es el indicador de consulta atrasada del
+Hay dos defensas. La primera es el indicador de consulta atrasada del
 [módulo 09](09-experiencia-del-operador.md), alimentado por
-`Control_de_Ingesta__c.Ultima_Consulta_Exitosa__c`. Es insuficiente si el silencio se
-prolonga y nadie mira la pantalla, y así queda dicho.
+`Control_de_Ingesta__c.Ultima_Consulta_Exitosa__c`, que solo ve quien mira la pantalla. La
+segunda es el aviso de ingesta caída del [módulo 02](02-ingesta.md): si en 10 minutos no
+hay una consulta exitosa, o la ingesta se corta por fallos, el administrador recibe un
+aviso en la campana y por correo aunque nadie mire el monitor.
 
-Construir un vigilante propio para cubrir este caso costaría más de lo que evita y
-reintroduciría exactamente las falsas alarmas que quisimos quitar al elegir el modelo de
-aviso explícito. Es un intercambio consciente, no un olvido.
+Lo que sigue sin cubrirse es el caso del proveedor que responde, pero sin avisos de
+pérdida: las consultas son exitosas y el sistema no tiene cómo saber que un sensor calló.
+Un vigilante por sensor reintroduciría las falsas alarmas que quisimos quitar al elegir el
+modelo de aviso explícito. Es un intercambio consciente, no un olvido.
 
 **El resto de activos no emite conectividad.** Solo las cámaras. Una bomba que deja de
 reportar no produce ningún `LOST`: su última lectura se queda ahí, y la única defensa es la

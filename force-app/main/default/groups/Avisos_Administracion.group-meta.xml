@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Group xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Reciben el aviso de ingesta caída y de su vuelta, en la campana y por correo: el administrador de la plataforma. Solo para avisos; la compartición no lo usa.</description>
+    <doesIncludeBosses>false</doesIncludeBosses>
+    <name>Avisos Administración</name>
+</Group>

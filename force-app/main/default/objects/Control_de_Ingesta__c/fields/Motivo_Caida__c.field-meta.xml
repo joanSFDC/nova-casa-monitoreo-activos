@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Motivo_Caida__c</fullName>
+    <description>Por qué se avisó la última caída: el corte por fallos con el último error, o los minutos sin consultas exitosas.</description>
+    <externalId>false</externalId>
+    <label>Motivo de la caída</label>
+    <length>255</length>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>
