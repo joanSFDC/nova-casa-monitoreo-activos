@@ -344,9 +344,10 @@ minutos en ver el tema, el logo y las páginas nuevas.
 La prueba de carga de la fase 7 ([módulo 12](12-plan-de-pruebas.md)) está en curso. El
 generador de `load-test/` está desplegado y la prueba de humo de 1.000 señales pasó: el
 edificio de carga no manda correos. Los escalones de 100.000, 500.000 y un millón van el
-25 de octubre, después de revisar la primera noche de la limpieza. Mientras dure, el
-coordinador y el gerente ven el edificio «Carga» y sus incidentes; al terminar se borra
-todo y el generador sale de la org.
+25 de octubre, después de revisar la primera noche de la limpieza. Mientras dure, nadie
+salvo el administrador ve el edificio «Carga» ni sus equipos, porque la compartición es
+por ciudad; el coordinador ve sus incidentes en la cola de Coordinación. Al terminar se
+borra todo y el generador sale de la org.
 
 Los arreglos encontrados al cerrar US-208 están hechos: la fecha futura
 contra `publishedAt` (issue #28), la sesión dentro de la clave de la señal
@@ -852,3 +853,4 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-24 | Generador de la prueba de carga en `load-test/`, con sus pruebas y la prueba de humo de 1.000 señales: el edificio de carga no avisa. PR #154 fusionado. Cierra #153 |
 | 2026-10-24 | Prueba del monitor al cerrar un incidente: la fila pierde «Ver incidente» y «Normalizado · caso abierto». PR #156 fusionado. Cierra #155 |
 | 2026-10-24 | Correcciones de la revisión de Cali en `estado.md`: la org caduca el 19 de noviembre, `Case` tiene 22 campos propios y falta `Resumen_Bitacora__c` en los objetos. PR #158 fusionado. Cierra #157 |
+| 2026-10-24 | Quién ve la prueba de carga, comprobado en la org: nadie salvo el administrador ve el edificio «Carga»; el coordinador ve sus incidentes en su cola. PR #160 fusionado. Cierra #159 |
