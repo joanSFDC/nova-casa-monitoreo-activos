@@ -34,6 +34,7 @@ public inherited sharing class IngestaValidador {
       SELECT Id, Codigo_Externo__c, Name
       FROM Edificio__c
       WITH SYSTEM_MODE
+      LIMIT :IngestaConstantes.TOPE_CATALOGO
     ]) {
       catalogo.edificios.put(edificio.Codigo_Externo__c, edificio);
     }
@@ -47,6 +48,7 @@ public inherited sharing class IngestaValidador {
         Edificio__r.Codigo_Externo__c
       FROM Activo__c
       WITH SYSTEM_MODE
+      LIMIT :IngestaConstantes.TOPE_CATALOGO
     ]) {
       catalogo.activos.put(activo.Codigo_Externo__c, activo);
     }

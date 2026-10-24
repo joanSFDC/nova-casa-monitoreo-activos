@@ -159,6 +159,55 @@ public without sharing class IngestaServicio {
     resultado.versionRechazada = false;
 
     Map<String, Object> sobre = parsearSobre(cuerpo);
+    leerPaginacion(sobre, resultado);
+    PaginaEnCurso pagina = new PaginaEnCurso();
+    agruparPorClave(sobre, ahora, inicioSesion, pagina, resultado);
+    if (pagina.porClave.isEmpty()) {
+      return resultado;
+    }
+
+    prepararGuardado(pagina, cargarExistentes(pagina.porClave.keySet()));
+    if (antesDeGuardar != null) {
+      antesDeGuardar.call('antesDeGuardar', null);
+    }
+    guardar(pagina);
+    resultado.senales = pagina.aGuardar.size();
+    clasificarResultados(pagina);
+    resolverRepetidas(pagina);
+    guardarRastros(pagina);
+    if (!pagina.sinGuardar.isEmpty()) {
+      resultado.errorGuardado = recortar(
+        pagina.sinGuardar.size() +
+          ' se\u00f1ales sin guardar. ' +
+          pagina.sinGuardar[0]
+      );
+    }
+    publicarAvisos(pagina, resultado);
+    return resultado;
+  }
+
+  /**
+   * Lo que una pagina va acumulando entre sus pasos: las senales por clave con
+   * su mensaje original, lo que se guarda, lo que se publica y lo que fallo.
+   */
+  private class PaginaEnCurso {
+    Map<String, Senal__c> porClave = new Map<String, Senal__c>();
+    Map<String, Map<String, Object>> originales = new Map<String, Map<String, Object>>();
+    List<Senal__c> aGuardar = new List<Senal__c>();
+    Set<String> nuevas = new Set<String>();
+    Set<String> publicar = new Set<String>();
+    Database.UpsertResult[] resultados;
+    List<Aviso_de_Senal__e> avisos = new List<Aviso_de_Senal__e>();
+    List<Integer> indicesAviso = new List<Integer>();
+    List<Senal__c> rastros = new List<Senal__c>();
+    List<String> sinGuardar = new List<String>();
+    Map<String, Integer> repetidas = new Map<String, Integer>();
+  }
+
+  private static void leerPaginacion(
+    Map<String, Object> sobre,
+    ResultadoPagina resultado
+  ) {
     Map<String, Object> pagination = IngestaValidador.mapa(sobre, 'pagination');
     resultado.siguienteCursor = IngestaValidador.texto(
       pagination,
@@ -166,16 +215,27 @@ public without sharing class IngestaServicio {
     );
     Object hasMore = pagination == null ? null : pagination.get('hasMore');
     resultado.hasMore = hasMore instanceof Boolean && (Boolean) hasMore;
+  }
 
-    String version = IngestaValidador.texto(sobre, 'schemaVersion');
+  /**
+   * Una senal por clave. Una clave repetida en la misma pagina no se manda al
+   * upsert: suma una entrega a la primera, y si trae otro contenido, la vuelve
+   * conflicto.
+   */
+  private static void agruparPorClave(
+    Map<String, Object> sobre,
+    Datetime ahora,
+    Datetime inicioSesion,
+    PaginaEnCurso pagina,
+    ResultadoPagina resultado
+  ) {
     List<Object> data = sobre.get('data') instanceof List<Object>
       ? (List<Object>) sobre.get('data')
       : new List<Object>();
-    Boolean versionOk = version == IngestaConstantes.VERSION_ESQUEMA;
-
+    Boolean versionOk =
+      IngestaValidador.texto(sobre, 'schemaVersion') ==
+      IngestaConstantes.VERSION_ESQUEMA;
     IngestaValidador.Catalogo catalogo = IngestaValidador.cargarCatalogo();
-    Map<String, Senal__c> porClave = new Map<String, Senal__c>();
-    Map<String, Map<String, Object>> originales = new Map<String, Map<String, Object>>();
 
     for (Object item : data) {
       if (!(item instanceof Map<String, Object>)) {
@@ -185,33 +245,18 @@ public without sharing class IngestaServicio {
       String clave = IngestaValidador.claveDe(mensaje, inicioSesion);
       if (String.isBlank(clave)) {
         Senal__c huerfana = senalRechazadaSinClave(mensaje, ahora);
-        porClave.put(huerfana.Clave__c, huerfana);
-        originales.put(huerfana.Clave__c, mensaje);
+        agregar(pagina, huerfana.Clave__c, huerfana, mensaje);
         continue;
       }
       String hash = IngestaValidador.hashDe(mensaje);
-      if (porClave.containsKey(clave)) {
-        Senal__c primera = porClave.get(clave);
-        primera.Entregas__c = nvlNum(primera.Entregas__c) + 1;
-        primera.Ultimo_Delivery_Id__c = IngestaValidador.texto(
-          mensaje,
-          'deliveryId'
-        );
-        primera.Ultima_Fecha_Publicacion__c = IngestaValidador.parsearIso(
-          IngestaValidador.texto(mensaje, 'publishedAt')
-        );
-        if (primera.Hash_Contenido__c != hash) {
-          IngestaConstantes.aplicar(
-            primera,
-            IngestaConstantes.RESULTADO_CONFLICTO,
-            null
-          );
-          primera.Detalle__c = detalleConflicto(primera.Ultimo_Delivery_Id__c);
-        }
+      if (pagina.porClave.containsKey(clave)) {
+        sumarEntregaRepetida(pagina.porClave.get(clave), mensaje, hash);
         continue;
       }
       Senal__c senal;
-      if (!versionOk) {
+      if (versionOk) {
+        senal = construirSenal(mensaje, catalogo, ahora, hash, clave);
+      } else {
         resultado.versionRechazada = true;
         senal = nuevaSenal(mensaje, ahora, hash, clave);
         IngestaConstantes.aplicar(
@@ -219,219 +264,275 @@ public without sharing class IngestaServicio {
           IngestaConstantes.RESULTADO_RECHAZADO,
           IngestaConstantes.MOTIVO_VERSION
         );
-      } else {
-        senal = construirSenal(mensaje, catalogo, ahora, hash, clave);
       }
-      porClave.put(clave, senal);
-      originales.put(clave, mensaje);
+      agregar(pagina, clave, senal, mensaje);
     }
+  }
 
-    if (porClave.isEmpty()) {
-      resultado.senales = 0;
-      return resultado;
+  private static void agregar(
+    PaginaEnCurso pagina,
+    String clave,
+    Senal__c senal,
+    Map<String, Object> mensaje
+  ) {
+    pagina.porClave.put(clave, senal);
+    pagina.originales.put(clave, mensaje);
+  }
+
+  private static void sumarEntregaRepetida(
+    Senal__c primera,
+    Map<String, Object> mensaje,
+    String hash
+  ) {
+    primera.Entregas__c = nvlNum(primera.Entregas__c) + 1;
+    primera.Ultimo_Delivery_Id__c = IngestaValidador.texto(
+      mensaje,
+      'deliveryId'
+    );
+    primera.Ultima_Fecha_Publicacion__c = IngestaValidador.parsearIso(
+      IngestaValidador.texto(mensaje, 'publishedAt')
+    );
+    if (primera.Hash_Contenido__c != hash) {
+      IngestaConstantes.aplicar(
+        primera,
+        IngestaConstantes.RESULTADO_CONFLICTO,
+        null
+      );
+      primera.Detalle__c = detalleConflicto(primera.Ultimo_Delivery_Id__c);
     }
+  }
 
+  private static Map<String, Senal__c> cargarExistentes(Set<String> claves) {
     Set<String> clavesReales = new Set<String>();
-    for (String clave : porClave.keySet()) {
+    for (String clave : claves) {
       if (!esClaveSinId(clave)) {
         clavesReales.add(clave);
       }
     }
     Map<String, Senal__c> existentes = new Map<String, Senal__c>();
-    if (!clavesReales.isEmpty()) {
-      for (Senal__c previa : [
-        SELECT
-          Id,
-          Clave__c,
-          Hash_Contenido__c,
-          Entregas__c,
-          Reintentable__c,
-          Fecha_Recepcion__c,
-          Lectura__c,
-          Carga__c
-        FROM Senal__c
-        WHERE Clave__c IN :clavesReales
-        WITH SYSTEM_MODE
-      ]) {
-        existentes.put(previa.Clave__c, previa);
-      }
+    if (clavesReales.isEmpty()) {
+      return existentes;
     }
+    for (Senal__c previa : [
+      SELECT
+        Id,
+        Clave__c,
+        Hash_Contenido__c,
+        Entregas__c,
+        Reintentable__c,
+        Fecha_Recepcion__c,
+        Lectura__c,
+        Carga__c
+      FROM Senal__c
+      WHERE Clave__c IN :clavesReales
+      WITH SYSTEM_MODE
+    ]) {
+      existentes.put(previa.Clave__c, previa);
+    }
+    return existentes;
+  }
 
-    List<Senal__c> aGuardar = new List<Senal__c>();
-    Set<String> publicar = new Set<String>();
-    for (String clave : porClave.keySet()) {
-      Senal__c senal = porClave.get(clave);
+  private static void prepararGuardado(
+    PaginaEnCurso pagina,
+    Map<String, Senal__c> existentes
+  ) {
+    for (String clave : pagina.porClave.keySet()) {
+      Senal__c senal = pagina.porClave.get(clave);
       Senal__c previa = existentes.get(clave);
       if (previa != null) {
-        Boolean distinta = previa.Hash_Contenido__c != senal.Hash_Contenido__c;
-        if (
-          distinta ||
-          senal.Resultado__c == IngestaConstantes.RESULTADO_CONFLICTO
-        ) {
-          senal = conflictoSobre(
-            previa,
-            senal,
-            distinta
-              ? detalleConflicto(senal.Ultimo_Delivery_Id__c)
-              : senal.Detalle__c
-          );
-          aGuardar.add(senal);
-          continue;
-        }
-        if (previa.Reintentable__c == true) {
-          senal.Id = previa.Id;
-          senal.Fecha_Recepcion__c = previa.Fecha_Recepcion__c;
-          senal.Entregas__c =
-            nvlNum(previa.Entregas__c) + nvlNum(senal.Entregas__c);
-          if (senal.Resultado__c == IngestaConstantes.RESULTADO_PENDIENTE) {
-            publicar.add(clave);
-          }
-        } else {
-          senal = entregaSobre(previa, senal);
-        }
+        senal = sobreLaPrevia(pagina, clave, senal, previa);
       } else if (senal.Resultado__c == IngestaConstantes.RESULTADO_PENDIENTE) {
-        publicar.add(clave);
+        pagina.publicar.add(clave);
       }
-      aGuardar.add(senal);
+      pagina.aGuardar.add(senal);
     }
+  }
 
-    if (antesDeGuardar != null) {
-      antesDeGuardar.call('antesDeGuardar', null);
+  /**
+   * Una clave que ya estaba guardada: otro contenido es conflicto; si la previa
+   * era reintentable se reemplaza y se vuelve a publicar; si no, solo se anota
+   * la entrega.
+   */
+  private static Senal__c sobreLaPrevia(
+    PaginaEnCurso pagina,
+    String clave,
+    Senal__c senal,
+    Senal__c previa
+  ) {
+    Boolean distinta = previa.Hash_Contenido__c != senal.Hash_Contenido__c;
+    if (
+      distinta || senal.Resultado__c == IngestaConstantes.RESULTADO_CONFLICTO
+    ) {
+      return conflictoSobre(
+        previa,
+        senal,
+        distinta
+          ? detalleConflicto(senal.Ultimo_Delivery_Id__c)
+          : senal.Detalle__c
+      );
     }
-    Set<String> nuevas = new Set<String>();
-    for (Senal__c senal : aGuardar) {
+    if (previa.Reintentable__c != true) {
+      return entregaSobre(previa, senal);
+    }
+    senal.Id = previa.Id;
+    senal.Fecha_Recepcion__c = previa.Fecha_Recepcion__c;
+    senal.Entregas__c = nvlNum(previa.Entregas__c) + nvlNum(senal.Entregas__c);
+    if (senal.Resultado__c == IngestaConstantes.RESULTADO_PENDIENTE) {
+      pagina.publicar.add(clave);
+    }
+    return senal;
+  }
+
+  private static void guardar(PaginaEnCurso pagina) {
+    for (Senal__c senal : pagina.aGuardar) {
       if (senal.Id == null) {
-        nuevas.add(senal.Clave__c);
+        pagina.nuevas.add(senal.Clave__c);
       }
     }
-    Database.UpsertResult[] resultados = Database.upsert(
-      aGuardar,
+    pagina.resultados = Database.upsert(
+      pagina.aGuardar,
       Senal__c.Clave__c,
       false,
       AccessLevel.SYSTEM_MODE
     );
-    resultado.senales = aGuardar.size();
+  }
 
-    List<Aviso_de_Senal__e> avisos = new List<Aviso_de_Senal__e>();
-    List<Integer> indicesAviso = new List<Integer>();
-    List<Senal__c> rastros = new List<Senal__c>();
-    List<String> sinGuardar = new List<String>();
-    Map<String, Integer> repetidas = new Map<String, Integer>();
-    for (Integer i = 0; i < aGuardar.size(); i++) {
+  /**
+   * Por cada fila: un duplicado de una senal nueva se resuelve aparte, un error
+   * deja rastro o se cuenta como sin guardar, y lo que se guardo y toca publicar
+   * pasa a aviso.
+   */
+  private static void clasificarResultados(PaginaEnCurso pagina) {
+    for (Integer i = 0; i < pagina.aGuardar.size(); i++) {
+      Senal__c senal = pagina.aGuardar[i];
+      Database.UpsertResult resultado = pagina.resultados[i];
       Boolean repetida =
-        nuevas.contains(aGuardar[i].Clave__c) &&
-        (simularDuplicado.contains(aGuardar[i].Clave__c) ||
-        esDuplicado(resultados[i]));
+        pagina.nuevas.contains(senal.Clave__c) &&
+        (simularDuplicado.contains(senal.Clave__c) || esDuplicado(resultado));
       if (repetida) {
-        repetidas.put(aGuardar[i].Clave__c, i);
+        pagina.repetidas.put(senal.Clave__c, i);
+      } else if (!resultado.isSuccess()) {
+        anotarFallo(pagina, senal, resultado);
+      } else if (pagina.publicar.contains(senal.Clave__c)) {
+        avisar(pagina, i);
+      }
+    }
+  }
+
+  private static void anotarFallo(
+    PaginaEnCurso pagina,
+    Senal__c senal,
+    Database.UpsertResult resultado
+  ) {
+    pagina.publicar.remove(senal.Clave__c);
+    String error =
+      senal.Clave__c +
+      ': ' +
+      resultado.getErrors()[0].getMessage();
+    if (senal.Id == null) {
+      pagina.rastros.add(rastroDe(senal, error));
+    } else {
+      pagina.sinGuardar.add(error);
+    }
+  }
+
+  private static void avisar(PaginaEnCurso pagina, Integer indice) {
+    Senal__c senal = pagina.aGuardar[indice];
+    pagina.avisos.add(avisoDe(senal, pagina.originales.get(senal.Clave__c)));
+    pagina.indicesAviso.add(indice);
+  }
+
+  // Un duplicado de una senal nueva puede ser ella misma ya guardada: escribirle
+  // un rastro la marcaria Fallido y su lectura no se procesaria nunca.
+  private static void resolverRepetidas(PaginaEnCurso pagina) {
+    if (pagina.repetidas.isEmpty()) {
+      return;
+    }
+    Map<String, Senal__c> guardadas = new Map<String, Senal__c>();
+    for (Senal__c guardada : [
+      SELECT Id, Clave__c, Resultado__c
+      FROM Senal__c
+      WHERE Clave__c IN :pagina.repetidas.keySet()
+      WITH SYSTEM_MODE
+    ]) {
+      guardadas.put(guardada.Clave__c, guardada);
+    }
+    for (String clave : pagina.repetidas.keySet()) {
+      Integer i = pagina.repetidas.get(clave);
+      Senal__c guardada = guardadas.get(clave);
+      if (guardada == null) {
+        pagina.publicar.remove(clave);
+        pagina.rastros.add(
+          rastroDe(
+            pagina.aGuardar[i],
+            clave + ': ' + detalleDe(pagina.resultados[i])
+          )
+        );
         continue;
       }
-      if (!resultados[i].isSuccess()) {
-        publicar.remove(aGuardar[i].Clave__c);
-        String error =
-          aGuardar[i].Clave__c +
-          ': ' +
-          resultados[i].getErrors()[0].getMessage();
-        if (aGuardar[i].Id == null) {
-          rastros.add(rastroDe(aGuardar[i], error));
-        } else {
-          sinGuardar.add(error);
-        }
+      pagina.aGuardar[i].Id = guardada.Id;
+      if (
+        guardada.Resultado__c == IngestaConstantes.RESULTADO_PENDIENTE &&
+        pagina.publicar.contains(clave)
+      ) {
+        avisar(pagina, i);
+      }
+    }
+  }
+
+  private static String detalleDe(Database.UpsertResult resultado) {
+    return resultado.isSuccess()
+      ? 'duplicado sin registro'
+      : resultado.getErrors()[0].getMessage();
+  }
+
+  private static void guardarRastros(PaginaEnCurso pagina) {
+    if (pagina.rastros.isEmpty()) {
+      return;
+    }
+    Database.UpsertResult[] guardados = Database.upsert(
+      pagina.rastros,
+      Senal__c.Clave__c,
+      false,
+      AccessLevel.SYSTEM_MODE
+    );
+    for (Integer i = 0; i < guardados.size(); i++) {
+      if (!guardados[i].isSuccess()) {
+        pagina.sinGuardar.add(pagina.rastros[i].Detalle__c);
+      }
+    }
+  }
+
+  /**
+   * Un aviso que no sale deja su senal en Fallido por error del sistema: sin el
+   * aviso, el procesamiento no la veria nunca.
+   */
+  private static void publicarAvisos(
+    PaginaEnCurso pagina,
+    ResultadoPagina resultado
+  ) {
+    if (pagina.avisos.isEmpty()) {
+      return;
+    }
+    List<Database.SaveResult> publicados = EventBus.publish(pagina.avisos);
+    List<Senal__c> fallosPublicacion = new List<Senal__c>();
+    for (Integer i = 0; i < publicados.size(); i++) {
+      if (publicados[i].isSuccess()) {
+        resultado.publicadas++;
         continue;
       }
-      if (publicar.contains(aGuardar[i].Clave__c)) {
-        avisos.add(avisoDe(aGuardar[i], originales.get(aGuardar[i].Clave__c)));
-        indicesAviso.add(i);
-      }
-    }
-
-    // Un duplicado de una senal nueva puede ser ella misma ya guardada: escribirle
-    // un rastro la marcaria Fallido y su lectura no se procesaria nunca.
-    if (!repetidas.isEmpty()) {
-      Map<String, Senal__c> guardadas = new Map<String, Senal__c>();
-      for (Senal__c guardada : [
-        SELECT Id, Clave__c, Resultado__c
-        FROM Senal__c
-        WHERE Clave__c IN :repetidas.keySet()
-        WITH SYSTEM_MODE
-      ]) {
-        guardadas.put(guardada.Clave__c, guardada);
-      }
-      for (String clave : repetidas.keySet()) {
-        Integer i = repetidas.get(clave);
-        Senal__c guardada = guardadas.get(clave);
-        if (guardada == null) {
-          publicar.remove(clave);
-          rastros.add(
-            rastroDe(
-              aGuardar[i],
-              clave +
-                ': ' +
-                (resultados[i].isSuccess()
-                  ? 'duplicado sin registro'
-                  : resultados[i].getErrors()[0].getMessage())
-            )
-          );
-          continue;
-        }
-        aGuardar[i].Id = guardada.Id;
-        if (
-          guardada.Resultado__c == IngestaConstantes.RESULTADO_PENDIENTE &&
-          publicar.contains(clave)
-        ) {
-          avisos.add(avisoDe(aGuardar[i], originales.get(clave)));
-          indicesAviso.add(i);
-        }
-      }
-    }
-
-    if (!rastros.isEmpty()) {
-      Database.UpsertResult[] guardados = Database.upsert(
-        rastros,
-        Senal__c.Clave__c,
-        false,
-        AccessLevel.SYSTEM_MODE
+      Senal__c senal = pagina.aGuardar[pagina.indicesAviso[i]];
+      IngestaConstantes.aplicar(
+        senal,
+        IngestaConstantes.RESULTADO_FALLIDO,
+        IngestaConstantes.MOTIVO_SISTEMA
       );
-      for (Integer i = 0; i < guardados.size(); i++) {
-        if (!guardados[i].isSuccess()) {
-          sinGuardar.add(rastros[i].Detalle__c);
-        }
-      }
+      senal.Detalle__c = recortar(publicados[i].getErrors()[0].getMessage());
+      fallosPublicacion.add(senal);
     }
-    if (!sinGuardar.isEmpty()) {
-      resultado.errorGuardado = recortar(
-        sinGuardar.size() + ' se\u00f1ales sin guardar. ' + sinGuardar[0]
-      );
+    if (!fallosPublicacion.isEmpty()) {
+      Database.update(fallosPublicacion, false, AccessLevel.SYSTEM_MODE);
     }
-
-    if (!avisos.isEmpty()) {
-      List<Database.SaveResult> publicados = EventBus.publish(avisos);
-      for (Integer i = 0; i < publicados.size(); i++) {
-        if (publicados[i].isSuccess()) {
-          resultado.publicadas++;
-        } else {
-          Integer idx = indicesAviso[i];
-          IngestaConstantes.aplicar(
-            aGuardar[idx],
-            IngestaConstantes.RESULTADO_FALLIDO,
-            IngestaConstantes.MOTIVO_SISTEMA
-          );
-          aGuardar[idx].Detalle__c = recortar(
-            publicados[i].getErrors()[0].getMessage()
-          );
-        }
-      }
-      List<Senal__c> fallosPublicacion = new List<Senal__c>();
-      for (Integer i = 0; i < publicados.size(); i++) {
-        if (!publicados[i].isSuccess()) {
-          fallosPublicacion.add(aGuardar[indicesAviso[i]]);
-        }
-      }
-      if (!fallosPublicacion.isEmpty()) {
-        Database.update(fallosPublicacion, false, AccessLevel.SYSTEM_MODE);
-      }
-    }
-    return resultado;
   }
 
   private static Boolean esDuplicado(Database.UpsertResult resultado) {
