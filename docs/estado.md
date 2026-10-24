@@ -721,6 +721,11 @@ No estaban en la especificación y conviene no redescubrirlas.
     ligadas a un incidente ni las pendientes. Una sola pasada en lotes de 2.000 que borra,
     suma a `Resumen_Bitacora__c` y vacía la papelera, y que se pausa con la ingesta caída
     o atrasada. Responde Q-11 ([módulo 11](11-trazabilidad.md)).
+75. **Cada rol entra por su app, con su inicio.** Nova Casa Operación, Coordinación,
+    Gerencia y Administración reemplazan a «Nova Casa», que se retiró. Cada inicio es una
+    página de inicio con el monitor, tarjetas de vista de lista y el panel, sin
+    componentes nuevos; cada app la hace visible el conjunto de su rol, y el script de
+    usuarios pone la de entrada ([módulo 09](09-experiencia-del-operador.md)).
 
 ## Historial breve
 
@@ -789,3 +794,4 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-23 | Aviso al administrador cuando la ingesta se cae y cuando vuelve, con un vigía propio cada 10 minutos. PR #128 fusionado. Cierra #127 |
 | 2026-10-23 | El aviso de ingesta caída usa dos flujos: con una vuelta rápida, la ruta asíncrona veía la caída ya cerrada y avisaba dos veces la vuelta. PR #130 fusionado. Cierra #129 |
 | 2026-10-24 | Limpieza nocturna de la bitácora con resumen; la primera borró 452.402 señales en 41 minutos sin errores. PR #132 fusionado. Cierra #131 |
+| 2026-10-24 | Una app por rol con su inicio y retiro de «Nova Casa». PR #134 fusionado. Cierra #133 |

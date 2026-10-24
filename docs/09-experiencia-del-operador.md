@@ -27,6 +27,39 @@ Esa segunda propiedad es la que hace que su recorrido sea el que mejor demuestra
 sistema completo funciona, desde que el sensor reporta hasta que alguien tiene trabajo
 asignado.
 
+### Una app por rol
+
+Antes había una sola app, «Nova Casa», con todas las pestañas para todos, y el Inicio era
+el de ventas. **Decisión: cada rol entra por su app, con su propio inicio**, armado con las
+piezas que ya existen.
+
+| App | Pestañas | Inicio |
+| --- | --- | --- |
+| Nova Casa Operación | Inicio, Monitor, Incidentes, Activos, Edificios | El monitor a todo lo ancho y «Incidentes abiertos», que la compartición deja en su ciudad |
+| Nova Casa Coordinación | Inicio, Incidentes, Monitor, Señales, Umbrales, Activos, Edificios, Estados actuales, Informes, Paneles | La cola de coordinación y el monitor a todo lo ancho, y debajo «Rechazadas hoy» |
+| Nova Casa Gerencia | Inicio, Paneles, Informes, Incidentes, Monitor, Edificios | El panel Gerencia y «Críticos abiertos» |
+| Nova Casa Administración | Inicio, Controles de ingesta, Señales, Umbrales, Monitor, Incidentes, Activos, Edificios, Estados actuales, Informes, Paneles | «Salud de la ingesta» y «Atascadas», con «Rechazadas hoy» al lado |
+
+- **Cada inicio es una página de inicio propia** (`Inicio_Operacion`, `Inicio_Coordinacion`,
+  `Inicio_Gerencia`, `Inicio_Administracion`), asignada en su app. Usa el componente del
+  monitor, tarjetas de vista de lista y el panel incrustado: ningún componente nuevo.
+- **Vistas de lista nuevas:** «Incidentes abiertos» y «Críticos abiertos» de incidentes, y
+  «Salud de la ingesta» del control, con activa, escenario, última consulta exitosa, fallos
+  seguidos, caída avisada y último error. Es una vista y no un componente: no hace falta
+  código para mostrar cinco campos de un registro.
+- **El coordinador va apilado.** Con «Rechazadas hoy» al lado, como en la maqueta, el monitor
+  quedaba en una columna angosta y sus botones se partían; apilado, monitor y cola van a todo
+  lo ancho.
+- **Cada app la hace visible el conjunto de su rol.** El de Administración ve además las
+  otras tres: el administrador las gestiona, y el script de usuarios, que corre como él,
+  necesita encontrarlas.
+- **La app de entrada** de cada persona la pone `scripts/crear-usuarios-demo.apex` según su
+  conjunto de permisos ([módulo 10](10-seguridad-y-accesos.md)).
+- **«Nova Casa» se retiró** después de pasar a cada persona a su app.
+- Las apps estándar de Salesforce (Servicio, Ventas y las demás) siguen en el selector de
+  apps del operador: el perfil de acceso mínimo las deja ver y se decidió no tocarlo. Su
+  entrada y su inicio son los de su rol.
+
 ### El tablero de la gerencia
 
 Es el panel **Gerencia · Nova Casa**, en la pestaña Paneles, con dos gráficos:
@@ -454,7 +487,8 @@ pegado encima de algo ajeno.
 
 Salesforce separa dos cosas. El **tema** es de la org entera: barra superior, logo,
 fondo y color de enlaces y botones. La **marca de la aplicación** es el logo y el color
-de una aplicación concreta, y solo se ve si la aplicación pide sobrescribir el tema.
+de una aplicación concreta, y solo se ve si la aplicación pide sobrescribir el tema. Las
+cuatro apps por rol llevan la misma marca.
 
 En esta org la marca de la aplicación no pinta la barra de navegación, ni en Cosmos ni en
 SLDS 1: solo cambia el logo al rato de cargar. Por eso **el color y el logo van en el

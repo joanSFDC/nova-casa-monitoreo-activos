@@ -3,7 +3,7 @@
     <description
   >Lectura de edificio, activo, estado actual y umbral. Crear casos y tareas. Lee solo Ultima_Consulta_Exitosa__c del control de ingesta para el aviso de atraso. Sin acceso a Senal__c ni al cursor.</description>
     <applicationVisibilities>
-        <application>Nova_Casa</application>
+        <application>Nova_Casa_Operacion</application>
         <visible>true</visible>
     </applicationVisibilities>
     <fieldPermissions>

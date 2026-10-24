@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Salud_de_la_ingesta</fullName>
+    <columns>NAME</columns>
+    <columns>Activo__c</columns>
+    <columns>Escenario__c</columns>
+    <columns>Ultima_Consulta_Exitosa__c</columns>
+    <columns>Fallos_Consecutivos__c</columns>
+    <columns>Caida_Desde__c</columns>
+    <columns>Ultimo_Error__c</columns>
+    <filterScope>Everything</filterScope>
+    <label>Salud de la ingesta</label>
+</ListView>
