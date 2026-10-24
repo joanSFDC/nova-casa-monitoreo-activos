@@ -77,7 +77,7 @@ Umbrales, clave `Tipo_Activo\|Tipo_Medicion`:
 
 ### Ingesta
 
-Clases en `force-app/main/default/classes/`:
+Clases en `force-app/main/default/classes/`, por dominio (`ingesta/`, `procesamiento/` e `incidentes/`):
 
 | Clase | Rol |
 | --- | --- |
@@ -739,6 +739,13 @@ No estaban en la especificación y conviene no redescubrirlas.
     corrigieron los defectos que encontró y las reglas de estilo que son convención del
     proyecto salen de `Recommended` en `code-analyzer.yml`, cada una con su razón
     ([módulo 12](12-plan-de-pruebas.md)).
+79. **Las clases y los disparadores van por dominio.** Las 44 clases en una sola carpeta
+    no decían qué hace cada una. Ahora van en `ingesta/`, `salud-ingesta/`,
+    `procesamiento/`, `incidentes/`, `monitor/`, `umbrales/` y `bitacora/`, cada una con
+    sus pruebas en `test/`, y las comunes en `classes/test/` (`AGENTS.md`). Salesforce
+    reconoce cada clase por su extensión, no por su ruta, así que lo desplegado no cambia.
+    Se descartó dejar las pruebas junto a su clase, que no las separa a la vista, y un
+    árbol paralelo de pruebas, que obliga a mantener cada dominio en dos lugares.
 
 ## Historial breve
 
@@ -815,3 +822,4 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-24 | `IncidentesServicio.escribir` en pasos con una sola responsabilidad (era 58), sin cambiar el comportamiento. PR #144 fusionado. Cierra #143 |
 | 2026-10-24 | `ProcesamientoServicio.resolver` pasa de 10 parámetros a un contexto `Tanda` y pasos con una sola responsabilidad, sin cambiar el comportamiento. PR #146 fusionado. Cierra #145 |
 | 2026-10-24 | Code Analyzer después de la fase 6: 162 hallazgos (eran 168), ninguno de severidad 1; quedan escritos los métodos complejos que no se partieron. PR #148 fusionado. Cierra #147 |
+| 2026-10-24 | Clases y disparadores por dominio, con sus pruebas en `test/`; lo desplegado no cambia. PR #150 fusionado. Cierra #149 |
