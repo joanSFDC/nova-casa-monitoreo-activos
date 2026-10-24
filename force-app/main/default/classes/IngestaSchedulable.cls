@@ -46,6 +46,7 @@ public with sharing class IngestaSchedulable implements Schedulable {
       SELECT Id
       FROM CronTrigger
       WHERE CronJobDetail.Name LIKE :prefijo
+      WITH SYSTEM_MODE
     ]) {
       System.abortJob(trabajo.Id);
     }

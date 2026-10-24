@@ -101,6 +101,7 @@ public without sharing class IngestaCliente {
       FROM Edificio__c
       WITH SYSTEM_MODE
       ORDER BY Codigo_Externo__c
+      LIMIT :IngestaConstantes.TOPE_CATALOGO
     ]) {
       if (String.isNotBlank(edificio.Codigo_Externo__c)) {
         codigos.add(edificio.Codigo_Externo__c);

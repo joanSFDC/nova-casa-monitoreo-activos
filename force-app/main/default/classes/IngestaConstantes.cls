@@ -10,6 +10,9 @@ public inherited sharing class IngestaConstantes {
   public static final Integer TOLERANCIA_FUTURO_MINUTOS = 5;
   public static final Integer TIEMPO_ESPERA_MS = 20000;
   public static final Integer TAMANO_TANDA_DEFECTO = 50;
+  // El catalogo de Nova Casa tiene decenas de equipos y dos edificios. Un catalogo
+  // de miles necesitaria cargarse por pagina, no entero.
+  public static final Integer TOPE_CATALOGO = 2000;
   public static final Integer SEMILLA_DEFECTO = 20260922;
   public static final String ESCENARIO_DEFECTO = 'MIXED';
 

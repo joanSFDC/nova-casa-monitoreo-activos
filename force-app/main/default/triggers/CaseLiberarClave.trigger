@@ -20,6 +20,7 @@ trigger CaseLiberarClave on Case(before update) {
     SELECT MasterLabel, ApiName
     FROM CaseStatus
     WHERE IsClosed = TRUE
+    WITH SYSTEM_MODE
   ]) {
     if (String.isNotBlank(estado.MasterLabel)) {
       cerrados.add(estado.MasterLabel);

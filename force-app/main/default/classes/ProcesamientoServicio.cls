@@ -543,12 +543,12 @@ public without sharing class ProcesamientoServicio {
     if (ultimo.ReplayId == null) {
       return;
     }
-    try {
-      EventBus.TriggerContext.currentContext()
-        .setResumeCheckpoint(ultimo.ReplayId);
-    } catch (Exception e) {
-      // Fuera del disparador (pruebas directas y procesarPendientes) no hay contexto.
+    // Fuera del disparador (pruebas directas y procesarPendientes) no hay contexto.
+    if (!Trigger.isExecuting) {
+      return;
     }
+    EventBus.TriggerContext.currentContext()
+      .setResumeCheckpoint(ultimo.ReplayId);
   }
 
   private static String tipoMedicionDe(Aviso_de_Senal__e aviso) {
