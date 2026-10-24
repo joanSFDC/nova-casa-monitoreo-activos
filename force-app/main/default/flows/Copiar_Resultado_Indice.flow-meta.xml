@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>67.0</apiVersion>
+    <assignments>
+        <name>Copiar_el_resultado</name>
+        <label>Copiar el resultado al índice</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignmentItems>
+            <assignToReference>$Record.Resultado_Indice__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>Resultado_en_texto</elementReference>
+            </value>
+        </assignmentItems>
+    </assignments>
+    <description>Mantiene Resultado_Indice__c igual a Resultado__c cuando alguien cambia el resultado a mano. La ingesta y el procesamiento ya lo copian en IngestaConstantes.aplicar, así que en ellos la condición no se cumple y el flujo no hace nada.</description>
+    <environments>Default</environments>
+    <formulas>
+        <name>Resultado_en_texto</name>
+        <dataType>String</dataType>
+        <expression>TEXT({!$Record.Resultado__c})</expression>
+    </formulas>
+    <interviewLabel>Copiar resultado al indice {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>Copiar el resultado al índice</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <start>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Copiar_el_resultado</targetReference>
+        </connector>
+        <filterFormula>ISCHANGED({!$Record.Resultado__c}) &amp;&amp; {!$Record.Resultado_Indice__c} &lt;&gt; TEXT({!$Record.Resultado__c})</filterFormula>
+        <object>Senal__c</object>
+        <recordTriggerType>Update</recordTriggerType>
+        <triggerType>RecordBeforeSave</triggerType>
+    </start>
+    <status>Active</status>
+</Flow>

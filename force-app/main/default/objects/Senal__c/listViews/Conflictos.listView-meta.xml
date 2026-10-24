@@ -9,7 +9,7 @@
     <columns>Fecha_Procesamiento__c</columns>
     <filterScope>Everything</filterScope>
     <filters>
-        <field>Resultado__c</field>
+        <field>Resultado_Indice__c</field>
         <operation>equals</operation>
         <value>Conflicto</value>
     </filters>

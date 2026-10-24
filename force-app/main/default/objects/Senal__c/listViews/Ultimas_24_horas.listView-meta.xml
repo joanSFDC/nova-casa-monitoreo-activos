@@ -12,7 +12,7 @@
     <columns>Fecha_Procesamiento__c</columns>
     <filterScope>Everything</filterScope>
     <filters>
-        <field>Fecha_Recepcion__c</field>
+        <field>CREATED_DATE</field>
         <operation>equals</operation>
         <value>LAST_N_DAYS:1</value>
     </filters>

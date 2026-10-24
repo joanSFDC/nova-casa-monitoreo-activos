@@ -287,6 +287,7 @@ public class TestDataFactory {
     senal.Message_Id__c = messageId;
     senal.Tipo_Mensaje__c = String.valueOf(mensaje.get('messageType'));
     senal.Resultado__c = IngestaConstantes.RESULTADO_PENDIENTE;
+    senal.Resultado_Indice__c = IngestaConstantes.RESULTADO_PENDIENTE;
     senal.Carga__c = JSON.serialize(mensaje);
     senal.Fecha_Origen__c = IngestaValidador.parsearIso(
       String.valueOf(mensaje.get('occurredAt'))

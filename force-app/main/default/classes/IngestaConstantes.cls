@@ -84,6 +84,7 @@ public inherited sharing class IngestaConstantes {
    */
   public static void aplicar(Senal__c senal, String resultado, String motivo) {
     senal.Resultado__c = resultado;
+    senal.Resultado_Indice__c = resultado;
     senal.Motivo__c = motivo;
     senal.Reintentable__c = esReintentable(motivo);
   }

@@ -730,6 +730,11 @@ No estaban en la especificación y conviene no redescubrirlas.
     2 s) y de crítico (cada 0,8 s), apagado con «reducir movimiento» y con el botón
     «Detener animación» del monitor, que se recuerda en el navegador
     ([módulo 09](09-experiencia-del-operador.md)).
+77. **Las vistas de la bitácora filtran por una copia indexada del resultado.**
+    `Resultado__c` no tiene índice y «Atascadas», en el inicio del administrador,
+    recorría 2,5 millones de señales en 15 s. `Resultado_Indice__c`, un External ID que
+    escribe `IngestaConstantes.aplicar`, la deja en 34 ms ([módulo 11](11-trazabilidad.md)).
+    Activos, Edificios y Estados actuales ganan su vista «Todos».
 
 ## Historial breve
 
@@ -800,3 +805,4 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-24 | Limpieza nocturna de la bitácora con resumen; la primera borró 452.402 señales en 41 minutos sin errores. PR #132 fusionado. Cierra #131 |
 | 2026-10-24 | Una app por rol con su inicio y retiro de «Nova Casa». PR #134 fusionado. Cierra #133 |
 | 2026-10-24 | La pastilla de advertencia y la de crítico pulsan, con «Detener animación» en el monitor. PR #136 fusionado. Cierra #135 |
+| 2026-10-24 | Índice del resultado para las vistas de la bitácora y vistas «Todos» en Activos, Edificios y Estados actuales. PR #138 fusionado. Cierra #137 |

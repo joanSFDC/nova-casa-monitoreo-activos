@@ -15,12 +15,12 @@
         <value>1</value>
     </filters>
     <filters>
-        <field>Resultado__c</field>
+        <field>Resultado_Indice__c</field>
         <operation>equals</operation>
         <value>Rechazado</value>
     </filters>
     <filters>
-        <field>Resultado__c</field>
+        <field>Resultado_Indice__c</field>
         <operation>equals</operation>
         <value>Fallido</value>
     </filters>

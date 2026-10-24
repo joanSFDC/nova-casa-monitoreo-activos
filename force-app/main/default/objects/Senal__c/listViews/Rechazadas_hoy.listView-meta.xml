@@ -10,12 +10,12 @@
     <columns>Fecha_Recepcion__c</columns>
     <filterScope>Everything</filterScope>
     <filters>
-        <field>Resultado__c</field>
+        <field>Resultado_Indice__c</field>
         <operation>equals</operation>
         <value>Rechazado</value>
     </filters>
     <filters>
-        <field>Fecha_Recepcion__c</field>
+        <field>CREATED_DATE</field>
         <operation>equals</operation>
         <value>TODAY</value>
     </filters>
