@@ -239,117 +239,176 @@ public without sharing class IncidentesServicio {
     if (decisiones == null || decisiones.isEmpty() || senales == null) {
       return;
     }
-    if (abiertos == null) {
-      abiertos = new Map<String, Case>();
+    Escritura escritura = new Escritura(
+      decisiones,
+      abiertos == null ? new Map<String, Case>() : abiertos,
+      senales,
+      ahora
+    );
+    for (Decision decision : decisiones.values()) {
+      clasificar(decision, escritura);
     }
+    normalizarCortes(escritura.recuperaciones, escritura.aActualizar, ahora);
+    insertarNuevos(escritura);
+    if (!escritura.clavesDuplicado.isEmpty()) {
+      reintentarEscalada(escritura.clavesDuplicado, decisiones, senales);
+    }
+    actualizarCambiados(escritura);
+  }
 
+  /**
+   * Lo que una tanda va a escribir en los casos: los nuevos, los que cambian, las
+   * claves que perdieron la carrera y las camaras que volvieron.
+   */
+  private class Escritura {
+    final Map<String, Decision> decisiones;
+    final Map<String, Case> abiertos;
+    final Map<String, Senal__c> senales;
+    final Datetime ahora;
     List<Case> aInsertar = new List<Case>();
-    List<String> senalesInsert = new List<String>();
+    List<String> clavesInsert = new List<String>();
     Map<Id, Case> aActualizar = new Map<Id, Case>();
     Map<Id, String> senalPorCaso = new Map<Id, String>();
     Set<String> clavesDuplicado = new Set<String>();
     Map<Id, Decision> recuperaciones = new Map<Id, Decision>();
 
-    for (Decision decision : decisiones.values()) {
-      if (decision.clavesSenal == null) {
-        decision.clavesSenal = new Set<String>();
-      }
-      if (String.isNotBlank(decision.claveSenal)) {
-        decision.clavesSenal.add(decision.claveSenal);
-      }
-      if (!depurarConAplicadas(decision, senales)) {
-        continue;
-      }
-      if (
-        decision.activoId != null &&
-        decision.tipoMedicion == LecturaFormato.CONECTIVIDAD &&
-        lecturaDe(decision).normalizado
-      ) {
-        recuperaciones.put(decision.activoId, decision);
-      }
-      Case abierto = abiertos.get(decision.clave);
-      if (abierto != null && abierto.IsClosed) {
-        continue;
-      }
-      if (abierto != null) {
-        Boolean cambio = false;
-        if (decision.marcarRecuperado) {
-          abierto.Description = lineaRecuperado(
-            abierto.Description,
-            decision.claveSenal,
-            ahora
-          );
-          cambio = true;
-        }
-        if (registrarCambio(abierto, decision, ahora)) {
-          cambio = true;
-        }
-        if (debeEscalar(abierto, decision.nivel)) {
-          escalar(abierto);
-          cambio = true;
-        }
-        if (cambio) {
-          aActualizar.put(abierto.Id, abierto);
-          senalPorCaso.put(abierto.Id, decision.claveSenal);
-        }
-        continue;
-      }
-      if (decision.nivel < 1) {
-        continue;
-      }
-      aInsertar.add(armarCaso(decision));
-      senalesInsert.add(decision.clave);
+    Escritura(
+      Map<String, Decision> decisiones,
+      Map<String, Case> abiertos,
+      Map<String, Senal__c> senales,
+      Datetime ahora
+    ) {
+      this.decisiones = decisiones;
+      this.abiertos = abiertos;
+      this.senales = senales;
+      this.ahora = ahora;
     }
+  }
 
-    normalizarCortes(recuperaciones, aActualizar, ahora);
+  /**
+   * Una decision abre un caso, cambia el que esta abierto o no hace nada: si
+   * ninguna de sus senales quedo Aplicado, si su caso esta cerrado, o si no hay
+   * caso y la lectura es normal.
+   */
+  private static void clasificar(Decision decision, Escritura escritura) {
+    if (decision.clavesSenal == null) {
+      decision.clavesSenal = new Set<String>();
+    }
+    if (String.isNotBlank(decision.claveSenal)) {
+      decision.clavesSenal.add(decision.claveSenal);
+    }
+    if (!depurarConAplicadas(decision, escritura.senales)) {
+      return;
+    }
+    if (esRecuperacionDeCamara(decision)) {
+      escritura.recuperaciones.put(decision.activoId, decision);
+    }
+    Case abierto = escritura.abiertos.get(decision.clave);
+    if (abierto != null) {
+      if (!abierto.IsClosed) {
+        cambiarAbierto(abierto, decision, escritura);
+      }
+      return;
+    }
+    if (decision.nivel >= 1) {
+      escritura.aInsertar.add(armarCaso(decision));
+      escritura.clavesInsert.add(decision.clave);
+    }
+  }
 
-    if (!aInsertar.isEmpty()) {
-      Database.SaveResult[] resultados = Database.insert(
-        aInsertar,
-        false,
-        AccessLevel.SYSTEM_MODE
+  private static Boolean esRecuperacionDeCamara(Decision decision) {
+    return decision.activoId != null &&
+      decision.tipoMedicion == LecturaFormato.CONECTIVIDAD &&
+      lecturaDe(decision).normalizado;
+  }
+
+  private static void cambiarAbierto(
+    Case abierto,
+    Decision decision,
+    Escritura escritura
+  ) {
+    Boolean cambio = false;
+    if (decision.marcarRecuperado) {
+      abierto.Description = lineaRecuperado(
+        abierto.Description,
+        decision.claveSenal,
+        escritura.ahora
       );
-      for (Integer i = 0; i < resultados.size(); i++) {
-        Decision decision = decisiones.get(senalesInsert[i]);
-        if (decision == null) {
-          continue;
-        }
-        if (resultados[i].isSuccess()) {
-          ligar(decision, senales, resultados[i].getId());
-          continue;
-        }
-        if (esDuplicado(resultados[i])) {
-          clavesDuplicado.add(aInsertar[i].Clave_Abierta__c);
-          continue;
-        }
-        marcarFallidas(decision, senales, resultados[i], ahora);
+      cambio = true;
+    }
+    if (registrarCambio(abierto, decision, escritura.ahora)) {
+      cambio = true;
+    }
+    if (debeEscalar(abierto, decision.nivel)) {
+      escalar(abierto);
+      cambio = true;
+    }
+    if (cambio) {
+      escritura.aActualizar.put(abierto.Id, abierto);
+      escritura.senalPorCaso.put(abierto.Id, decision.claveSenal);
+    }
+  }
+
+  /**
+   * Guardado parcial: un caso que falla deja Fallido solo a sus senales, y un
+   * duplicado es otro proceso que lo abrio primero, que se escala despues.
+   */
+  private static void insertarNuevos(Escritura escritura) {
+    if (escritura.aInsertar.isEmpty()) {
+      return;
+    }
+    Database.SaveResult[] resultados = Database.insert(
+      escritura.aInsertar,
+      false,
+      AccessLevel.SYSTEM_MODE
+    );
+    for (Integer i = 0; i < resultados.size(); i++) {
+      Decision decision = escritura.decisiones.get(escritura.clavesInsert[i]);
+      if (decision == null) {
+        continue;
+      }
+      if (resultados[i].isSuccess()) {
+        ligar(decision, escritura.senales, resultados[i].getId());
+      } else if (esDuplicado(resultados[i])) {
+        escritura.clavesDuplicado.add(escritura.aInsertar[i].Clave_Abierta__c);
+      } else {
+        marcarFallidas(
+          decision,
+          escritura.senales,
+          resultados[i],
+          escritura.ahora
+        );
       }
     }
+  }
 
-    if (!clavesDuplicado.isEmpty()) {
-      reintentarEscalada(clavesDuplicado, decisiones, senales);
+  private static void actualizarCambiados(Escritura escritura) {
+    if (escritura.aActualizar.isEmpty()) {
+      return;
     }
-
-    if (!aActualizar.isEmpty()) {
-      List<Case> listaActualizar = aActualizar.values();
-      Database.SaveResult[] resultados = Database.update(
-        listaActualizar,
-        false,
-        AccessLevel.SYSTEM_MODE
+    List<Case> casos = escritura.aActualizar.values();
+    Database.SaveResult[] resultados = Database.update(
+      casos,
+      false,
+      AccessLevel.SYSTEM_MODE
+    );
+    for (Integer i = 0; i < resultados.size(); i++) {
+      Decision decision = decisionPorSenal(
+        escritura.decisiones,
+        escritura.senalPorCaso.get(casos[i].Id)
       );
-      for (Integer i = 0; i < resultados.size(); i++) {
-        String claveSenal = senalPorCaso.get(listaActualizar[i].Id);
-        Decision decision = decisionPorSenal(decisiones, claveSenal);
-        if (resultados[i].isSuccess()) {
-          if (decision != null) {
-            ligar(decision, senales, listaActualizar[i].Id);
-          }
-          continue;
-        }
-        if (decision == null) {
-          continue;
-        }
-        marcarFallidas(decision, senales, resultados[i], ahora);
+      if (decision == null) {
+        continue;
+      }
+      if (resultados[i].isSuccess()) {
+        ligar(decision, escritura.senales, casos[i].Id);
+      } else {
+        marcarFallidas(
+          decision,
+          escritura.senales,
+          resultados[i],
+          escritura.ahora
+        );
       }
     }
   }
