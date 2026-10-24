@@ -333,6 +333,13 @@ minutos en ver el tema, el logo y las páginas nuevas.
 
 ## Qué se está haciendo ahora
 
+La prueba de carga de la fase 7 ([módulo 12](12-plan-de-pruebas.md)) está en curso. El
+generador de `load-test/` está desplegado y la prueba de humo de 1.000 señales pasó: el
+edificio de carga no manda correos. Los escalones de 100.000, 500.000 y un millón van el
+25 de octubre, después de revisar la primera noche de la limpieza. Mientras dure, el
+coordinador y el gerente ven el edificio «Carga» y sus incidentes; al terminar se borra
+todo y el generador sale de la org.
+
 Los arreglos encontrados al cerrar US-208 están hechos: la fecha futura
 contra `publishedAt` (issue #28), la sesión dentro de la clave de la señal
 (issue #31), la nota al abrir una intervención (issue #29) y `Caso_Registro`
@@ -750,6 +757,12 @@ No estaban en la especificación y conviene no redescubrirlas.
     entra con prioridad alta y ciudad Bogotá, Barranquilla o vacía (un caso manual sin
     equipo sigue avisando a coordinación). El edificio de la prueba de carga va en la
     ciudad «Carga» y no manda correo ni campana ([módulo 07](07-incidentes.md)).
+81. **La prueba de carga pasa por la ingesta real, desde fuera de `force-app`.**
+    `load-test/CargaSinteticaBatch` fabrica páginas del proveedor y llama a
+    `IngestaServicio.procesarPagina`, una por transacción, a 200.000 por hora, con freno
+    por pendientes y por eventos libres. Los escalones son acumulados hasta un millón,
+    sobre un edificio de cinco equipos, y al final se borra todo y se retira el
+    generador ([módulo 12](12-plan-de-pruebas.md)).
 
 ## Historial breve
 
@@ -828,3 +841,4 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-24 | Code Analyzer después de la fase 6: 162 hallazgos (eran 168), ninguno de severidad 1; quedan escritos los métodos complejos que no se partieron. PR #148 fusionado. Cierra #147 |
 | 2026-10-24 | Clases y disparadores por dominio, con sus pruebas en `test/`; lo desplegado no cambia. PR #150 fusionado. Cierra #149 |
 | 2026-10-24 | El correo y la campana del caso crítico solo avisan lo de Bogotá, Barranquilla o sin ciudad; el edificio de carga, en «Carga», no avisa. PR #152 fusionado. Cierra #151 |
+| 2026-10-24 | Generador de la prueba de carga en `load-test/`, con sus pruebas y la prueba de humo de 1.000 señales: el edificio de carga no avisa. PR #154 fusionado. Cierra #153 |
