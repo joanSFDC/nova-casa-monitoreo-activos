@@ -244,8 +244,9 @@ ingesta toma un solo control activo: tener dos sería un error de configuración
 
 ### Acceso a la aplicación
 
-Los cuatro conjuntos humanos hacen **visible** la aplicación Nova Casa. Lo que un conjunto
-de permisos no puede hacer es marcarla como aplicación por defecto: eso solo lo admite el
+Cada conjunto humano hace **visible** la app de su rol: Operación, Coordinación, Gerencia o
+Administración, y el de Administración además las otras tres. Lo que un conjunto de
+permisos no puede hacer es marcarla como aplicación por defecto: eso solo lo admite el
 perfil, y el perfil de operadores, coordinador y gerente es `Minimum Access - Salesforce`, de
 fábrica, que deja ver un centenar de aplicaciones. Cambiar de perfil para eso contradiría la
 regla de que el acceso va en los conjuntos. El administrador es la excepción deliberada:
@@ -255,9 +256,9 @@ campo de los campos propios.
 
 La aplicación de entrada de cada persona es un registro `UserAppInfo`, el mismo que
 Salesforce guarda cuando alguien cambia de aplicación. `scripts/crear-usuarios-demo.sh` lo
-deja en Nova Casa para los cinco humanos, en escritorio. Si alguien se pasa a otra
-aplicación, la siguiente sesión empieza en esa, como en cualquier org; volver a correr el
-script la devuelve a Nova Casa.
+deja en la app del rol de cada uno de los cinco humanos, en escritorio, según su conjunto
+de permisos. Si alguien se pasa a otra aplicación, la siguiente sesión empieza en esa, como
+en cualquier org; volver a correr el script lo devuelve a la de su rol.
 
 ### Acceso a los informes
 

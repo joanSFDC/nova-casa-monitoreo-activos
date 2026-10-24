@@ -238,6 +238,7 @@ El panel de gerencia es metadato y no tiene prueba de Apex. Se comprueba en la o
 | Operador | La barra no muestra Paneles ni Informes |
 | Gerente, monitor | Ve «Ver incidente» y nunca «Abrir intervención» |
 | Coordinador, caso | La cabecera muestra «Registrar intervención» y crea la tarea; operador, gerente y administrador no la ven |
+| Cada rol, inicio | El operador entra por Nova Casa Operación con el monitor y sus incidentes abiertos; el coordinador por Coordinación con la cola, el monitor y las rechazadas de hoy; el gerente por Gerencia con el panel y los críticos abiertos; el administrador por Administración con la salud de la ingesta, las atascadas y las rechazadas de hoy |
 | Operador, coordinador y gerente, caso | «Historia del incidente» muestra la intervención abierta de 00001149 en español y los cambios con «Sistema»; el operador de Bogotá no abre el caso de Barranquilla |
 | Coordinador, caso | «Lecturas del periodo» entra cerrada; al abrirla trae 50 lecturas en menos de un segundo, la siguiente página dice «Lecturas 51 a 100» y volver no consulta; el operador no ve la tarjeta |
 | Incidente crítico de prueba | El 00002442, en la bomba de Barranquilla, escala de advertencia a alta: llegan los dos correos de «Nova Casa · Monitoreo», el del operador de Barranquilla y el del coordinador; a las 2 horas, el gerente recibe «Caso crítico sin atender» en la campana. Después se cierra |

@@ -17,7 +17,7 @@ echo "==> Conjuntos de permisos asignados"
 sf data query -o "$ORG" -r human -q \
   "SELECT Assignee.Username, PermissionSet.Name FROM PermissionSetAssignment WHERE PermissionSet.Name LIKE 'Nova_Casa_%' AND Assignee.Username LIKE '%novacasa.95b2e3a11aa777%' ORDER BY PermissionSet.Name, Assignee.Username"
 
-echo "==> Aplicacion de entrada en escritorio (Nova Casa)"
+echo "==> Aplicacion de entrada en escritorio (la de cada rol)"
 sf data query -o "$ORG" -r human -q \
   "SELECT User.Username, AppDefinitionId FROM UserAppInfo WHERE FormFactor = 'Large' AND User.Username LIKE '%novacasa.95b2e3a11aa777%' ORDER BY User.Username"
 

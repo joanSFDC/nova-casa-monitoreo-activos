@@ -3,7 +3,7 @@
     <description
   >Lectura operativa de ambas ciudades. No edita umbrales y no ve la bitacora.</description>
     <applicationVisibilities>
-        <application>Nova_Casa</application>
+        <application>Nova_Casa_Gerencia</application>
         <visible>true</visible>
     </applicationVisibilities>
     <fieldPermissions>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Incidentes_abiertos</fullName>
+    <columns>CASES.CASE_NUMBER</columns>
+    <columns>CASES.SUBJECT</columns>
+    <columns>Ciudad__c</columns>
+    <columns>CASES.PRIORITY</columns>
+    <columns>Condicion_Equipo__c</columns>
+    <columns>Ultima_Lectura__c</columns>
+    <columns>CASES.CREATED_DATE_DATE_ONLY</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>CASES.CLOSED</field>
+        <operation>equals</operation>
+        <value>0</value>
+    </filters>
+    <label>Incidentes abiertos</label>
+</ListView>

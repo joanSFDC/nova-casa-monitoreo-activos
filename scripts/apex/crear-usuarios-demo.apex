@@ -5,7 +5,8 @@
 // Avisos_* solo reciben los avisos de caso critico: el correo del operador de
 // cada ciudad, el del coordinador, la campana del gerente y la ingesta caida al
 // administrador. Los humanos
-// quedan con Nova Casa como aplicacion de entrada en escritorio.
+// entran en escritorio por la app de su rol: Operacion, Coordinacion, Gerencia o
+// Administracion.
 //
 // Uso, desde la raiz del repositorio:
 //   sf apex run -f scripts/apex/crear-usuarios-demo.apex
@@ -198,6 +199,7 @@ List<GroupMember> nuevosMiembros = new List<GroupMember>();
 List<PermissionSetLicenseAssign> nuevasLicencias = new List<PermissionSetLicenseAssign>();
 List<Id> humanosParaClave = new List<Id>();
 Set<Id> humanos = new Set<Id>();
+Map<Id, String> conjuntoPorUsuario = new Map<Id, String>();
 
 for (String fila : filas) {
     List<String> c = fila.split('\\|');
@@ -236,6 +238,7 @@ for (String fila : filas) {
 
     if (esHumano) {
         humanos.add(u.Id);
+        conjuntoPorUsuario.put(u.Id, permsetName);
     }
     if (esHumano && creadosAhora.contains(username)) {
         humanosParaClave.add(u.Id);
@@ -254,7 +257,21 @@ if (!nuevosMiembros.isEmpty()) {
 
 // Un conjunto de permisos no puede marcar la aplicacion por defecto, solo el
 // perfil. La aplicacion de entrada de cada usuario es su UserAppInfo.
-Id novaCasa = [SELECT DurableId FROM AppDefinition WHERE DeveloperName = 'Nova_Casa' LIMIT 1].DurableId;
+// Cada rol entra por su app: la del conjunto de permisos que tiene.
+Map<String, String> appPorConjunto = new Map<String, String>{
+    'Nova_Casa_Operador' => 'Nova_Casa_Operacion',
+    'Nova_Casa_Coordinador' => 'Nova_Casa_Coordinacion',
+    'Nova_Casa_Gerencia' => 'Nova_Casa_Gerencia',
+    'Nova_Casa_Administracion' => 'Nova_Casa_Administracion'
+};
+Map<String, Id> appPorNombre = new Map<String, Id>();
+for (AppDefinition app : [
+    SELECT DeveloperName, DurableId
+    FROM AppDefinition
+    WHERE DeveloperName IN :appPorConjunto.values()
+]) {
+    appPorNombre.put(app.DeveloperName, app.DurableId);
+}
 Map<Id, UserAppInfo> entradaPorUsuario = new Map<Id, UserAppInfo>();
 for (UserAppInfo entrada : [
     SELECT Id, UserId, AppDefinitionId
@@ -265,11 +282,15 @@ for (UserAppInfo entrada : [
 }
 List<UserAppInfo> entradas = new List<UserAppInfo>();
 for (Id humanoId : humanos) {
+    Id appDelRol = appPorNombre.get(appPorConjunto.get(conjuntoPorUsuario.get(humanoId)));
+    if (appDelRol == null) {
+        continue;
+    }
     UserAppInfo entrada = entradaPorUsuario.get(humanoId);
     if (entrada == null) {
-        entradas.add(new UserAppInfo(UserId = humanoId, AppDefinitionId = novaCasa, FormFactor = 'Large'));
-    } else if (entrada.AppDefinitionId != novaCasa) {
-        entrada.AppDefinitionId = novaCasa;
+        entradas.add(new UserAppInfo(UserId = humanoId, AppDefinitionId = appDelRol, FormFactor = 'Large'));
+    } else if (entrada.AppDefinitionId != appDelRol) {
+        entrada.AppDefinitionId = appDelRol;
         entradas.add(entrada);
     }
 }

@@ -3,7 +3,19 @@
     <description
   >Acceso total, incluida la bitacora con Carga__c y Detalle__c: corregir una senal deja historial en resultado, motivo y detalle. Va con el perfil System Administrator, porque un despliegue no concede FLS de los campos propios.</description>
     <applicationVisibilities>
-        <application>Nova_Casa</application>
+        <application>Nova_Casa_Administracion</application>
+        <visible>true</visible>
+    </applicationVisibilities>
+    <applicationVisibilities>
+        <application>Nova_Casa_Coordinacion</application>
+        <visible>true</visible>
+    </applicationVisibilities>
+    <applicationVisibilities>
+        <application>Nova_Casa_Gerencia</application>
+        <visible>true</visible>
+    </applicationVisibilities>
+    <applicationVisibilities>
+        <application>Nova_Casa_Operacion</application>
         <visible>true</visible>
     </applicationVisibilities>
     <fieldPermissions>

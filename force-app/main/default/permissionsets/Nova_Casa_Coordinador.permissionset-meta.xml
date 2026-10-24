@@ -3,7 +3,7 @@
     <description
   >Lo del operador, mas editar Umbral__c, leer Senal__c (sin Carga__c ni Detalle__c) y editar casos y tareas. Ver todas las senales para investigar sin campos sensibles.</description>
     <applicationVisibilities>
-        <application>Nova_Casa</application>
+        <application>Nova_Casa_Coordinacion</application>
         <visible>true</visible>
     </applicationVisibilities>
     <fieldPermissions>
