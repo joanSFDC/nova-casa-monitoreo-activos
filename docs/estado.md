@@ -811,3 +811,4 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-24 | La pastilla de advertencia y la de crítico pulsan, con «Detener animación» en el monitor. PR #136 fusionado. Cierra #135 |
 | 2026-10-24 | Índice del resultado para las vistas de la bitácora y vistas «Todos» en Activos, Edificios y Estados actuales. PR #138 fusionado. Cierra #137 |
 | 2026-10-24 | Correcciones de Code Analyzer y configuración del análisis en el repositorio. PR #140 fusionado. Cierra #139 |
+| 2026-10-24 | `IngestaServicio.procesarPagina` en pasos con una sola responsabilidad: de complejidad cognitiva 97 a ninguno por encima de 15, sin cambiar el comportamiento. PR #142 fusionado. Cierra #141 |

@@ -538,6 +538,10 @@ sequenceDiagram
 
 #### Notas
 
+- `procesarPagina` orquesta pasos con una sola responsabilidad, que comparten el estado de
+  la página en `PaginaEnCurso`: leer la paginación, agrupar por clave, cargar las que ya
+  estaban, preparar el guardado, guardar, clasificar los resultados, resolver los
+  duplicados, guardar los rastros y publicar.
 - Guardar antes de publicar evita un aviso en el bus sin senal que lo respalde.
 - Pendiente significa publicado, no procesado. `Fecha_Procesamiento__c` queda vacia.
 - Una señal rechazada al recibir no pasa por el procesamiento, que es el que escribe
