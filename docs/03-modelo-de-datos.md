@@ -244,6 +244,7 @@ La bitácora. Cada mensaje recibido queda aquí con su resultado.
 | `Activo__c` | Lookup(Activo__c) | Vacío si el activo no se resolvió |
 | `Lectura__c` | Text(100) | La lectura en palabras, como en el monitor. La escribe el procesamiento con los decimales del umbral; una rechazada al recibir la guarda tal como llegó. Vacía en las señales anteriores al 22 de octubre de 2026 |
 | `Incidente__c` | Lookup(Case) | El caso que abrió, escaló, bajó o normalizó, si hubo. Una lectura que repite la severidad no se liga |
+| `Resultado_Indice__c` | Text(20), External ID | Copia del resultado en un campo indexado, para las vistas de la bitácora ([módulo 11](11-trazabilidad.md)) |
 
 ### Las cuatro fechas
 

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Resultado_Indice__c</fullName>
+    <description>Copia del resultado en un campo External ID, que Salesforce indexa: Resultado__c es una lista de selección y no tiene índice. Las vistas de la bitácora filtran por aquí para no recorrer la tabla entera. La escribe IngestaConstantes.aplicar, y el flujo Copiar_Resultado_Indice la corrige si alguien cambia el resultado a mano.</description>
+    <externalId>true</externalId>
+    <inlineHelpText>El mismo resultado, en un campo indexado para que las vistas de la bitácora respondan rápido. No se edita.</inlineHelpText>
+    <label>Resultado (índice)</label>
+    <length>20</length>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

@@ -43,6 +43,8 @@ piezas que ya existen.
 - **Cada inicio es una página de inicio propia** (`Inicio_Operacion`, `Inicio_Coordinacion`,
   `Inicio_Gerencia`, `Inicio_Administracion`), asignada en su app. Usa el componente del
   monitor, tarjetas de vista de lista y el panel incrustado: ningún componente nuevo.
+- **Activos, Edificios y Estados actuales** tienen ahora la vista «Todos»; antes solo
+  ofrecían «Vistos recientemente». La compartición la filtra por ciudad, como la página.
 - **Vistas de lista nuevas:** «Incidentes abiertos» y «Críticos abiertos» de incidentes, y
   «Salud de la ingesta» del control, con activa, escenario, última consulta exitosa, fallos
   seguidos, caída avisada y último error. Es una vista y no un componente: no hace falta

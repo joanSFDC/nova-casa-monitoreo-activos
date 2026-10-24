@@ -10,7 +10,7 @@
     <columns>Fecha_Publicacion__c</columns>
     <filterScope>Everything</filterScope>
     <filters>
-        <field>Resultado__c</field>
+        <field>Resultado_Indice__c</field>
         <operation>equals</operation>
         <value>Pendiente</value>
     </filters>

@@ -213,7 +213,23 @@ Las tres consecuencias de diseño que ya están tomadas:
 - **No hay resúmenes automáticos sobre la bitácora.** Los únicos están en el activo, cuyos
   hijos son pocos. El resumen de la limpieza lo escribe el Batch, no la plataforma.
 - **Los campos por los que se filtra están indexados**: `Clave__c` y `Message_Id__c` por ser
-  External ID, y `Fecha_Recepcion__c` y `Resultado__c` como índices adicionales.
+  External ID, `CreatedDate` de fábrica y `Resultado_Indice__c`, una copia del resultado.
+  `Resultado__c` es una lista de selección y Salesforce no la indexa; pedir un índice a
+  medida exige un caso con Soporte. Por eso las vistas filtran por la copia, un campo de
+  texto External ID que la plataforma indexa sola. La escribe `IngestaConstantes.aplicar`,
+  el único lugar que pone resultados, y el flujo `Copiar_Resultado_Indice` la corrige si el
+  administrador cambia un resultado a mano.
+
+| Vista | Antes | Con el índice |
+| --- | --- | --- |
+| Atascadas | 15.254 ms, recorre la tabla entera porque casi nunca hay | 34 ms |
+| Conflictos | 1.517 ms | 389 ms |
+| Rechazadas hoy | 1.505 ms | 365 ms, con `CreatedDate = TODAY` |
+| Duplicadas | 1,8 s | Igual: filtra por entregas, que no tiene índice, y solo se usa para investigar |
+
+Medido en el servidor el 24 de octubre de 2026 con 2,5 millones de señales. Las señales que
+ya existían se rellenaron una vez con `SenalIndiceRellenoBatch` (unas 96.000, en 4 minutos);
+las aplicadas y atrasadas no lo necesitan, porque ninguna vista las busca.
 
 ### La limpieza nocturna (Q-11)
 
