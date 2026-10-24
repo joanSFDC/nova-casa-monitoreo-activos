@@ -746,6 +746,10 @@ No estaban en la especificación y conviene no redescubrirlas.
     reconoce cada clase por su extensión, no por su ruta, así que lo desplegado no cambia.
     Se descartó dejar las pruebas junto a su clase, que no las separa a la vista, y un
     árbol paralelo de pruebas, que obliga a mantener cada dominio en dos lugares.
+80. **El correo crítico solo avisa lo de las ciudades que se operan.** `Avisar_Caso_Critico`
+    entra con prioridad alta y ciudad Bogotá, Barranquilla o vacía (un caso manual sin
+    equipo sigue avisando a coordinación). El edificio de la prueba de carga va en la
+    ciudad «Carga» y no manda correo ni campana ([módulo 07](07-incidentes.md)).
 
 ## Historial breve
 
@@ -823,3 +827,4 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-24 | `ProcesamientoServicio.resolver` pasa de 10 parámetros a un contexto `Tanda` y pasos con una sola responsabilidad, sin cambiar el comportamiento. PR #146 fusionado. Cierra #145 |
 | 2026-10-24 | Code Analyzer después de la fase 6: 162 hallazgos (eran 168), ninguno de severidad 1; quedan escritos los métodos complejos que no se partieron. PR #148 fusionado. Cierra #147 |
 | 2026-10-24 | Clases y disparadores por dominio, con sus pruebas en `test/`; lo desplegado no cambia. PR #150 fusionado. Cierra #149 |
+| 2026-10-24 | El correo y la campana del caso crítico solo avisan lo de Bogotá, Barranquilla o sin ciudad; el edificio de carga, en «Carga», no avisa. PR #152 fusionado. Cierra #151 |

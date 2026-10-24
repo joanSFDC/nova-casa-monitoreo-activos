@@ -174,7 +174,7 @@
             <label>Sigue abierto y en alta</label>
         </rules>
     </decisions>
-    <description>Cuando un incidente pasa a prioridad alta, al crearse o al escalar: en la ruta asíncrona, el correo a coordinación y a los operadores de su ciudad; a las 2 horas, si sigue abierto y en alta, el aviso en la campana al gerente. Las alertas van después de guardar, así que si una falla el incidente ya quedó guardado.</description>
+    <description>Cuando un incidente pasa a prioridad alta, al crearse o al escalar: en la ruta asíncrona, el correo a coordinación y a los operadores de su ciudad; a las 2 horas, si sigue abierto y en alta, el aviso en la campana al gerente. Solo avisa lo de las ciudades que se operan, Bogotá y Barranquilla, y lo que no tiene ciudad: una ciudad sin operadores, como la del edificio de la prueba de carga, no avisa. Las alertas van después de guardar, así que si una falla el incidente ya quedó guardado.</description>
     <environments>Default</environments>
     <interviewLabel>Caso crítico {!$Record.CaseNumber} {!$Flow.CurrentDateTime}</interviewLabel>
     <label>Avisar caso crítico</label>
@@ -272,12 +272,33 @@
         <locationX>0</locationX>
         <locationY>0</locationY>
         <doesRequireRecordChangedToMeetCriteria>true</doesRequireRecordChangedToMeetCriteria>
-        <filterLogic>and</filterLogic>
+        <filterLogic>1 AND (2 OR 3 OR 4)</filterLogic>
         <filters>
             <field>Priority</field>
             <operator>EqualTo</operator>
             <value>
                 <stringValue>High</stringValue>
+            </value>
+        </filters>
+        <filters>
+            <field>Ciudad__c</field>
+            <operator>EqualTo</operator>
+            <value>
+                <stringValue>Bogotá</stringValue>
+            </value>
+        </filters>
+        <filters>
+            <field>Ciudad__c</field>
+            <operator>EqualTo</operator>
+            <value>
+                <stringValue>Barranquilla</stringValue>
+            </value>
+        </filters>
+        <filters>
+            <field>Ciudad__c</field>
+            <operator>IsNull</operator>
+            <value>
+                <booleanValue>true</booleanValue>
             </value>
         </filters>
         <object>Case</object>

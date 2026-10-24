@@ -304,6 +304,13 @@ rojo, que son la mayoría, y los que escalan desde advertencia, y sale **un solo
 incidente**: las lecturas siguientes que mantienen el rojo no lo repiten. Una advertencia
 nunca avisa. En la org llegan unos tres incidentes en alta por semana.
 
+La condición lleva además la ciudad: Bogotá, Barranquilla o vacía. **Solo avisa lo de las
+ciudades que se operan**, y un incidente sin ciudad, que es un caso manual sin equipo,
+sigue avisando a coordinación. Una ciudad sin operadores, como «Carga», la del edificio de
+la prueba de carga ([módulo 12](12-plan-de-pruebas.md)), no manda correo ni campana. Se
+prefirió a excluir solo «Carga», que dejaría avisar a una ciudad nueva sin operadores, y a
+apagar el flujo durante la prueba, que dejaría sin aviso los críticos reales de esas horas.
+
 | Alternativa | Por qué no |
 | --- | --- |
 | Apex en `IncidentesServicio` con `Messaging.sendEmail` | Cuenta contra el límite de 15 correos individuales por día de esta org; las alertas cuentan contra el de 61.125. Además ata el correo al procesamiento, que no debe fallar por un correo |
