@@ -338,11 +338,13 @@ vez, a 200.000 filas por hora. Se frena cinco minutos si hay más de 20.000 pend
 comparte ese cupo de 450.000 y usa unos 14.000.
 
 **Dónde.** El edificio `BLD-CARGA-001`, en la ciudad «Carga», tiene un equipo de cada
-tipo, como los edificios reales, así que reproduce el mismo sesgo por activo. Los
-operadores no lo ven, porque edificios e incidentes se comparten por ciudad. El
-coordinador y el gerente sí lo ven mientras dure la prueba. Sus críticos no mandan correo
-ni campana: el flujo solo avisa lo de las ciudades que se operan
-([módulo 07](07-incidentes.md)).
+tipo, como los edificios reales, así que reproduce el mismo sesgo por activo. Edificios e
+incidentes se comparten por ciudad, y el coordinador y el gerente ven las dos ciudades
+porque están en los grupos de cada una, no porque vean todo. «Carga» no tiene grupo:
+nadie ve el edificio, sus equipos ni sus filas en el monitor, salvo el administrador.
+Solo el coordinador ve sus incidentes críticos, porque van a la cola de Coordinación,
+de la que es miembro. Esos críticos no mandan correo ni campana: el flujo solo avisa lo
+de las ciudades que se operan ([módulo 07](07-incidentes.md)).
 
 **Qué mensajes.** Todo sale del índice del mensaje, así que un reenvío o un conflicto
 repiten exactamente el mensaje original y cada escalón sigue la secuencia donde quedó el
