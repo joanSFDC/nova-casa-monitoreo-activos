@@ -160,6 +160,55 @@ private class MonitorControladorTest {
   }
 
   @isTest
+  static void shouldQuitarVerIncidenteYNormalizado_WhenSeCierraElIncidente() {
+    Activo__c bomba = [
+      SELECT Id, Codigo_Externo__c
+      FROM Activo__c
+      WHERE Codigo_Externo__c = :TestDataFactory.AST_PUMP
+    ];
+    insert new Estado_Actual__c(
+      Activo__c = bomba.Id,
+      Clave__c = bomba.Codigo_Externo__c + '|WATER_PRESSURE',
+      Tipo_Medicion__c = 'WATER_PRESSURE',
+      Valor__c = 3.8,
+      Unidad__c = 'BAR',
+      Severidad__c = IngestaConstantes.SEV_NORMAL,
+      Severidad_Nivel__c = 0,
+      Fecha_Origen__c = Datetime.now()
+    );
+    Case abierto = new Case(
+      Subject = 'Lectura fuera de rango',
+      Status = 'New',
+      Origin = 'Web',
+      Priority = 'High',
+      Clave_Abierta__c = bomba.Codigo_Externo__c + '|WATER_PRESSURE',
+      Activo__c = bomba.Id,
+      Tipo_Medicion__c = 'WATER_PRESSURE'
+    );
+    insert abierto;
+    MonitorControlador.FilaDTO antes = MonitorControlador.obtenerPanel(null)
+      .filas[0];
+    Assert.isTrue(antes.casoNormalizado, 'Abierto y normal: normalizado');
+
+    Test.startTest();
+    abierto.Status = 'Closed';
+    update abierto;
+    MonitorControlador.FilaDTO despues = MonitorControlador.obtenerPanel(null)
+      .filas[0];
+    Test.stopTest();
+
+    Assert.isNull(despues.casoId, 'Cerrado, la fila ya no lleva al incidente');
+    Assert.isFalse(
+      despues.casoNormalizado,
+      'Sin caso abierto no queda la etiqueta Normalizado - caso abierto'
+    );
+    Assert.isFalse(
+      despues.puedeIntervenir,
+      'Normal y sin incidente: no hay Ver incidente ni Abrir intervencion'
+    );
+  }
+
+  @isTest
   static void shouldConservarCasoDeCamara_WhenVuelveLaComunicacion() {
     Activo__c camara = [
       SELECT Id, Codigo_Externo__c
