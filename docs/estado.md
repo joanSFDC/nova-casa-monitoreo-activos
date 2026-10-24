@@ -814,3 +814,4 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-24 | `IngestaServicio.procesarPagina` en pasos con una sola responsabilidad: de complejidad cognitiva 97 a ninguno por encima de 15, sin cambiar el comportamiento. PR #142 fusionado. Cierra #141 |
 | 2026-10-24 | `IncidentesServicio.escribir` en pasos con una sola responsabilidad (era 58), sin cambiar el comportamiento. PR #144 fusionado. Cierra #143 |
 | 2026-10-24 | `ProcesamientoServicio.resolver` pasa de 10 parámetros a un contexto `Tanda` y pasos con una sola responsabilidad, sin cambiar el comportamiento. PR #146 fusionado. Cierra #145 |
+| 2026-10-24 | Code Analyzer después de la fase 6: 162 hallazgos (eran 168), ninguno de severidad 1; quedan escritos los métodos complejos que no se partieron. PR #148 fusionado. Cierra #147 |

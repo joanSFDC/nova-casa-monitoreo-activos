@@ -298,9 +298,16 @@ que eran defectos: dos consultas de sistema sin `WITH SYSTEM_MODE` (`IngestaSche
 dentro de un bucle en el monitor y consultas de catálogo sin tope (`TOPE_CATALOGO`). Con
 eso y la configuración quedan 168.
 
+La fase 6 partió en pasos los tres métodos más complejos, sin cambiar el comportamiento:
+`IngestaServicio.procesarPagina`, `IncidentesServicio.escribir` (complejidad 58) y
+`ProcesamientoServicio.resolver` (10 parámetros, ahora un contexto `Tanda`). Ninguno de los
+tres vuelve a aparecer y el total baja a 162. `ExcessiveParameterList` sube de 15 a 20
+porque la regla salta desde 4 parámetros y los pasos nuevos tienen 4 o 5; la lista más
+larga del código bajó de 10 a 7 (`IncidentesServicio.acumular`).
+
 | Lo que queda | Por qué |
 | --- | --- |
-| Complejidad (`CyclomaticComplexity`, `CognitiveComplexity`, `NcssCount`, `ExcessiveParameterList`) | Son las clases grandes; la fase 6 refactoriza las tres peores y deja escritas las demás |
+| Complejidad (`CyclomaticComplexity`, `CognitiveComplexity`, `NcssCount`, `ExcessiveParameterList`) | Son las clases grandes. Las tres peores ya se partieron; quedan, por orden, `ProcesamientoServicio.procesar` (44), `UmbralAplicacionServicio.aplicar` (34), `IngestaServicio.ejecutar` (23), `LecturasPeriodoControlador.pagina` (22) y `MonitorControlador.abrirIntervencion` (16), con pruebas que las cubren |
 | Tres avisos de SFGE sobre modo sistema | Son a propósito y están documentados: los límites del periodo de las lecturas y la aplicación de umbrales ([módulo 10](10-seguridad-y-accesos.md)) |
 | `System.schedule` dentro de un bucle | Programa los 60 trabajos de la ingesta y los 6 del vigía: es una vez, al programar |
 | `MAX(SystemModstamp)` sin filtro | Lee unas 20 filas, una por equipo y medición, para el timbre |
