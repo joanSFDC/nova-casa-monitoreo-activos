@@ -7,6 +7,7 @@ import TIME_ZONE from "@salesforce/i18n/timeZone";
 import obtenerPanel from "@salesforce/apex/MonitorControlador.obtenerPanel";
 import abrirIntervencion from "@salesforce/apex/MonitorControlador.abrirIntervencion";
 import NotaIntervencion from "c/notaIntervencion";
+import { detenerPulso, pulsoDetenido } from "c/animacionSeveridad";
 
 const CANAL_TIMBRE = "/event/Panel_Actualizado__e";
 const ESPERA_MS = 2000;
@@ -113,6 +114,7 @@ export default class MonitorDeActivos extends NavigationMixin(
   }
 
   connectedCallback() {
+    this.pulsoQuieto = pulsoDetenido();
     this.anuncio = "Cargando el monitor";
     onError(() => {
       this.avisarSinTiempoReal();
@@ -519,6 +521,22 @@ export default class MonitorDeActivos extends NavigationMixin(
     this.filtroSeveridad = null;
     this.filtroTipo = "";
     this.busqueda = "";
+  }
+
+  get textoPulso() {
+    return this.pulsoQuieto ? "Reanudar animación" : "Detener animación";
+  }
+
+  get pulsoPresionado() {
+    return this.pulsoQuieto ? "true" : "false";
+  }
+
+  handlePulso() {
+    this.pulsoQuieto = !this.pulsoQuieto;
+    detenerPulso(this.pulsoQuieto);
+    this.anuncio = this.pulsoQuieto
+      ? "Animación de la severidad detenida"
+      : "Animación de la severidad reanudada";
   }
 
   handleActualizar() {

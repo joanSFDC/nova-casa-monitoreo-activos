@@ -726,6 +726,10 @@ No estaban en la especificación y conviene no redescubrirlas.
     página de inicio con el monitor, tarjetas de vista de lista y el panel, sin
     componentes nuevos; cada app la hace visible el conjunto de su rol, y el script de
     usuarios pone la de entrada ([módulo 09](09-experiencia-del-operador.md)).
+76. **La severidad grave pulsa.** Un anillo alrededor de la pastilla de advertencia (cada
+    2 s) y de crítico (cada 0,8 s), apagado con «reducir movimiento» y con el botón
+    «Detener animación» del monitor, que se recuerda en el navegador
+    ([módulo 09](09-experiencia-del-operador.md)).
 
 ## Historial breve
 
@@ -795,3 +799,4 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-23 | El aviso de ingesta caída usa dos flujos: con una vuelta rápida, la ruta asíncrona veía la caída ya cerrada y avisaba dos veces la vuelta. PR #130 fusionado. Cierra #129 |
 | 2026-10-24 | Limpieza nocturna de la bitácora con resumen; la primera borró 452.402 señales en 41 minutos sin errores. PR #132 fusionado. Cierra #131 |
 | 2026-10-24 | Una app por rol con su inicio y retiro de «Nova Casa». PR #134 fusionado. Cierra #133 |
+| 2026-10-24 | La pastilla de advertencia y la de crítico pulsan, con «Detener animación» en el monitor. PR #136 fusionado. Cierra #135 |

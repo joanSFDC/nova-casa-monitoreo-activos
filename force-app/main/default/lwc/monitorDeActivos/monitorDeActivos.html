@@ -55,13 +55,23 @@
               </p>
             </template>
           </div>
-          <lightning-button
-            variant="neutral"
-            label="Actualizar"
-            icon-name="utility:refresh"
-            onclick={handleActualizar}
-            disabled={actualizando}
-          ></lightning-button>
+          <div class="acciones-cabecera">
+            <button
+              type="button"
+              class="slds-button slds-button_neutral pulso"
+              aria-pressed={pulsoPresionado}
+              onclick={handlePulso}
+            >
+              {textoPulso}
+            </button>
+            <lightning-button
+              variant="neutral"
+              label="Actualizar"
+              icon-name="utility:refresh"
+              onclick={handleActualizar}
+              disabled={actualizando}
+            ></lightning-button>
+          </div>
         </div>
 
         <div class="barra">

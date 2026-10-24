@@ -448,6 +448,30 @@ describe("c-monitor-de-activos", () => {
     expect(abrirIntervencion).not.toHaveBeenCalled();
   });
 
+  it("detiene y reanuda el pulso de la severidad, y lo recuerda", async () => {
+    window.localStorage.clear();
+    const el = elemento();
+    obtenerPanel.emit(PANEL);
+    await flushPromises();
+
+    const boton = el.shadowRoot.querySelector("button.pulso");
+    expect(boton.textContent.trim()).toBe("Detener animación");
+    expect(boton.getAttribute("aria-pressed")).toBe("false");
+
+    boton.click();
+    await flushPromises();
+    expect(boton.textContent.trim()).toBe("Reanudar animación");
+    expect(boton.getAttribute("aria-pressed")).toBe("true");
+    expect(window.localStorage.getItem("novaCasa.pulsoSeveridad")).toBe(
+      "detenido"
+    );
+
+    boton.click();
+    await flushPromises();
+    expect(boton.textContent.trim()).toBe("Detener animación");
+    expect(window.localStorage.getItem("novaCasa.pulsoSeveridad")).toBeNull();
+  });
+
   describe("vigilancia y anuncios", () => {
     beforeEach(() => {
       jest.useFakeTimers();
