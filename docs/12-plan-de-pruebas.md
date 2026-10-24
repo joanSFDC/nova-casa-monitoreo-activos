@@ -318,6 +318,96 @@ razón: nombres de prueba `shouldX_WhenY`, `@isTest` en minúscula, `runAs` solo
 los permisos, comentarios solo para lo que el código no muestra, colores de severidad fijos
 y adaptadores `@wire` usados con `emit()` en Jest.
 
+## La prueba de carga
+
+Mide el código que se va a presentar, ya con la fase 6, con un volumen que la operación
+todavía no tiene: hasta un millón de señales más sobre los 2,5 millones de la bitácora.
+Lo que se mide: el ritmo que sostiene la ingesta, la latencia del procesamiento, los
+bloqueos y las fallidas, el sesgo con el activo, los límites de la org, la ingesta en
+vivo mientras tanto, la limpieza nocturna con ese volumen y el monitor.
+
+**Cómo entra la carga.** `load-test/` está fuera de `force-app` y se despliega aparte.
+`CargaSinteticaBatch` fabrica páginas con el formato del proveedor
+([módulo 01](01-contrato-del-mensaje.md)) y las pasa por `IngestaServicio.procesarPagina`:
+la carga recorre la deduplicación, la validación, el guardado, la publicación del aviso y
+el procesamiento reales. Va una página de 200 por transacción, como `IngestaQueueable`.
+Al terminar cada ciclo se reprograma con `System.scheduleBatch`, con un solo trabajo a la
+vez, a 200.000 filas por hora. Se frena cinco minutos si hay más de 20.000 pendientes en
+15 minutos o si quedan menos de 150.000 eventos libres en la hora: la ingesta en vivo
+comparte ese cupo de 450.000 y usa unos 14.000.
+
+**Dónde.** El edificio `BLD-CARGA-001`, en la ciudad «Carga», tiene un equipo de cada
+tipo, como los edificios reales, así que reproduce el mismo sesgo por activo. Los
+operadores no lo ven, porque edificios e incidentes se comparten por ciudad. El
+coordinador y el gerente sí lo ven mientras dure la prueba. Sus críticos no mandan correo
+ni campana: el flujo solo avisa lo de las ciudades que se operan
+([módulo 07](07-incidentes.md)).
+
+**Qué mensajes.** Todo sale del índice del mensaje, así que un reenvío o un conflicto
+repiten exactamente el mensaje original y cada escalón sigue la secuencia donde quedó el
+anterior:
+
+- **Rechazadas, el 2,6 %:** un equipo que no existe, un dato que falta y una unidad o un
+  estado que no corresponden.
+- **Repetidas, desde el mensaje 2.000:** un 0,6 % de conflictos y un 1 % de reenvíos de un
+  mensaje mil posiciones atrás.
+- **Válidas:** tres de cada cuatro llegan una hora tarde. Cada equipo pasa por 200
+  lecturas críticas, 200 de advertencia y 3.600 normales, así que abre, escala y
+  normaliza su incidente una y otra vez.
+- **Fechas:** un reloj virtual avanza 10 ms por mensaje. A 200.000 por hora va más
+  despacio que el real, y `occurredAt` nunca queda en el futuro.
+
+Rechazos y repetidas siguen la mezcla del último día real. La proporción entre aplicadas
+y atrasadas no se impone: sale de las tandas del suscriptor, porque en cada tanda solo
+gana una lectura por equipo y medición.
+
+**Escalones.** Son acumulados: 100.000, luego hasta 500.000 y luego hasta un millón, con
+una foto después de cada uno. Con el millón cargado se corre a mano la limpieza nocturna
+(`programar-limpieza.sh --ahora`), que no borra las sintéticas porque son nuevas pero
+mide la consulta y el tiempo con la tabla un 40 % más grande. Al final,
+`CargaSinteticaLimpiezaBatch` borra todo lo que creó la carga (señales por el prefijo de
+la clave, incidentes, estados, equipos y edificio) y vacía la papelera, y el generador se
+retira de la org.
+
+| Decisión | Alternativa | Por qué no |
+| --- | --- | --- |
+| Batch en la org que llama a la ingesta real | Apex anónimo en un bucle desde la terminal | Límites síncronos distintos a los de la ingesta y depende de un computador encendido |
+| | Insertar señales con Bulk API | Se salta la deduplicación, la validación y la publicación: no mide el código real |
+| Escalones acumulados | Independientes, limpiando entre uno y otro | 1,6 millones de filas y tres limpiezas: muchas más horas |
+| 200.000 por hora | Lo más rápido posible | Podría dejar sin cupo de eventos a la ingesta en vivo |
+| Cinco equipos | Cincuenta | Menos sesgo por activo del que tiene la operación |
+| Limpieza nocturna a mano con el millón | Esperar a la noche siguiente | Un día más de carga visible para el coordinador y el gerente |
+
+```bash
+python3 load-test/carga.py desplegar
+python3 load-test/carga.py preparar
+python3 load-test/carga.py lanzar 100000      # y después 500000 y 1000000
+python3 load-test/carga.py estado
+python3 load-test/carga.py medir escalon-100k  # deja la foto en load-test/resultados/
+python3 load-test/carga.py limpiar
+python3 load-test/carga.py retirar
+```
+
+`CargaSinteticaTest` comprueba, antes de gastar horas de carga, cuatro cosas:
+
+- Lo fabricado pasa el validador real, salvo los rechazos.
+- Un reenvío repite el contenido y un conflicto cambia el valor del mismo hecho.
+- La mezcla es exacta.
+- La limpieza no toca lo que no es de la carga.
+
+**Prueba de humo, 24 de octubre.** Fueron 1.000 señales, todas de la fase crítica:
+
+| Medida | Resultado |
+| --- | --- |
+| Filas | 1.000: 40 aplicadas, 934 atrasadas y 26 rechazadas (2,6 %) |
+| Latencia del procesamiento | 2 s de mediana y 3 s en el percentil 95 |
+| Fallidas y errores del generador | Ninguno |
+| Incidentes | 5 en alta, uno por equipo, en la cola de Coordinación |
+| Correos del día (`DailyWorkflowEmails`) | 61.125 antes y después: el edificio de carga no avisa |
+
+Las aplicadas son el 4 % y no el 24 % del día real porque hay cinco equipos y las tandas
+son grandes. Es lo esperado, y por eso esa proporción se mide en vez de imponerse.
+
 ## La cobertura
 
 Salesforce exige un 75 % para desplegar a producción. Es un mínimo administrativo, no un

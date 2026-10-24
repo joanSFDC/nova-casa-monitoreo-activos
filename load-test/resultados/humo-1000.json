@@ -1,0 +1,109 @@
+{
+  "etiqueta": "humo-1000",
+  "momento": "2026-10-24T23:25:21Z",
+  "escalon": {
+    "meta": 1000,
+    "ritmo": 200000,
+    "inicio": "2026-10-24T23:22:59Z",
+    "filas_al_iniciar": 0,
+    "siguiente_al_iniciar": 0
+  },
+  "filas": 1000,
+  "proximo_mensaje": 1000,
+  "por_resultado": {
+    "Pendiente": 0,
+    "Aplicado": 40,
+    "Atrasado": 934,
+    "Rechazado": 26,
+    "Conflicto": 0,
+    "Fallido": 0
+  },
+  "segundos_desde_el_inicio": 142.987083,
+  "filas_por_hora": 25177,
+  "latencia_procesamiento_s": {
+    "muestra": 974,
+    "p50": 2.0,
+    "p95": 3.0,
+    "max": 3.0,
+    "media": 2.14
+  },
+  "fallidas_muestra": [],
+  "trabajos": [
+    {
+      "Name": "IngestaQueueable",
+      "Status": "Completed",
+      "n": 15,
+      "e": 0
+    },
+    {
+      "Name": "CargaSinteticaBatch",
+      "Status": "Completed",
+      "n": 1,
+      "e": 0
+    }
+  ],
+  "errores_del_generador": [],
+  "suscriptor_aviso": [
+    {
+      "Position": 4000456,
+      "Status": "Running",
+      "Retries": 0,
+      "LastError": null
+    }
+  ],
+  "ingesta_en_vivo": {
+    "control": {
+      "Ultima_Consulta_Exitosa__c": "2026-10-24T23:25:06.000+0000",
+      "Caida_Desde__c": null,
+      "Motivo_Caida__c": "Prueba del aviso de ingesta caída",
+      "Fallos_Consecutivos__c": 1,
+      "Ultimo_Error__c": "Se ha alcanzado la profundidad máxima de pilas."
+    },
+    "pendientes_reales_15_min": 0
+  },
+  "incidentes_de_carga": 5,
+  "limites": {
+    "DailyApiRequests": {
+      "max": 441450,
+      "restante": 439649
+    },
+    "DailyAsyncApexExecutions": {
+      "max": 691800,
+      "restante": 682944
+    },
+    "DailyWorkflowEmails": {
+      "max": 61125,
+      "restante": 61125
+    },
+    "DataStorageMB": {
+      "max": 52537,
+      "restante": 47548
+    },
+    "HourlyPublishedPlatformEvents": {
+      "max": 450000,
+      "restante": 442742
+    }
+  },
+  "limites_al_iniciar": {
+    "DailyApiRequests": {
+      "max": 441450,
+      "restante": 439670
+    },
+    "DailyAsyncApexExecutions": {
+      "max": 691800,
+      "restante": 682969
+    },
+    "DailyWorkflowEmails": {
+      "max": 61125,
+      "restante": 61125
+    },
+    "DataStorageMB": {
+      "max": 52537,
+      "restante": 47550
+    },
+    "HourlyPublishedPlatformEvents": {
+      "max": 450000,
+      "restante": 444472
+    }
+  }
+}

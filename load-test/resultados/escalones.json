@@ -1,0 +1,31 @@
+[
+  {
+    "meta": 1000,
+    "ritmo": 200000,
+    "inicio": "2026-10-24T23:22:59Z",
+    "filas_al_iniciar": 0,
+    "siguiente_al_iniciar": 0,
+    "limites_al_iniciar": {
+      "DailyApiRequests": {
+        "max": 441450,
+        "restante": 439670
+      },
+      "DailyAsyncApexExecutions": {
+        "max": 691800,
+        "restante": 682969
+      },
+      "DailyWorkflowEmails": {
+        "max": 61125,
+        "restante": 61125
+      },
+      "DataStorageMB": {
+        "max": 52537,
+        "restante": 47550
+      },
+      "HourlyPublishedPlatformEvents": {
+        "max": 450000,
+        "restante": 444472
+      }
+    }
+  }
+]

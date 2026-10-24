@@ -37,15 +37,16 @@ US-210.
 
 ## 2. La estructura del repositorio
 
-| Ruta                      | Qué es                                                                     |
-| ------------------------- | -------------------------------------------------------------------------- |
-| `docs/`                   | **La especificación.** Trece documentos. Es la fuente de verdad del diseño |
-| `docs/estado.md`          | **Qué ya existe y qué se está haciendo.** Se actualiza en cada PR          |
-| `docs/data-model/`        | El diagrama del modelo de datos                                            |
-| `force-app/main/default/` | El código y los metadatos de Salesforce                                    |
-| `scripts/`                | Siembra y reconstrucción de la org. No es metadato                         |
-| `CONTRIBUTING.md`         | El manual de git y del flujo de equipo                                     |
-| `AGENTS.md`               | Este archivo                                                               |
+| Ruta                      | Qué es                                                                                               |
+| ------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `docs/`                   | **La especificación.** Trece documentos. Es la fuente de verdad del diseño                           |
+| `docs/estado.md`          | **Qué ya existe y qué se está haciendo.** Se actualiza en cada PR                                    |
+| `docs/data-model/`        | El diagrama del modelo de datos                                                                      |
+| `force-app/main/default/` | El código y los metadatos de Salesforce                                                              |
+| `scripts/`                | Siembra y reconstrucción de la org. No es metadato                                                   |
+| `load-test/`              | La prueba de carga: generador, orquestador y resultados. Se despliega aparte y se retira al terminar |
+| `CONTRIBUTING.md`         | El manual de git y del flujo de equipo                                                               |
+| `AGENTS.md`               | Este archivo                                                                                         |
 
 Dentro de `force-app/main/default/`:
 
