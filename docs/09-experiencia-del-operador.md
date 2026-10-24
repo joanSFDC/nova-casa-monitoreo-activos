@@ -558,6 +558,31 @@ normalizado, azul (`#0b5cab`). Así un cambio de tema, o volver a Cosmos, no los
 que no es severidad (bordes, fondos, texto suave) usa los ganchos de SLDS con un valor de
 respaldo.
 
+### El pulso de la severidad
+
+**Decisión: la pastilla de advertencia y la de crítico pulsan, y la de crítico más rápido**,
+para que lo grave se note sin leer la tabla. Es un anillo que crece alrededor de toda la
+pastilla y se desvanece; el texto y el punto no se mueven.
+
+- Advertencia cada 2 segundos y crítico cada 0,8 segundos: 1,25 pulsos por segundo, lejos
+  de los 3 destellos por segundo que las pautas de accesibilidad ponen como máximo.
+- Se apaga si el sistema de la persona pide reducir movimiento.
+- El monitor trae el botón «Detener animación», con `aria-pressed`, porque las pautas piden
+  poder detener lo que se mueve más de 5 segundos. La elección se recuerda en el navegador
+  y vale para todas las pastillas, también las de los resúmenes del incidente, el activo y
+  el edificio, que se enteran al momento si están abiertas.
+- Es una sombra y no una escala, para que crezca lo mismo a lo alto que a lo ancho.
+
+| Alternativa | Por qué no |
+|---|---|
+| Que parpadee toda la pastilla, fondo y texto | Es lo más visible, pero cansa y distrae en un monitor con varios críticos |
+| Pulsar solo 5 segundos al cambiar de severidad | Cumple las pautas sin botón, pero un crítico que ya estaba no se notaría |
+| Pulsar solo el punto de color | Se veía poco; se pidió el anillo alrededor de la pastilla |
+
+Los campos estándar de Salesforce, como la severidad en las secciones de campos de una
+página de registro, no se pueden animar: el pulso está en el componente compartido
+`pastillaSeveridad` y en el módulo `animacionSeveridad`, que guarda la elección.
+
 ### Los iconos
 
 Salesforce **solo lee el número** del motivo de una pestaña; el nombre que lo acompaña es

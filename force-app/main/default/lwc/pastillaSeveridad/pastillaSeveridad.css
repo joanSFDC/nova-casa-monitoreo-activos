@@ -23,6 +23,46 @@
   background: currentColor;
 }
 
+/*
+ * El pulso es un anillo que crece alrededor de toda la pastilla y se desvanece; el
+ * texto y el punto no se mueven. Es una sombra y no una escala: crece lo mismo a lo
+ * alto que a lo ancho. Advertencia cada 2 s y crítico cada 0,8 s, lejos de los 3
+ * destellos por segundo que las pautas ponen como máximo.
+ */
+.pastilla_advertencia,
+.pastilla_critico {
+  animation: pulso 2s ease-out infinite;
+}
+
+.pastilla_advertencia {
+  --halo: rgba(221, 122, 1, 0.55);
+}
+
+.pastilla_critico {
+  --halo: rgba(186, 5, 23, 0.5);
+  animation-duration: 0.8s;
+}
+
+.pastilla_quieta {
+  animation: none;
+}
+
+@keyframes pulso {
+  0% {
+    box-shadow: 0 0 0 0 var(--halo);
+  }
+  80%,
+  100% {
+    box-shadow: 0 0 0 0.5rem rgba(255, 255, 255, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pastilla {
+    animation: none;
+  }
+}
+
 .pastilla_critico {
   color: #ba0517;
   background: #fef1ee;
