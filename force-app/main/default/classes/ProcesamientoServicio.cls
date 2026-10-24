@@ -70,10 +70,11 @@ public without sharing class ProcesamientoServicio {
     );
 
     Datetime ahora = Datetime.now();
-    Map<String, Senal__c> aActualizar = new Map<String, Senal__c>();
-    Map<String, Estado_Actual__c> aUpsertar = new Map<String, Estado_Actual__c>();
-    Map<String, String> estadoAClaveSenal = new Map<String, String>();
-    Map<String, IncidentesServicio.Decision> decisiones = new Map<String, IncidentesServicio.Decision>();
+    Tanda tanda = new Tanda(activos, umbrales, estados, ahora);
+    Map<String, Senal__c> aActualizar = tanda.aActualizar;
+    Map<String, Estado_Actual__c> aUpsertar = tanda.aUpsertar;
+    Map<String, String> estadoAClaveSenal = tanda.estadoAClaveSenal;
+    Map<String, IncidentesServicio.Decision> decisiones = tanda.decisiones;
 
     for (Aviso_de_Senal__e aviso : avisos) {
       if (
@@ -87,18 +88,7 @@ public without sharing class ProcesamientoServicio {
       }
       resultado.senales++;
       aActualizar.put(senal.Clave__c, senal);
-      resolver(
-        aviso,
-        senal,
-        activos,
-        umbrales,
-        estados,
-        aUpsertar,
-        aActualizar,
-        estadoAClaveSenal,
-        decisiones,
-        ahora
-      );
+      resolver(aviso, senal, tanda);
     }
 
     List<Estado_Actual__c> listaEstados = ordenarPorActivo(aUpsertar.values());
@@ -237,35 +227,50 @@ public without sharing class ProcesamientoServicio {
     return procesar(avisos);
   }
 
+  /**
+   * Lo que comparten las senales de una tanda al resolverse: el catalogo y los
+   * estados cargados, lo que se va a escribir y las decisiones de incidente.
+   */
+  private class Tanda {
+    final Map<String, Activo__c> activos;
+    final Map<String, Umbral__c> umbrales;
+    final Map<String, Estado_Actual__c> estados;
+    final Datetime ahora;
+    Map<String, Estado_Actual__c> aUpsertar = new Map<String, Estado_Actual__c>();
+    Map<String, Senal__c> aActualizar = new Map<String, Senal__c>();
+    Map<String, String> estadoAClaveSenal = new Map<String, String>();
+    Map<String, IncidentesServicio.Decision> decisiones = new Map<String, IncidentesServicio.Decision>();
+
+    Tanda(
+      Map<String, Activo__c> activos,
+      Map<String, Umbral__c> umbrales,
+      Map<String, Estado_Actual__c> estados,
+      Datetime ahora
+    ) {
+      this.activos = activos;
+      this.umbrales = umbrales;
+      this.estados = estados;
+      this.ahora = ahora;
+    }
+  }
+
+  /**
+   * Una senal se rechaza, queda atrasada o gana su estado: entonces se aplica y
+   * suma a la decision de su incidente.
+   */
   private static void resolver(
     Aviso_de_Senal__e aviso,
     Senal__c senal,
-    Map<String, Activo__c> activos,
-    Map<String, Umbral__c> umbrales,
-    Map<String, Estado_Actual__c> estados,
-    Map<String, Estado_Actual__c> aUpsertar,
-    Map<String, Senal__c> aActualizar,
-    Map<String, String> estadoAClaveSenal,
-    Map<String, IncidentesServicio.Decision> decisiones,
-    Datetime ahora
+    Tanda tanda
   ) {
-    String tipoMensaje = aviso.Tipo_Mensaje__c;
-    if (
-      tipoMensaje != IngestaConstantes.TIPO_MEDICION &&
-      tipoMensaje != IngestaConstantes.TIPO_CONECTIVIDAD
-    ) {
-      rechazar(senal, IngestaConstantes.MOTIVO_TIPO_MENSAJE, ahora);
+    String motivo = motivoDeRechazo(aviso, tanda);
+    if (motivo != null) {
+      rechazar(senal, motivo, tanda.ahora);
       return;
     }
-
-    Activo__c activo = activos.get(aviso.Codigo_Activo__c);
-    if (activo == null) {
-      rechazar(senal, IngestaConstantes.MOTIVO_ACTIVO, ahora);
-      return;
-    }
-
+    Activo__c activo = tanda.activos.get(aviso.Codigo_Activo__c);
     String tipoMedicion = tipoMedicionDe(aviso);
-    Umbral__c umbral = umbrales.get(activo.Tipo__c + '|' + tipoMedicion);
+    Umbral__c umbral = tanda.umbrales.get(activo.Tipo__c + '|' + tipoMedicion);
     Integer lugares = umbral == null ||
       umbral.Decimales__c == null
       ? 0
@@ -279,107 +284,37 @@ public without sharing class ProcesamientoServicio {
         aviso.Gap_Segundos__c
       )
       ?.left(LARGO_LECTURA);
-    ClasificacionServicio.Dictamen dictamen;
-    if (tipoMensaje == IngestaConstantes.TIPO_MEDICION) {
-      if (
-        umbral != null &&
-        String.isNotBlank(aviso.Unidad__c) &&
-        aviso.Unidad__c != umbral.Unidad__c
-      ) {
-        rechazar(senal, IngestaConstantes.MOTIVO_UNIDAD, ahora);
-        return;
-      }
-      dictamen = ClasificacionServicio.clasificarMedicion(
-        aviso.Valor__c,
-        umbral
-      );
-    } else {
-      dictamen = ClasificacionServicio.clasificarConectividad(
-        aviso.Estado_Comunicacion__c,
-        aviso.Gap_Segundos__c,
-        umbral
-      );
+    if (unidadIncompatible(aviso, umbral)) {
+      rechazar(senal, IngestaConstantes.MOTIVO_UNIDAD, tanda.ahora);
+      return;
     }
+    ClasificacionServicio.Dictamen dictamen = clasificar(aviso, umbral);
     if (!dictamen.esValido()) {
-      rechazar(senal, dictamen.motivo, ahora);
+      rechazar(senal, dictamen.motivo, tanda.ahora);
       return;
     }
 
     String claveEstado = aviso.Codigo_Activo__c + '|' + tipoMedicion;
-    Estado_Actual__c vigente = estados.get(claveEstado);
+    Estado_Actual__c vigente = tanda.estados.get(claveEstado);
     if (!esMasVigente(aviso, vigente)) {
-      IngestaConstantes.aplicar(
-        senal,
-        IngestaConstantes.RESULTADO_ATRASADO,
-        null
-      );
-      senal.Fecha_Procesamiento__c = ahora;
+      atrasar(senal, tanda.ahora);
       return;
     }
-
     Estado_Actual__c estado = vigente == null
-      ? new Estado_Actual__c()
+      ? new Estado_Actual__c(Activo__c = activo.Id)
       : vigente;
     estado.Clave__c = claveEstado;
-    if (estado.Id == null) {
-      estado.Activo__c = activo.Id;
-    }
     estado.Tipo_Medicion__c = tipoMedicion;
     estado.Fecha_Origen__c = aviso.Fecha_Origen__c;
-    estado.Fecha_Actualizacion__c = ahora;
+    estado.Fecha_Actualizacion__c = tanda.ahora;
     estado.Ultimo_Message_Id__c = aviso.Message_Id__c;
     estado.Severidad__c = dictamen.severidad;
     estado.Severidad_Nivel__c = dictamen.nivel;
-    if (tipoMensaje == IngestaConstantes.TIPO_MEDICION) {
-      estado.Valor__c = aviso.Valor__c;
-      estado.Unidad__c = aviso.Unidad__c;
-      estado.Estado_Comunicacion__c = null;
-      estado.Gap_Segundos__c = null;
-      estado.Episodio_Id__c = null;
-      estado.Ultima_Vez_Visto__c = null;
-      estado.Sin_Comunicacion_Num__c = 0;
-    } else {
-      estado.Valor__c = null;
-      estado.Unidad__c = null;
-      estado.Estado_Comunicacion__c = aviso.Estado_Comunicacion__c;
-      estado.Gap_Segundos__c = aviso.Gap_Segundos__c;
-      estado.Ultima_Vez_Visto__c = aviso.Ultima_Vez_Visto__c;
-      estado.Sin_Comunicacion_Num__c = aviso.Estado_Comunicacion__c == 'LOST'
-        ? 1
-        : 0;
-      if (aviso.Estado_Comunicacion__c == 'HEALTHY') {
-        estado.Episodio_Id__c = null;
-      } else {
-        estado.Episodio_Id__c = aviso.Episodio_Id__c;
-      }
-    }
-
-    String ganadorPrevio = estadoAClaveSenal.get(claveEstado);
-    if (String.isNotBlank(ganadorPrevio) && ganadorPrevio != senal.Clave__c) {
-      Senal__c perdedora = aActualizar.get(ganadorPrevio);
-      if (perdedora != null) {
-        IngestaConstantes.aplicar(
-          perdedora,
-          IngestaConstantes.RESULTADO_ATRASADO,
-          null
-        );
-        perdedora.Fecha_Procesamiento__c = ahora;
-      }
-    }
-
-    estados.put(claveEstado, estado);
-    aUpsertar.put(claveEstado, estado);
-    estadoAClaveSenal.put(claveEstado, senal.Clave__c);
-
-    IngestaConstantes.aplicar(
-      senal,
-      IngestaConstantes.RESULTADO_APLICADO,
-      null
-    );
-    senal.Fecha_Procesamiento__c = ahora;
+    copiarLectura(estado, aviso);
+    marcarGanadora(senal, claveEstado, estado, tanda);
     senal.Activo__c = activo.Id;
     IncidentesServicio.acumular(
-      decisiones,
+      tanda.decisiones,
       aviso,
       senal,
       activo,
@@ -387,6 +322,106 @@ public without sharing class ProcesamientoServicio {
       dictamen,
       lugares
     );
+  }
+
+  private static String motivoDeRechazo(Aviso_de_Senal__e aviso, Tanda tanda) {
+    if (
+      aviso.Tipo_Mensaje__c != IngestaConstantes.TIPO_MEDICION &&
+      aviso.Tipo_Mensaje__c != IngestaConstantes.TIPO_CONECTIVIDAD
+    ) {
+      return IngestaConstantes.MOTIVO_TIPO_MENSAJE;
+    }
+    if (!tanda.activos.containsKey(aviso.Codigo_Activo__c)) {
+      return IngestaConstantes.MOTIVO_ACTIVO;
+    }
+    return null;
+  }
+
+  private static Boolean unidadIncompatible(
+    Aviso_de_Senal__e aviso,
+    Umbral__c umbral
+  ) {
+    return aviso.Tipo_Mensaje__c == IngestaConstantes.TIPO_MEDICION &&
+      umbral != null &&
+      String.isNotBlank(aviso.Unidad__c) &&
+      aviso.Unidad__c != umbral.Unidad__c;
+  }
+
+  private static ClasificacionServicio.Dictamen clasificar(
+    Aviso_de_Senal__e aviso,
+    Umbral__c umbral
+  ) {
+    if (aviso.Tipo_Mensaje__c == IngestaConstantes.TIPO_MEDICION) {
+      return ClasificacionServicio.clasificarMedicion(aviso.Valor__c, umbral);
+    }
+    return ClasificacionServicio.clasificarConectividad(
+      aviso.Estado_Comunicacion__c,
+      aviso.Gap_Segundos__c,
+      umbral
+    );
+  }
+
+  private static void atrasar(Senal__c senal, Datetime ahora) {
+    IngestaConstantes.aplicar(
+      senal,
+      IngestaConstantes.RESULTADO_ATRASADO,
+      null
+    );
+    senal.Fecha_Procesamiento__c = ahora;
+  }
+
+  /**
+   * Una medicion deja su valor y borra lo de comunicacion; una camara, al reves.
+   * Un latido sano cierra el episodio del corte.
+   */
+  private static void copiarLectura(
+    Estado_Actual__c estado,
+    Aviso_de_Senal__e aviso
+  ) {
+    Boolean medicion = aviso.Tipo_Mensaje__c == IngestaConstantes.TIPO_MEDICION;
+    estado.Valor__c = medicion ? aviso.Valor__c : null;
+    estado.Unidad__c = medicion ? aviso.Unidad__c : null;
+    estado.Estado_Comunicacion__c = medicion
+      ? null
+      : aviso.Estado_Comunicacion__c;
+    estado.Gap_Segundos__c = medicion ? null : aviso.Gap_Segundos__c;
+    estado.Ultima_Vez_Visto__c = medicion ? null : aviso.Ultima_Vez_Visto__c;
+    estado.Sin_Comunicacion_Num__c = !medicion &&
+      aviso.Estado_Comunicacion__c == 'LOST'
+      ? 1
+      : 0;
+    estado.Episodio_Id__c = medicion ||
+      aviso.Estado_Comunicacion__c == 'HEALTHY'
+      ? null
+      : aviso.Episodio_Id__c;
+  }
+
+  /**
+   * La mas vigente de la tanda gana el estado; la que ganaba antes pasa a
+   * atrasada.
+   */
+  private static void marcarGanadora(
+    Senal__c senal,
+    String claveEstado,
+    Estado_Actual__c estado,
+    Tanda tanda
+  ) {
+    String ganadorPrevio = tanda.estadoAClaveSenal.get(claveEstado);
+    if (String.isNotBlank(ganadorPrevio) && ganadorPrevio != senal.Clave__c) {
+      Senal__c perdedora = tanda.aActualizar.get(ganadorPrevio);
+      if (perdedora != null) {
+        atrasar(perdedora, tanda.ahora);
+      }
+    }
+    tanda.estados.put(claveEstado, estado);
+    tanda.aUpsertar.put(claveEstado, estado);
+    tanda.estadoAClaveSenal.put(claveEstado, senal.Clave__c);
+    IngestaConstantes.aplicar(
+      senal,
+      IngestaConstantes.RESULTADO_APLICADO,
+      null
+    );
+    senal.Fecha_Procesamiento__c = tanda.ahora;
   }
 
   private static Boolean esMasVigente(
