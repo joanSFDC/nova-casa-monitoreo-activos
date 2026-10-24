@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Fecha__c</fullName>
+    <description>El día en que se recibieron las señales, en hora de Bogotá.</description>
+    <externalId>false</externalId>
+    <label>Fecha</label>
+    <required>true</required>
+    <trackTrending>false</trackTrending>
+    <type>Date</type>
+</CustomField>

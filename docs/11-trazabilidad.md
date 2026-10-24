@@ -211,11 +211,45 @@ Las tres consecuencias de diseño que ya están tomadas:
 - **La pantalla del operador no la consulta nunca.** Consulta `Estado_Actual__c`, cuyo
   tamaño depende del número de equipos y no del tiempo.
 - **No hay resúmenes automáticos sobre la bitácora.** Los únicos están en el activo, cuyos
-  hijos son pocos.
+  hijos son pocos. El resumen de la limpieza lo escribe el Batch, no la plataforma.
 - **Los campos por los que se filtra están indexados**: `Clave__c` y `Message_Id__c` por ser
   External ID, y `Fecha_Recepcion__c` y `Resultado__c` como índices adicionales.
 
-Queda abierta Q-11: si se conserva todo el histórico o hay una política de retención. No
-bloquea el sprint. Cuando se responda, la salida natural es archivar las señales aplicadas
-con más de cierta antigüedad y conservar indefinidamente las rechazadas, las fallidas y las
-de conflicto, que son las que se consultan.
+### La limpieza nocturna (Q-11)
+
+Con unas 347.500 señales por día, la bitácora llenaba el almacenamiento de la org en meses.
+**Decisión: una limpieza cada noche, a las 2 a. m., que borra lo que ya no se consulta y
+deja contado lo que borró.**
+
+| Señales | Se borran a los | Por qué |
+| --- | --- | --- |
+| Aplicadas y atrasadas | 7 días | Su efecto ya está en el estado actual y en el incidente; «Lecturas del periodo» cubre la última semana |
+| Rechazadas, fallidas y en conflicto | 90 días | Son las que se investigan |
+| Ligadas a cualquier incidente, abierto o cerrado | Nunca | Son la evidencia de por qué se abrió, escaló o normalizó |
+| Pendientes | Nunca | Una pendiente vieja está atascada, y eso se investiga |
+
+`BitacoraRetencionBatch` lo hace **en una sola pasada**, en lotes de 2.000. Cada lote borra
+sus señales, suma lo que borró a `Resumen_Bitacora__c` (una fila por día, equipo, resultado
+y motivo, con una clave única) y vacía su papelera, para que el espacio se libere esa misma
+noche. El día del resumen es el de recepción en hora de Bogotá. Un lote vuelve a mirar cada
+señal antes de borrarla, por si se ligó a un caso después de la consulta inicial.
+
+Si la ingesta tiene una caída avisada o hay más de 2.000 señales pendientes de los últimos
+15 minutos, el lote no borra y la limpieza termina: sigue la noche siguiente. Se cuentan
+solo las de 15 minutos porque contarlas en el último día recorría unas 347.000 señales y
+tardaba 11 segundos por lote; así tarda 60 ms, y un atraso real del procesamiento siempre
+deja pendientes recientes.
+
+| Alternativa | Por qué no |
+| --- | --- |
+| Primero resumir todo y después borrar, en dos trabajos | Dos recorridos de millones de filas, y si el segundo falla queda un resumen de algo que no se borró |
+| Archivar en un objeto grande o fuera de Salesforce | Más almacenamiento o una integración nueva para algo que se consulta poco; el resumen guarda el conteo |
+| Borrar sin vaciar la papelera | El espacio no se libera hasta 15 días después |
+
+`./scripts/programar-limpieza.sh novacasa2` la programa, `--abortar` la quita y `--ahora` la
+corre una vez. `./scripts/ver-limpieza.sh novacasa2` muestra su avance cada 20 segundos.
+
+La primera corrida, el 24 de octubre de 2026 con la ingesta funcionando, hizo 227 lotes en
+unos 41 minutos y sin errores: borró 452.402 señales (364.886 atrasadas y 87.516 aplicadas),
+que quedaron contadas en 113 filas del resumen. La bitácora quedó en 2.508.222 señales, y la
+ingesta siguió consultando cada minuto mientras tanto.

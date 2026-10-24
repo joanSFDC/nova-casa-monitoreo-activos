@@ -312,6 +312,7 @@ sf org assign permset -o novacasa2 -n Nova_Casa_Administracion
 ./scripts/configurar-suscriptor.sh novacasa2
 ./scripts/programar-ingesta.sh novacasa2
 ./scripts/programar-vigia.sh novacasa2
+./scripts/programar-limpieza.sh novacasa2
 ```
 
 `crear-usuarios-demo.sh` se puede volver a correr: solo manda el correo de
@@ -715,6 +716,11 @@ No estaban en la especificación y conviene no redescubrirlas.
     aparte de los 60 trabajos de la ingesta, marca 10 minutos sin consultas exitosas. Un
     flujo avisa en la campana y por correo al caer y al volver, una vez por caída. Cierra
     el riesgo R-15 en lo que toca a la ingesta ([módulo 02](02-ingesta.md)).
+74. **La bitácora se limpia cada noche y deja contado lo que borra.** Aplicadas y
+    atrasadas a los 7 días; rechazadas, fallidas y en conflicto a los 90; nunca las
+    ligadas a un incidente ni las pendientes. Una sola pasada en lotes de 2.000 que borra,
+    suma a `Resumen_Bitacora__c` y vacía la papelera, y que se pausa con la ingesta caída
+    o atrasada. Responde Q-11 ([módulo 11](11-trazabilidad.md)).
 
 ## Historial breve
 
@@ -782,3 +788,4 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-23 | El timbre suena como mucho cada 30 segundos, el monitor no escucha con la pestaña oculta y cerrar un incidente toca el timbre. PR #126 fusionado. Cierra #125 |
 | 2026-10-23 | Aviso al administrador cuando la ingesta se cae y cuando vuelve, con un vigía propio cada 10 minutos. PR #128 fusionado. Cierra #127 |
 | 2026-10-23 | El aviso de ingesta caída usa dos flujos: con una vuelta rápida, la ruta asíncrona veía la caída ya cerrada y avisaba dos veces la vuelta. PR #130 fusionado. Cierra #129 |
+| 2026-10-24 | Limpieza nocturna de la bitácora con resumen; la primera borró 452.402 señales en 41 minutos sin errores. PR #132 fusionado. Cierra #131 |

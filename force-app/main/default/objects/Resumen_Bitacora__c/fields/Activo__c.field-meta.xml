@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Activo__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>El equipo de las señales. Vacío si la señal no resolvió su activo.</description>
+    <externalId>false</externalId>
+    <label>Equipo</label>
+    <referenceTo>Activo__c</referenceTo>
+    <relationshipLabel>Resúmenes de bitácora</relationshipLabel>
+    <relationshipName>Resumenes_Bitacora</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

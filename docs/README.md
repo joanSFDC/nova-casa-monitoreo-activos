@@ -66,5 +66,6 @@ en cada módulo, pero conviene tener presentes los cuatro de fondo:
 | Q-17 · ¿Qué valor informa la recuperación? | `RESTORED`. Existe además `HEALTHY` como latido |
 
 Siguen abiertas Q-09 (volumen esperado en producción), Q-10 (cómo se asigna el operador
-a edificios), Q-11 (política de retención de la bitácora) y Q-13 (el vocabulario de
-cara al usuario). Ninguna bloquea la implementación del sprint.
+a edificios) y Q-13 (el vocabulario de cara al usuario). Q-11 (política de retención de
+la bitácora) quedó decidida: 7 días para las aplicadas y atrasadas, 90 para las
+rechazadas, fallidas y en conflicto, y nunca las ligadas a un incidente. Ninguna bloquea la implementación del sprint.
