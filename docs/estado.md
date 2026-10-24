@@ -813,3 +813,4 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-24 | Correcciones de Code Analyzer y configuración del análisis en el repositorio. PR #140 fusionado. Cierra #139 |
 | 2026-10-24 | `IngestaServicio.procesarPagina` en pasos con una sola responsabilidad: de complejidad cognitiva 97 a ninguno por encima de 15, sin cambiar el comportamiento. PR #142 fusionado. Cierra #141 |
 | 2026-10-24 | `IncidentesServicio.escribir` en pasos con una sola responsabilidad (era 58), sin cambiar el comportamiento. PR #144 fusionado. Cierra #143 |
+| 2026-10-24 | `ProcesamientoServicio.resolver` pasa de 10 parámetros a un contexto `Tanda` y pasos con una sola responsabilidad, sin cambiar el comportamiento. PR #146 fusionado. Cierra #145 |
