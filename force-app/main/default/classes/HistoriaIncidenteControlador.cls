@@ -216,7 +216,9 @@ public with sharing class HistoriaIncidenteControlador {
       dto.texto = 'Se abrió el incidente';
       return dto;
     }
-    Schema.SObjectField campo = Case.SObjectType.getDescribe()
+    Schema.SObjectField campo = Case.SObjectType.getDescribe(
+        SObjectDescribeOptions.DEFERRED
+      )
       .fields.getMap()
       .get(fila.campo);
     dto.campo = campo == null ? fila.campo : campo.getDescribe().getLabel();

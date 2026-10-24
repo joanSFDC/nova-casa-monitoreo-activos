@@ -1,0 +1,34 @@
+# Configuracion de Code Analyzer del proyecto. Las reglas de aqui se aceptaron en
+# la fase 5 (24 de octubre de 2026): salen de la seleccion Recommended porque son
+# convenciones del proyecto, no defectos. Cada una dice por que.
+#
+# Java y Python no van aqui porque dependen de cada maquina: ponlos en el PATH
+# antes de correr el analisis (docs/12-plan-de-pruebas.md, «Analisis estatico»).
+rules:
+  pmd:
+    # Las pruebas se llaman shouldX_WhenY, como pide AGENTS.md.
+    MethodNamingConventions:
+      tags: ["Aceptada"]
+    # El proyecto escribe @isTest en minuscula en todas las clases de prueba.
+    AnnotationsNamingConventions:
+      tags: ["Aceptada"]
+    # runAs se usa donde importan los permisos; en el resto de las pruebas no cambia nada.
+    ApexUnitTestClassShouldHaveRunAs:
+      tags: ["Aceptada"]
+    # Los comentarios solo dicen lo que el codigo no muestra (AGENTS.md); no se documenta cada metodo.
+    ApexDoc:
+      tags: ["Aceptada"]
+  cpd:
+    # Los XML de metadatos se repiten por naturaleza: campos, vistas y permisos con la misma forma.
+    DetectCopyPasteForXml:
+      tags: ["Aceptada"]
+  eslint:
+    # Los colores de severidad se fijan a proposito para que un cambio de tema no los mueva (docs/09).
+    "@salesforce-ux/slds/no-hardcoded-values-slds2":
+      tags: ["Aceptada"]
+    # Cada desactivacion en linea lleva su razon (setTimeout en pruebas y en la espera del monitor).
+    "@lwc/lwc-platform/no-inline-disable":
+      tags: ["Aceptada"]
+    # En las pruebas de Jest los adaptadores se usan con emit(): es como se prueba un @wire.
+    "@lwc/lwc/no-unexpected-wire-adapter-usages":
+      tags: ["Aceptada"]

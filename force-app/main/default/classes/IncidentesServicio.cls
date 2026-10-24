@@ -386,8 +386,7 @@ public without sharing class IncidentesServicio {
     }
   }
 
-  @TestVisible
-  static Boolean esDuplicado(Database.SaveResult resultado) {
+  public static Boolean esDuplicado(Database.SaveResult resultado) {
     if (resultado == null || resultado.isSuccess()) {
       return false;
     }

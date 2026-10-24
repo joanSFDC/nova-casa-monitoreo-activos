@@ -105,6 +105,7 @@ public with sharing class MonitorControlador {
       FROM Edificio__c
       WITH USER_MODE
       ORDER BY Name
+      LIMIT :IngestaConstantes.TOPE_CATALOGO
     ];
     if (edificios.isEmpty()) {
       panel.sinEdificios = true;
@@ -142,6 +143,7 @@ public with sharing class MonitorControlador {
         FROM Estado_Actual__c
         WITH USER_MODE
         ORDER BY Severidad_Nivel__c DESC, Fecha_Origen__c ASC
+        LIMIT :IngestaConstantes.TOPE_CATALOGO
       ];
     } else {
       estados = [
@@ -167,6 +169,7 @@ public with sharing class MonitorControlador {
         WHERE Activo__r.Edificio__c = :edificioId
         WITH USER_MODE
         ORDER BY Severidad_Nivel__c DESC, Fecha_Origen__c ASC
+        LIMIT :IngestaConstantes.TOPE_CATALOGO
       ];
     }
     if (estados.isEmpty()) {
@@ -298,18 +301,16 @@ public with sharing class MonitorControlador {
       }
       return resultado.getId();
     }
-    for (Database.Error error : resultado.getErrors()) {
-      if (error.getStatusCode() == StatusCode.DUPLICATE_VALUE) {
-        List<Case> ganador = [
-          SELECT Id
-          FROM Case
-          WHERE Clave_Abierta__c = :clave AND IsClosed = FALSE
-          WITH USER_MODE
-          LIMIT 1
-        ];
-        if (!ganador.isEmpty()) {
-          return ganador[0].Id;
-        }
+    if (IncidentesServicio.esDuplicado(resultado)) {
+      List<Case> ganador = [
+        SELECT Id
+        FROM Case
+        WHERE Clave_Abierta__c = :clave AND IsClosed = FALSE
+        WITH USER_MODE
+        LIMIT 1
+      ];
+      if (!ganador.isEmpty()) {
+        return ganador[0].Id;
       }
     }
     throw new AuraHandledException(

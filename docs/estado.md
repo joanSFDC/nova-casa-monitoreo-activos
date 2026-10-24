@@ -735,6 +735,10 @@ No estaban en la especificación y conviene no redescubrirlas.
     recorría 2,5 millones de señales en 15 s. `Resultado_Indice__c`, un External ID que
     escribe `IngestaConstantes.aplicar`, la deja en 34 ms ([módulo 11](11-trazabilidad.md)).
     Activos, Edificios y Estados actuales ganan su vista «Todos».
+78. **Code Analyzer sin hallazgos de severidad 1 y con las convenciones escritas.** Se
+    corrigieron los defectos que encontró y las reglas de estilo que son convención del
+    proyecto salen de `Recommended` en `code-analyzer.yml`, cada una con su razón
+    ([módulo 12](12-plan-de-pruebas.md)).
 
 ## Historial breve
 
@@ -806,3 +810,4 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-24 | Una app por rol con su inicio y retiro de «Nova Casa». PR #134 fusionado. Cierra #133 |
 | 2026-10-24 | La pastilla de advertencia y la de crítico pulsan, con «Detener animación» en el monitor. PR #136 fusionado. Cierra #135 |
 | 2026-10-24 | Índice del resultado para las vistas de la bitácora y vistas «Todos» en Activos, Edificios y Estados actuales. PR #138 fusionado. Cierra #137 |
+| 2026-10-24 | Correcciones de Code Analyzer y configuración del análisis en el repositorio. PR #140 fusionado. Cierra #139 |

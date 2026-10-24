@@ -278,6 +278,39 @@ de las otras diez, veinte por bomba. Comprueba que la tanda grande no hace más 
 ni más escrituras que la chica, que hay un solo caso abierto por bomba, todos en prioridad
 alta, y que en cada bomba gana una lectura y las otras diecinueve quedan Atrasado.
 
+## Análisis estático
+
+Code Analyzer 5 corre sobre `force-app` con cuatro selecciones: `Recommended`,
+`all:Security:(1,2)`, `pmd:Performance` y `cpd`. Java 17 (Azul Zulu) y Python 3.10 o más
+nuevo tienen que estar en el `PATH`; la configuración del proyecto, `code-analyzer.yml`,
+no los lleva porque su ruta depende de cada máquina.
+
+```bash
+sf code-analyzer run -w . -t force-app -c code-analyzer.yml \
+  -r Recommended -r "all:Security:(1,2)" -r "pmd:Performance" -r cpd \
+  --output-file ../code-analyzer-results.json
+```
+
+El 24 de octubre de 2026 dio 1.393 hallazgos, ninguno de severidad 1. Se corrigieron los
+que eran defectos: dos consultas de sistema sin `WITH SYSTEM_MODE` (`IngestaSchedulable` y
+`CaseLiberarClave`), un `describe` que cargaba de más en la historia del incidente, un
+`catch` vacío en el procesamiento (ahora comprueba `Trigger.isExecuting`), una consulta
+dentro de un bucle en el monitor y consultas de catálogo sin tope (`TOPE_CATALOGO`). Con
+eso y la configuración quedan 168.
+
+| Lo que queda | Por qué |
+| --- | --- |
+| Complejidad (`CyclomaticComplexity`, `CognitiveComplexity`, `NcssCount`, `ExcessiveParameterList`) | Son las clases grandes; la fase 6 refactoriza las tres peores y deja escritas las demás |
+| Tres avisos de SFGE sobre modo sistema | Son a propósito y están documentados: los límites del periodo de las lecturas y la aplicación de umbrales ([módulo 10](10-seguridad-y-accesos.md)) |
+| `System.schedule` dentro de un bucle | Programa los 60 trabajos de la ingesta y los 6 del vigía: es una vez, al programar |
+| `MAX(SystemModstamp)` sin filtro | Lee unas 20 filas, una por equipo y medición, para el timbre |
+| Duplicados de XML | Los metadatos se repiten por naturaleza |
+
+Las reglas de estilo que se aceptaron salen de `Recommended` en `code-analyzer.yml`, con su
+razón: nombres de prueba `shouldX_WhenY`, `@isTest` en minúscula, `runAs` solo donde importan
+los permisos, comentarios solo para lo que el código no muestra, colores de severidad fijos
+y adaptadores `@wire` usados con `emit()` en Jest.
+
 ## La cobertura
 
 Salesforce exige un 75 % para desplegar a producción. Es un mínimo administrativo, no un
