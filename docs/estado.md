@@ -29,21 +29,29 @@ La especificación sigue en los módulos [01](01-contrato-del-mensaje.md) a
 | El resto de historias | Pendiente | Issue #13 |
 
 Org de trabajo: alias `novacasa2`, dominio
-`trailsignup-95b2e3a11aa777`. Caduca el 23 de octubre de 2026. Lo que no esté
+`trailsignup-95b2e3a11aa777`. Caduca el 19 de noviembre de 2026. Lo que no esté
 en el repositorio desaparece ese día.
 
 ## Qué hay hoy en la org
 
 ### Modelo
 
-Nueve elementos desplegados y verificados:
+Lo desplegado y verificado:
 
 - Objetos: `Edificio__c`, `Activo__c`, `Estado_Actual__c`, `Umbral__c`,
-  `Senal__c`, `Control_de_Ingesta__c`
+  `Senal__c`, `Control_de_Ingesta__c` y `Resumen_Bitacora__c`
 - Eventos: `Aviso_de_Senal__e` y `Panel_Actualizado__e`, el timbre sin campos
   del monitor (los dos `PublishAfterCommit`)
-- Campos en `Case`: `Clave_Abierta__c`, `Activo__c`, `Tipo_Medicion__c`,
-  `Episodio_Id__c`, `Origen_Senal__c`, `Ciudad__c`
+- 22 campos en `Case`:
+  - Identidad y ruta (6): `Clave_Abierta__c`, `Activo__c`, `Tipo_Medicion__c`,
+    `Episodio_Id__c`, `Origen_Senal__c` y `Ciudad__c`.
+  - Lecturas (9): `Severidad_Apertura__c`, `Lectura_Apertura__c`,
+    `Fecha_Lectura_Apertura__c`, `Severidad_Ultima_Lectura__c`, `Ultima_Lectura__c`,
+    `Fecha_Ultima_Lectura__c`, `Ultima_Senal__c`, `Condicion_Equipo__c` y
+    `Normalizado_En__c`.
+  - Fórmulas del correo (7): `Edificio_Nombre__c`, `Equipo_Nombre__c`,
+    `Como_Llego_A_Rojo__c`, `Que_Paso_Titulo__c`, `Que_Paso__c`,
+    `Hora_Cambio_Texto__c` y `Responsable_Texto__c`.
 - Catálogos globales: `Tipo_Activo`, `Tipo_Medicion`, `Unidad`, `Severidad`
 
 Las claves External ID y Unique funcionan: dos estados con la misma
@@ -843,3 +851,4 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-24 | El correo y la campana del caso crítico solo avisan lo de Bogotá, Barranquilla o sin ciudad; el edificio de carga, en «Carga», no avisa. PR #152 fusionado. Cierra #151 |
 | 2026-10-24 | Generador de la prueba de carga en `load-test/`, con sus pruebas y la prueba de humo de 1.000 señales: el edificio de carga no avisa. PR #154 fusionado. Cierra #153 |
 | 2026-10-24 | Prueba del monitor al cerrar un incidente: la fila pierde «Ver incidente» y «Normalizado · caso abierto». PR #156 fusionado. Cierra #155 |
+| 2026-10-24 | Correcciones de la revisión de Cali en `estado.md`: la org caduca el 19 de noviembre, `Case` tiene 22 campos propios y falta `Resumen_Bitacora__c` en los objetos. PR #158 fusionado. Cierra #157 |
