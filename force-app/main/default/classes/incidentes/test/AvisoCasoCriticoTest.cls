@@ -1,7 +1,7 @@
 /**
  * El flujo Avisar_Caso_Critico y los textos del correo. Apex no puede afirmar
  * que una alerta salio: se comprueba que el incidente queda guardado por cada
- * camino (nace en rojo, escala, sin ciudad) y que las formulas que lee el
+ * camino (nace en rojo, escala, sin ciudad, ciudad sin operadores) y que las formulas que lee el
  * correo dicen lo que muestra la maqueta.
  */
 @isTest
@@ -56,6 +56,36 @@ private class AvisoCasoCriticoTest {
 
     Case guardado = leer(incidente.Id);
     Assert.isNull(guardado.Ciudad__c, 'Sin ciudad no hay alerta de operadores');
+    Assert.areEqual(IncidentesServicio.PRIORIDAD_ALTA, guardado.Priority);
+  }
+
+  @isTest
+  static void shouldGuardarElIncidente_WhenLaCiudadNoSeOpera() {
+    Edificio__c carga = new Edificio__c(
+      Name = 'Edificio de carga',
+      Codigo_Externo__c = 'BLD-CARGA-TEST',
+      Ciudad__c = 'Carga'
+    );
+    insert carga;
+    Activo__c equipo = new Activo__c(
+      Name = 'Bomba de carga',
+      Codigo_Externo__c = 'AST-CARGA-TEST',
+      Edificio__c = carga.Id,
+      Tipo__c = 'WATER_PUMP'
+    );
+    insert equipo;
+    Case incidente = incidente(equipo, IncidentesServicio.PRIORIDAD_ALTA);
+
+    Test.startTest();
+    insert incidente;
+    Test.stopTest();
+
+    Case guardado = leer(incidente.Id);
+    Assert.areEqual(
+      'Carga',
+      guardado.Ciudad__c,
+      'Una ciudad sin operadores queda fuera de la condicion del flujo'
+    );
     Assert.areEqual(IncidentesServicio.PRIORIDAD_ALTA, guardado.Priority);
   }
 
