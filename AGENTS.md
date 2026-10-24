@@ -54,10 +54,26 @@ Dentro de `force-app/main/default/`:
 | `objects/`                              | Objetos personalizados, sus campos y el evento de plataforma |
 | `globalValueSets/`                      | Los cuatro catálogos compartidos                             |
 | `permissionsets/`                       | Conjuntos de permisos. **Todo el acceso se concede aquí**    |
-| `classes/`                              | Apex                                                         |
-| `triggers/`                             | Disparadores                                                 |
+| `classes/`                              | Apex por dominio, cada uno con sus pruebas en `test/`        |
+| `triggers/`                             | Disparadores, con los mismos dominios                        |
 | `lwc/`                                  | Componentes Lightning                                        |
 | `applications/`, `tabs/`, `flexipages/` | La aplicación y su navegación                                |
+
+Los dominios de `classes/` y `triggers/`:
+
+| Carpeta          | Qué hace                                                            |
+| ---------------- | ------------------------------------------------------------------- |
+| `ingesta/`       | Trae las páginas del simulador, valida, deduplica, guarda y publica |
+| `salud-ingesta/` | Vigila que la ingesta siga consultando y avisa si se cae            |
+| `procesamiento/` | Suscriptor del aviso: clasifica, estado actual y lectura            |
+| `incidentes/`    | Casos: abrir, escalar, normalizar, su historia y sus lecturas       |
+| `monitor/`       | El controlador del monitor                                          |
+| `umbrales/`      | Aplicar límites nuevos                                              |
+| `bitacora/`      | Retención, resumen y relleno del índice de la bitácora              |
+| `test/`          | Lo que comparten las pruebas y las que cruzan dominios              |
+
+Una clase nueva va en la carpeta de su dominio, y su prueba en el `test/` de ese dominio.
+`sf project retrieve` deja en `classes/` lo que no existía en el proyecto: hay que moverlo.
 
 ---
 
