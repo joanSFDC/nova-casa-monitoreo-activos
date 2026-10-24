@@ -279,8 +279,23 @@ tiene una fila por activo y medición y por tanto un tamaño acotado por el núm
 equipos, no por el tiempo. La bitácora la consulta el administrador desde vistas de lista
 estándar, con filtros, y ese uso sí tolera ser más lento.
 
-Queda abierta Q-11: si se conserva todo el histórico o hay política de retención. No
-bloquea el sprint, pero conviene que esté decidido antes de producción.
+La política de retención (Q-11) ya está decidida: una limpieza nocturna borra las
+aplicadas y atrasadas a los 7 días y las rechazadas, fallidas y en conflicto a los 90, y
+nunca las ligadas a un incidente ([módulo 11](11-trazabilidad.md)).
+
+## `Resumen_Bitacora__c`
+
+Lo que la limpieza borró, contado: una fila por día, equipo, resultado y motivo. Las
+señales se borran; su conteo queda para siempre. Solo lo lee el administrador.
+
+| Campo | Tipo | Notas |
+| --- | --- | --- |
+| `Clave__c` | Text(255), External ID, Unique | Día, equipo, resultado y motivo: cada lote suma a la fila que ya existe |
+| `Fecha__c` | Date | El día de recepción, en hora de Bogotá |
+| `Activo__c` | Lookup(Activo__c) | Vacío si la señal no resolvió su activo |
+| `Resultado__c` | Text(40) | Valor de API del resultado |
+| `Motivo__c` | Text(255) | Valor de API del motivo, si lo tenía |
+| `Cantidad__c` | Number(18, 0) | Cuántas señales borró |
 
 ## `Aviso_de_Senal__e`
 
