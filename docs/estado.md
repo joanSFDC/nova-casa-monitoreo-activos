@@ -90,7 +90,7 @@ Clases en `force-app/main/default/classes/`, por dominio (`ingesta/`, `procesami
 | Clase | Rol |
 | --- | --- |
 | `IngestaSchedulable` | Cada minuto encola el primer eslabón |
-| `IngestaQueueable` | Una página por transacción, hasta seis por ciclo |
+| `IngestaQueueable` | Una página por transacción, hasta cinco por ciclo (el tope de cadena de la org) |
 | `IngestaCliente` | `callout:Nova_Casa_Simulador` — el token no está aquí |
 | `IngestaValidador` | Contrato del [módulo 01](01-contrato-del-mensaje.md) |
 | `IngestaServicio` | Deduplica, upsert `Senal__c`, publica `Aviso_de_Senal__e`, avanza el cursor |
@@ -323,6 +323,10 @@ sf org assign permset -o novacasa2 -n Nova_Casa_Administracion
 ./scripts/programar-limpieza.sh novacasa2
 ```
 
+Los tres `programar-*` se corren con el administrador en hora de Bogotá: un trabajo
+programado toma la zona horaria de quien lo programa, y una zona con horario de verano se
+salta o repite una hora el día del cambio.
+
 `crear-usuarios-demo.sh` se puede volver a correr: solo manda el correo de
 clave a los usuarios que crea en esa corrida, así que no invalida las claves
 de quienes ya existían. El correo de los cinco humanos es el de Joan, adonde
@@ -341,10 +345,11 @@ minutos en ver el tema, el logo y las páginas nuevas.
 
 ## Qué se está haciendo ahora
 
-La prueba de carga de la fase 7 ([módulo 12](12-plan-de-pruebas.md)) está en curso. El
-generador de `load-test/` está desplegado y la prueba de humo de 1.000 señales pasó: el
-edificio de carga no manda correos. Los escalones de 100.000, 500.000 y un millón van el
-25 de octubre, después de revisar la primera noche de la limpieza. Mientras dure, nadie
+La primera noche programada de la limpieza, el 25 de octubre, corrió en 25 minutos y sin
+errores ([módulo 11](11-trazabilidad.md)). La prueba de carga de la fase 7
+([módulo 12](12-plan-de-pruebas.md)) está en curso. El generador de `load-test/` está
+desplegado y la prueba de humo de 1.000 señales pasó: el edificio de carga no manda
+correos. Los escalones de 100.000, 500.000 y un millón corren el 25 de octubre. Mientras dure, nadie
 salvo el administrador ve el edificio «Carga» ni sus equipos, porque la compartición es
 por ciudad; el coordinador ve sus incidentes en la cola de Coordinación. Al terminar se
 borra todo y el generador sale de la org.
@@ -772,6 +777,14 @@ No estaban en la especificación y conviene no redescubrirlas.
     por pendientes y por eventos libres. Los escalones son acumulados hasta un millón,
     sobre un edificio de cinco equipos, y al final se borra todo y se retira el
     generador ([módulo 12](12-plan-de-pruebas.md)).
+82. **La cadena de la ingesta llega a cinco páginas, no a seis.** Es el tope de cadena de
+    Developer Edition y Trailhead. El sexto eslabón fallaba siempre, y con el usuario en
+    español su error no se reconocía y sumaba un fallo de la ingesta. Con cinco no se pide
+    nunca, en ningún idioma, y el ritmo no cambia ([módulo 02](02-ingesta.md)).
+83. **Los trabajos programados van en hora de Bogotá.** Los 60 de la ingesta estaban en hora
+    de París y el 25 de octubre, con el fin del horario de verano europeo, se saltaron una
+    hora; el vigía la detectó y avisó. Se reprogramaron con el administrador en hora de
+    Bogotá, como el vigía y la limpieza ([módulo 02](02-ingesta.md)).
 
 ## Historial breve
 
@@ -854,3 +867,4 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-24 | Prueba del monitor al cerrar un incidente: la fila pierde «Ver incidente» y «Normalizado · caso abierto». PR #156 fusionado. Cierra #155 |
 | 2026-10-24 | Correcciones de la revisión de Cali en `estado.md`: la org caduca el 19 de noviembre, `Case` tiene 22 campos propios y falta `Resumen_Bitacora__c` en los objetos. PR #158 fusionado. Cierra #157 |
 | 2026-10-24 | Quién ve la prueba de carga, comprobado en la org: nadie salvo el administrador ve el edificio «Carga»; el coordinador ve sus incidentes en su cola. PR #160 fusionado. Cierra #159 |
+| 2026-10-25 | Revisión de la primera noche: la limpieza borró 153.876 señales en 25 minutos sin afectar la ingesta. La cadena de la ingesta llega a cinco páginas y sus trabajos se reprogramaron en hora de Bogotá. PR #162 fusionado. Cierra #161 |

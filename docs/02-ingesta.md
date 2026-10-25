@@ -219,8 +219,11 @@ comportamiento continuo del sistema, que es parte de lo que se pide.
 3. Continúa encolando el siguiente eslabón mientras se cumplan a la vez tres condiciones:
    quedan páginas por debajo del tope del ciclo, `hasMore` es verdadero, y no se ha
    agotado el presupuesto de llamadas de la transacción.
-4. El tope por ciclo es **seis páginas**, que es el número de ventanas de diez segundos que
-   caben en un minuto. Se guarda como constante nombrada.
+4. El tope por ciclo es **cinco páginas**, la constante `PAGINAS_POR_CICLO`. Seis serían las
+   ventanas de diez segundos de un minuto, pero Developer Edition y Trailhead cortan una
+   cadena de `Queueable` a cinco eslabones. El sexto fallaba siempre, y desde que el
+   usuario que programa la ingesta está en español, su error («Se ha alcanzado la
+   profundidad máxima de pilas») ya no se reconocía y contaba como fallo de la ingesta.
 
 Esto aproxima la cadencia de diez segundos sin bucle infinito y sin depender de que Apex
 pueda esperar. Cada eslabón es una transacción independiente, así que el presupuesto de
@@ -241,6 +244,14 @@ entre un operador que sabe que está mirando datos viejos y uno que no.
 
 Que el `Schedulable` corra cada minuto es parte de la misma defensa: aunque la cadena se
 rompa, el siguiente minuto la vuelve a arrancar desde el cursor guardado.
+
+Un trabajo programado toma la zona horaria del usuario que lo programa. Los 60 de la
+ingesta se programaron el 16 de octubre, cuando ese usuario tenía la zona de la org,
+Europa/París. El 25 de octubre París volvió a su horario de invierno: la hora de 2:00 a 2:59
+se repitió y Salesforce disparó los trabajos solo la segunda vez. La ingesta no corrió de
+00:00 a 00:59 UTC. El vigía, ya en hora de Bogotá, marcó la caída a los 15 minutos y avisó,
+y la ingesta volvió sola a la 01:00. **Los trabajos se programan con un usuario en hora de
+Bogotá**, que no tiene horario de verano. Se reprogramaron ese día.
 
 ### El aviso de ingesta caída
 
@@ -412,7 +423,7 @@ página está en [`estado.md`](estado.md).
 Estos diagramas son el mapa de US-201. El Mermaid se ve en GitHub; el ASCII está
 para quien lea el documento en un terminal.
 
-### 1. Un ciclo: del minuto a las seis páginas
+### 1. Un ciclo: del minuto a las cinco páginas
 
 #### Mermaid
 
@@ -426,10 +437,10 @@ sequenceDiagram
     participant Sim as Simulador
     participant DB as Control_de_Ingesta__c
 
-    Note over Sch,DB: Un minuto. Tope de seis paginas porque hasMore no termina.
+    Note over Sch,DB: Un minuto. Tope de cinco paginas porque hasMore no termina.
 
     Sch-)Q: enqueueJob(indice 0)
-    loop Mientras indice menor que 6 y hasMore y Activo
+    loop Mientras indice menor que 5 y hasMore y Activo
         Q->>Svc: ejecutar(indice)
         Svc->>DB: SELECT FOR UPDATE
         alt Cursor vacio
@@ -471,14 +482,14 @@ IngestaSchedulable          IngestaQueueable           Simulador         Control
         |                          |---------------------------------------->|
         |                          |  enqueue indice+1     |                 |
         |                          |-----+                 |                 |
-        |                          |     | (hasta 6)       |                 |
+        |                          |     | (hasta 5)       |                 |
         |                          |<----+                 |                 |
 ```
 
 #### Notas
 
 - Cada eslabon es una transaccion: callout, DML y tope de eventos se renuevan.
-- `hasMore` en MIXED es siempre verdadero; el tope de seis es lo que evita el bucle infinito.
+- `hasMore` en MIXED es siempre verdadero; el tope de cinco es lo que evita el bucle infinito.
 - Si un eslabon muere, el Schedulable del minuto siguiente retoma el cursor guardado.
 
 ### 2. Una pagina: validar, guardar, publicar, avanzar

@@ -5,7 +5,8 @@ public inherited sharing class IngestaConstantes {
   public static final String CREDENCIAL = 'Nova_Casa_Simulador';
   public static final String ORIGEN = 'nova-casa-simulator';
   public static final String VERSION_ESQUEMA = '1.0';
-  public static final Integer PAGINAS_POR_CICLO = 6;
+  // Developer Edition y Trailhead cortan una cadena de Queueable a 5 eslabones.
+  public static final Integer PAGINAS_POR_CICLO = 5;
   public static final Integer FALLOS_PARA_CORTAR = 3;
   public static final Integer TOLERANCIA_FUTURO_MINUTOS = 5;
   public static final Integer TIEMPO_ESPERA_MS = 20000;
