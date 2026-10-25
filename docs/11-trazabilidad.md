@@ -269,3 +269,10 @@ La primera corrida, el 24 de octubre de 2026 con la ingesta funcionando, hizo 22
 unos 41 minutos y sin errores: borró 452.402 señales (364.886 atrasadas y 87.516 aplicadas),
 que quedaron contadas en 113 filas del resumen. La bitácora quedó en 2.508.222 señales, y la
 ingesta siguió consultando cada minuto mientras tanto.
+
+La primera noche programada, el 25 de octubre, corrió de 2:00:36 a 2:25:50 a. m., en 77 lotes
+y sin errores. Borró 153.876 señales, 121.690 atrasadas y 32.186 aplicadas: lo que quedaba
+del 17 de octubre después de la corrida a mano y el comienzo del 18. No le quitó nada a la
+operación. La ingesta trajo unas 6.200 señales cada 26 minutos antes, durante y después de
+la limpieza, y la latencia del procesamiento fue la misma en las tres ventanas: 1 s de
+mediana y 3 s en el percentil 95.

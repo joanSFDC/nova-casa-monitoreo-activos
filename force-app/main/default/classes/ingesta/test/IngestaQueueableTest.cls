@@ -53,6 +53,41 @@ private class IngestaQueueableTest {
   }
 
   @isTest
+  static void shouldEncadenar_WhenElCuartoEslabonTieneMasPaginas() {
+    Test.setMock(HttpCalloutMock.class, new IngestaSimuladorMock());
+
+    Test.startTest();
+    IngestaServicio.ResultadoCiclo cuarto = IngestaServicio.ejecutar(3);
+    Test.stopTest();
+
+    Assert.isTrue(
+      cuarto.encadenar,
+      'Con mas paginas, el cuarto pide el quinto'
+    );
+  }
+
+  @isTest
+  static void shouldNoPedirUnSexto_WhenElQuintoEslabonTieneMasPaginas() {
+    Test.setMock(HttpCalloutMock.class, new IngestaSimuladorMock());
+
+    Test.startTest();
+    IngestaServicio.ResultadoCiclo quinto = IngestaServicio.ejecutar(4);
+    Test.stopTest();
+
+    Assert.isFalse(
+      quinto.encadenar,
+      'La plataforma rechaza el sexto eslabon; pedirlo contaba como fallo'
+    );
+    Assert.areEqual(
+      0,
+      [SELECT Fallos_Consecutivos__c FROM Control_de_Ingesta__c LIMIT 1]
+        .Fallos_Consecutivos__c
+        .intValue(),
+      'Terminar el ciclo no es un fallo'
+    );
+  }
+
+  @isTest
   static void shouldNoAvanzarCursor_When429() {
     Control_de_Ingesta__c control = [
       SELECT Id
