@@ -10,6 +10,7 @@ Uso, desde la raiz del repositorio:
     python3 load-test/carga.py medir ETIQUETA     # foto del escalon en resultados/
     python3 load-test/carga.py detener            # aborta el ciclo programado
     python3 load-test/carga.py limpiar            # borra todo lo que creo la carga
+    python3 load-test/carga.py borrar-edificio    # el edificio y sus equipos, tras la purga
     python3 load-test/carga.py retirar            # quita el generador de la org
 
 La org sale de NC_ORG o, si no esta, del alias novacasa2. No imprime credenciales.
@@ -325,6 +326,17 @@ def limpiar():
     print("limpieza lanzada: sigue su avance con estado")
 
 
+def borrar_edificio():
+    """Un dia despues de limpiar: antes, la purga pendiente de las senales hace que
+    borrar un equipo supere el tope de una cascada."""
+    apex(
+        "List<Edificio__c> e = [SELECT Id FROM Edificio__c "
+        "WHERE Codigo_Externo__c = 'BLD-CARGA-001']; delete e; "
+        "Database.emptyRecycleBin(e);"
+    )
+    print("edificio de carga borrado, con sus equipos")
+
+
 def retirar():
     d = sf(
         "project",
@@ -356,6 +368,8 @@ def main(argv):
         detener()
     elif orden == "limpiar":
         limpiar()
+    elif orden == "borrar-edificio":
+        borrar_edificio()
     elif orden == "retirar":
         retirar()
     else:

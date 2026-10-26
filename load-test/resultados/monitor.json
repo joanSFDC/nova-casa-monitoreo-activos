@@ -1,0 +1,54 @@
+[
+  {
+    "etiqueta": "base",
+    "momento": "2026-10-25T15:55:15Z",
+    "segundos": [
+      3.41,
+      3.99,
+      4.49
+    ],
+    "mediana": 3.99
+  },
+  {
+    "etiqueta": "escalon-100k",
+    "momento": "2026-10-25T16:42:35Z",
+    "segundos": [
+      4.28,
+      3.3,
+      3.69
+    ],
+    "mediana": 3.69
+  },
+  {
+    "etiqueta": "escalon-500k",
+    "momento": "2026-10-25T21:15:00Z",
+    "segundos": [
+      5.38,
+      3.82,
+      2.99
+    ],
+    "mediana": 3.82
+  },
+  {
+    "etiqueta": "escalon-1m",
+    "momento": "2026-10-25T23:49:44Z",
+    "segundos": [
+      6.62,
+      4.68,
+      6.74
+    ],
+    "mediana": 6.62
+  },
+  {
+    "etiqueta": "escalon-1m-repeticion",
+    "momento": "2026-10-25T23:52:32Z",
+    "segundos": [
+      3.87,
+      2.85,
+      3.69,
+      3.71,
+      3.31
+    ],
+    "mediana": 3.69
+  }
+]

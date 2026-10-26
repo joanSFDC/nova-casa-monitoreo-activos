@@ -276,3 +276,8 @@ del 17 de octubre después de la corrida a mano y el comienzo del 18. No le quit
 operación. La ingesta trajo unas 6.200 señales cada 26 minutos antes, durante y después de
 la limpieza, y la latencia del procesamiento fue la misma en las tres ventanas: 1 s de
 mediana y 3 s en el percentil 95.
+
+Con un millón de señales más de la prueba de carga, 3,74 millones en total, la limpieza borró
+213.002 en 107 lotes y 18 minutos, sin errores: unos 10 s por lote, frente a 20 s sin la
+carga. El tamaño de la tabla no la hace más lenta, porque la consulta va por `CreatedDate`
+([módulo 12](12-plan-de-pruebas.md)).
