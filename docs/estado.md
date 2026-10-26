@@ -346,10 +346,12 @@ minutos en ver el tema, el logo y las páginas nuevas.
 ## Qué se está haciendo ahora
 
 La primera noche programada de la limpieza, el 25 de octubre, corrió en 25 minutos y sin
-errores ([módulo 11](11-trazabilidad.md)). La prueba de carga de la fase 7
-([módulo 12](12-plan-de-pruebas.md)) está en curso. El generador de `load-test/` está
-desplegado y la prueba de humo de 1.000 señales pasó: el edificio de carga no manda
-correos. Los escalones de 100.000, 500.000 y un millón corren el 25 de octubre. Mientras dure, nadie
+errores ([módulo 11](11-trazabilidad.md)). La prueba de carga de la fase 7 terminó el 25 de
+octubre ([módulo 12](12-plan-de-pruebas.md)): un millón de señales a 200.000 por hora, sin
+fallidas ni atrasos, sin correos y sin afectar la ingesta en vivo. Después se borraron sus
+señales, incidentes y estados, y el generador salió de la org. El edificio de carga y sus
+cinco equipos, vacíos y visibles solo para el administrador, se borran el 26 de octubre,
+cuando Salesforce termine de purgar las señales. Mientras dure, nadie
 salvo el administrador ve el edificio «Carga» ni sus equipos, porque la compartición es
 por ciudad; el coordinador ve sus incidentes en la cola de Coordinación. Al terminar se
 borra todo y el generador sale de la org.
@@ -868,3 +870,4 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-24 | Correcciones de la revisión de Cali en `estado.md`: la org caduca el 19 de noviembre, `Case` tiene 22 campos propios y falta `Resumen_Bitacora__c` en los objetos. PR #158 fusionado. Cierra #157 |
 | 2026-10-24 | Quién ve la prueba de carga, comprobado en la org: nadie salvo el administrador ve el edificio «Carga»; el coordinador ve sus incidentes en su cola. PR #160 fusionado. Cierra #159 |
 | 2026-10-25 | Revisión de la primera noche: la limpieza borró 153.876 señales en 25 minutos sin afectar la ingesta. La cadena de la ingesta llega a cinco páginas y sus trabajos se reprogramaron en hora de Bogotá. PR #162 fusionado. Cierra #161 |
+| 2026-10-25 | Prueba de carga: 100.000, 500.000 y un millón de señales a 200.000 por hora, sin fallidas ni atrasos; limpieza nocturna con el millón en 18 minutos; limpieza de la carga y retiro del generador. PR #164 fusionado. Cierra #163 |

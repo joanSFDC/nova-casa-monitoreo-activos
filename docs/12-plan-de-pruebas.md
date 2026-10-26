@@ -306,6 +306,12 @@ tres vuelve a aparecer y el total baja a 162. `ExcessiveParameterList` sube de 1
 porque la regla salta desde 4 parámetros y los pasos nuevos tienen 4 o 5; la lista más
 larga del código bajó de 10 a 7 (`IncidentesServicio.acumular`).
 
+En la verificación final, el 25 de octubre, quedan 163: los mismos tres avisos de severidad 2
+y ninguno de severidad 1. El único nuevo es una preparación repetida en
+`MonitorControladorTest`, porque la prueba de cerrar el incidente arma los mismos datos que
+la de normalizado. Es código de prueba, y se dejó así para no tocar el código antes de la
+exposición.
+
 | Lo que queda | Por qué |
 | --- | --- |
 | Complejidad (`CyclomaticComplexity`, `CognitiveComplexity`, `NcssCount`, `ExcessiveParameterList`) | Son las clases grandes. Las tres peores ya se partieron; quedan, por orden, `ProcesamientoServicio.procesar` (44), `UmbralAplicacionServicio.aplicar` (34), `IngestaServicio.ejecutar` (23), `LecturasPeriodoControlador.pagina` (22) y `MonitorControlador.abrirIntervencion` (16), con pruebas que las cubren |
@@ -379,7 +385,7 @@ retira de la org.
 | Escalones acumulados | Independientes, limpiando entre uno y otro | 1,6 millones de filas y tres limpiezas: muchas más horas |
 | 200.000 por hora | Lo más rápido posible | Podría dejar sin cupo de eventos a la ingesta en vivo |
 | Cinco equipos | Cincuenta | Menos sesgo por activo del que tiene la operación |
-| Limpieza nocturna a mano con el millón | Esperar a la noche siguiente | Un día más de carga visible para el coordinador y el gerente |
+| Limpieza nocturna a mano con el millón | Esperar a la noche siguiente | Un día más con la carga en la org y sus incidentes en la cola del coordinador |
 
 ```bash
 python3 load-test/carga.py desplegar
@@ -410,6 +416,48 @@ python3 load-test/carga.py retirar
 
 Las aplicadas son el 4 % y no el 24 % del día real porque hay cinco equipos y las tandas
 son grandes. Es lo esperado, y por eso esa proporción se mide en vez de imponerse.
+
+**Los escalones, 25 de octubre.** A 200.000 filas por hora, unas 14 veces lo que trae hoy la
+ingesta en vivo:
+
+| Escalón | Tiempo | Aplicadas · atrasadas · rechazadas · conflictos | Fallidas y pendientes | Latencia del procesamiento | Monitor |
+| --- | --- | --- | --- | --- | --- |
+| Antes de la carga | — | — | — | 1 s de mediana, 3 s en el percentil 95 | 3,99 s |
+| 100.007 filas | 40 min, unas 150.000 por hora | 3,6 % · 93,2 % · 2,64 % · 0,60 % | Ninguna | 2 s y 4 s | 3,69 s |
+| 500.102 filas | 2 h 2 min, unas 197.000 por hora | 3,6 % · 93,2 % · 2,64 % · 0,61 % | Ninguna | 2 s y 4 s | 3,82 s |
+| 1.000.170 filas | 2 h 30 min, unas 200.000 por hora | 3,6 % · 93,1 % · 2,64 % · 0,61 % | Ninguna | 3 s y 4 s | 3,69 s |
+
+- **Límites.** En la hora de más carga se publicaron unos 165.000 eventos de los 450.000
+  permitidos, con la ingesta en vivo incluida. No se envió ningún correo:
+  `DailyWorkflowEmails` siguió en 61.125.
+- **Bloqueos y sesgo.** Ninguna señal fallida ni pendiente, y el suscriptor del aviso nunca
+  reintentó ni registró un error, con 200.000 señales nuevas por equipo de carga sobre los
+  2,6 millones de la bitácora.
+- **La ingesta en vivo.** Siguió consultando cada minuto, sin errores ni caídas y sin
+  pendientes propias, durante toda la prueba.
+- **El monitor.** El tiempo hasta pintar sus filas, como administrador, quedó igual que antes
+  de la carga. Una primera serie con el millón dio 6,62 s, justo al terminar el generador;
+  la repetición, con cinco cargas, dio 3,69 s. El monitor no consulta la bitácora.
+- **Almacenamiento.** De 5.124 a 7.301 MB: unos 2,2 KB por señal.
+- **La limpieza nocturna con el millón.** Con 3,74 millones de señales en la bitácora borró
+  213.002 en 107 lotes y 17 minutos y 55 segundos, sin errores. Son unos 10 s por lote,
+  frente a 20 s la noche anterior sin la carga. La tabla más grande no la hace más lenta,
+  porque la consulta va por `CreatedDate`, que está indexado. Las señales reales que llegaron
+  mientras tanto se procesaron en 1 s de mediana y 3 s en el percentil 95.
+- **La limpieza de la carga.** Borró las 1.000.170 señales en 501 lotes y 1 h 49 min. La
+  bitácora volvió a 2.565.799 señales y el almacenamiento a 5.012 MB. Los 55 incidentes de
+  carga, casi todos de la cámara, que abre uno por episodio, y los cinco estados se borraron
+  aparte, y el generador salió de la org.
+- **Lo que enseñó la limpieza.** El edificio y sus cinco equipos no se pudieron borrar esa
+  noche. Vaciar la papelera no borra las filas en el acto: Salesforce las purga después, y
+  hasta entonces borrar un equipo tiene que dejar en blanco su referencia en las 200.000
+  señales que tuvo. Eso supera el tope de una cascada (`DELETE_OPERATION_TOO_LARGE`). Quedan
+  sin estados, sin incidentes y visibles solo para el administrador, y se borran con
+  `python3 load-test/carga.py borrar-edificio` cuando termina la purga, un día después.
+
+La conclusión: la org sostiene unas 14 veces el volumen de hoy sin fallidas, sin atrasar el
+procesamiento ni la ingesta en vivo, y la limpieza nocturna no depende del tamaño de la
+tabla.
 
 ## La cobertura
 

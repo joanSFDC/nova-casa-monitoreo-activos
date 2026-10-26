@@ -27,5 +27,92 @@
         "restante": 444472
       }
     }
+  },
+  {
+    "meta": 100000,
+    "ritmo": 200000,
+    "inicio": "2026-10-25T15:55:31Z",
+    "filas_al_iniciar": 1000,
+    "siguiente_al_iniciar": 1000,
+    "limites_al_iniciar": {
+      "DailyApiRequests": {
+        "max": 441450,
+        "restante": 441288
+      },
+      "DailyAsyncApexExecutions": {
+        "max": 691800,
+        "restante": 683047
+      },
+      "DailyWorkflowEmails": {
+        "max": 61125,
+        "restante": 61125
+      },
+      "DataStorageMB": {
+        "max": 52537,
+        "restante": 47410
+      },
+      "HourlyPublishedPlatformEvents": {
+        "max": 450000,
+        "restante": 436971
+      }
+    }
+  },
+  {
+    "meta": 500000,
+    "ritmo": 200000,
+    "inicio": "2026-10-25T16:43:01Z",
+    "filas_al_iniciar": 100007,
+    "siguiente_al_iniciar": 101600,
+    "limites_al_iniciar": {
+      "DailyApiRequests": {
+        "max": 441450,
+        "restante": 441227
+      },
+      "DailyAsyncApexExecutions": {
+        "max": 691800,
+        "restante": 682981
+      },
+      "DailyWorkflowEmails": {
+        "max": 61125,
+        "restante": 61125
+      },
+      "DataStorageMB": {
+        "max": 52537,
+        "restante": 47194
+      },
+      "HourlyPublishedPlatformEvents": {
+        "max": 450000,
+        "restante": 362586
+      }
+    }
+  },
+  {
+    "meta": 1000000,
+    "ritmo": 200000,
+    "inicio": "2026-10-25T21:14:19Z",
+    "filas_al_iniciar": 500102,
+    "siguiente_al_iniciar": 508200,
+    "limites_al_iniciar": {
+      "DailyApiRequests": {
+        "max": 441450,
+        "restante": 441256
+      },
+      "DailyAsyncApexExecutions": {
+        "max": 691800,
+        "restante": 681370
+      },
+      "DailyWorkflowEmails": {
+        "max": 61125,
+        "restante": 61125
+      },
+      "DataStorageMB": {
+        "max": 52537,
+        "restante": 46284
+      },
+      "HourlyPublishedPlatformEvents": {
+        "max": 450000,
+        "restante": 446517
+      }
+    }
   }
 ]
