@@ -63,11 +63,11 @@ proteccion contra duplicados vive en `Senal__c.Clave__c`.
 ## Como regenerarlo
 
 ```bash
-cd generadores
-PYTHONPATH="../.pylibs:." python3 render_modelo_detallado.py
+cd _trabajo/generadores
+PYTHONPATH="../../.pylibs:." python3 render_modelo_detallado.py
 ```
 
-La fuente esta en `generadores/modelo_detallado.py`, en el mismo estilo que los diagramas
+La fuente esta en `_trabajo/generadores/modelo_detallado.py`, en el mismo estilo que los diagramas
 de los entregables. **Si cambia el modelo, se cambia primero en
 [`../03-modelo-de-datos.md`](../03-modelo-de-datos.md) y despues aqui**, nunca al
 contrario: el documento es la fuente de verdad y el diagrama es su retrato.
