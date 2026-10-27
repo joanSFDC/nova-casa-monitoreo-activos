@@ -346,6 +346,8 @@ Ver no basta: cada acción comprueba también quién la pide, en el servidor.
 | Abrir intervención, en el monitor | Quien puede crear casos: operador, coordinador y administrador | El panel trae `puedeAbrir` (`Case.isCreateable()`) y la fila solo ofrece el botón si es verdadero: el gerente no lo ve. `abrirIntervencion` lo vuelve a comprobar antes de escribir, lee el estado con `USER_MODE` y crea caso y nota con `USER_MODE`. Sobre un equipo ajeno responde que no existe |
 | Ver incidente, en el monitor | Todos los que ven el equipo | Solo navega al caso; la página aplica la compartición por ciudad |
 | Registrar intervención, en el caso | Coordinador | Acción rápida que crea la tarea. La cabecera del caso la muestra solo con el permiso personalizado `Nova_Casa_Registrar_Intervencion`, que solo tiene `Nova_Casa_Coordinador` |
+| Completar una intervención, en la historia | Coordinador | El botón «Completar» sale con el mismo permiso `Nova_Casa_Registrar_Intervencion`; el cambio va por `updateRecord`, con los permisos de la persona |
+| Cerrar incidente, en el caso | Coordinador | Acción rápida que deja el caso Cerrado y pide «Cómo se resolvió». La cabecera la muestra solo con el permiso personalizado `Nova_Casa_Cerrar_Incidente`, que solo tiene `Nova_Casa_Coordinador`, y solo con el caso abierto. Al cerrar, el flujo `Completar_Intervenciones_Al_Cerrar` completa sus tareas abiertas en modo sistema |
 | Aplicar límites | Quien edita `Umbral__c`: coordinador y administrador | `UmbralAplicacionServicio.aplicar` lo comprueba antes de nada y lanza `SinPermisoException` |
 | Programar la ingesta | Administrador | Es quien tiene la credencial. `./scripts/programar-ingesta.sh` |
 | Procesar avisos | Usuario de integración | `./scripts/configurar-suscriptor.sh` |
@@ -356,7 +358,7 @@ abrir la intervención». Ahora el criterio es el mismo en todo el sistema: el b
 muestra solo a quien puede hacer la acción, y el servidor lo comprueba igual por si alguien
 la pide directo. «Abrir intervención» se decide por el permiso de crear casos.
 «Registrar intervención» no se puede decidir así, porque el operador también crea tareas
-(sus notas): por eso es un permiso personalizado, que el coordinador tiene y nadie más.
+(sus notas): por eso es un permiso personalizado, que el coordinador tiene y nadie más. «Cerrar incidente» tiene el suyo, `Nova_Casa_Cerrar_Incidente`: cerrar es afirmar que el problema se resolvió, y eso lo verifica el coordinador. «Cómo se resolvió» (`Case.Resolucion__c`) lo editan el coordinador y el administrador; el operador y el gerente lo leen.
 «Aplicar límites» ya lo cumplía: el flujo solo está habilitado para coordinador y
 administración, y Salesforce no muestra la acción a los demás.
 
@@ -418,7 +420,7 @@ Lo que cada prueba verifica. Salvo las dos primeras filas, están en `SeguridadA
 | Timbre del monitor | `shouldEscucharTimbreSinLeerAviso_WhenPersonaDelMonitor` | Operador, coordinador y gerente leen el timbre y no el aviso |
 | Gerente en el monitor | `shouldOcultarYNegarAbrirIntervencion_WhenGerente` | No tiene `puedeAbrir`, la fila crítica no le ofrece abrir intervención y el servidor la rechaza si la pide directo |
 | Quien crea casos | `shouldOfrecerAbrirIntervencion_WhenPuedeCrearCasos` | Operador, coordinador y administrador tienen `puedeAbrir` |
-| Registrar intervención | `shouldMostrarRegistrarIntervencion_SoloAlCoordinador` | Solo el coordinador tiene el permiso personalizado |
+| Registrar intervención y cerrar incidente | `shouldMostrarRegistrarIntervencion_SoloAlCoordinador` | Solo el coordinador tiene los dos permisos personalizados |
 | Coordinador registra | `shouldRegistrarIntervencion_WhenCoordinador` | La tarea se crea en `USER_MODE` sobre el caso |
 | Lecturas del caso | `shouldLeerSinEscribirLecturasDelCaso_WhenPersonas` | Operador, coordinador y gerente las leen y no las escriben; ni el coordinador, que edita casos, puede cambiar una |
 

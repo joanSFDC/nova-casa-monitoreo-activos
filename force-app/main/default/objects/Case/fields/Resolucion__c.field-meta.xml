@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Resolucion__c</fullName>
+    <description>Lo que escribe el coordinador al cerrar el incidente con «Cerrar incidente»: qué se hizo y cómo quedó el equipo.</description>
+    <externalId>false</externalId>
+    <inlineHelpText>Qué se hizo y cómo quedó el equipo. Lo pide «Cerrar incidente».</inlineHelpText>
+    <label>Cómo se resolvió</label>
+    <length>2000</length>
+    <trackTrending>false</trackTrending>
+    <type>LongTextArea</type>
+    <visibleLines>4</visibleLines>
+</CustomField>

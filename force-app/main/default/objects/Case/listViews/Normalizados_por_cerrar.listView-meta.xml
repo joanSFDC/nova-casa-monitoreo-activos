@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Normalizados_por_cerrar</fullName>
+    <columns>CASES.CASE_NUMBER</columns>
+    <columns>CASES.SUBJECT</columns>
+    <columns>Activo__c</columns>
+    <columns>Ciudad__c</columns>
+    <columns>Condicion_Equipo__c</columns>
+    <columns>Ultima_Lectura__c</columns>
+    <columns>CASES.PRIORITY</columns>
+    <columns>CASES.STATUS</columns>
+    <columns>CASES.CREATED_DATE_DATE_ONLY</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>CASES.CLOSED</field>
+        <operation>equals</operation>
+        <value>0</value>
+    </filters>
+    <filters>
+        <field>Condicion_Equipo__c</field>
+        <operation>equals</operation>
+        <value>Normalizado</value>
+    </filters>
+    <label>Normalizados por cerrar</label>
+</ListView>

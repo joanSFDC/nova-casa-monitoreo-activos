@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <FlexiPage xmlns="http://soap.sforce.com/2006/04/metadata">
-    <description>El inicio del coordinador: la cola de coordinación y el monitor, con las señales rechazadas hoy al lado.</description>
+    <description>El inicio del coordinador: la cola de coordinación con lo que sigue en falla, los normalizados por cerrar y el monitor, con las señales rechazadas hoy al lado.</description>
     <flexiPageRegions>
         <itemInstances>
             <componentInstance>
@@ -14,6 +14,20 @@
                 </componentInstanceProperties>
                 <componentName>flexipage:filterListCard</componentName>
                 <identifier>flexipage_filterListCard_cola</identifier>
+            </componentInstance>
+        </itemInstances>
+        <itemInstances>
+            <componentInstance>
+                <componentInstanceProperties>
+                    <name>entityName</name>
+                    <value>Case</value>
+                </componentInstanceProperties>
+                <componentInstanceProperties>
+                    <name>filterName</name>
+                    <value>Normalizados_por_cerrar</value>
+                </componentInstanceProperties>
+                <componentName>flexipage:filterListCard</componentName>
+                <identifier>flexipage_filterListCard_normalizados</identifier>
             </componentInstance>
         </itemInstances>
         <itemInstances>

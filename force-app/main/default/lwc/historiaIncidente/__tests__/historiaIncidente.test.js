@@ -2,6 +2,7 @@ import { createElement } from "lwc";
 import HistoriaIncidente, { TOPE_MAXIMO } from "c/historiaIncidente";
 import historia from "@salesforce/apex/HistoriaIncidenteControlador.historia";
 import { registerRefreshHandler } from "lightning/refresh";
+import { updateRecord } from "lightning/uiRecordApi";
 
 jest.mock(
   "@salesforce/apex/HistoriaIncidenteControlador.historia",
@@ -9,6 +10,12 @@ jest.mock(
     const { createApexTestWireAdapter } = require("@salesforce/sfdx-lwc-jest");
     return { default: createApexTestWireAdapter(jest.fn()) };
   },
+  { virtual: true }
+);
+
+jest.mock(
+  "@salesforce/customPermission/Nova_Casa_Registrar_Intervencion",
+  () => ({ default: true }),
   { virtual: true }
 );
 
@@ -73,6 +80,58 @@ describe("c-historia-incidente", () => {
       document.body.removeChild(document.body.firstChild);
     }
     jest.clearAllMocks();
+  });
+
+  it("completa una intervención abierta y lo avisa", async () => {
+    const elemento = crear();
+    const avisos = [];
+    elemento.addEventListener("lightning__showtoast", (e) =>
+      avisos.push(e.detail)
+    );
+    historia.emit(HISTORIA);
+    await flushPromises();
+
+    const boton = elemento.shadowRoot.querySelector("button.completar");
+    expect(boton.textContent.trim()).toBe("Completar");
+    expect(boton.getAttribute("aria-label")).toBe(
+      "Completar «Revisar la presión de la bomba»"
+    );
+    boton.click();
+    await flushPromises();
+
+    expect(updateRecord).toHaveBeenCalledWith({
+      fields: { Id: "00Txx0000001", Status: "Completed" }
+    });
+    expect(avisos).toEqual([
+      expect.objectContaining({
+        title: "Intervención completada.",
+        variant: "success"
+      })
+    ]);
+  });
+
+  it("avisa si no se pudo completar la intervención", async () => {
+    updateRecord.mockRejectedValueOnce(new Error("sin acceso"));
+    const elemento = crear();
+    const avisos = [];
+    elemento.addEventListener("lightning__showtoast", (e) =>
+      avisos.push(e.detail)
+    );
+    historia.emit(HISTORIA);
+    await flushPromises();
+
+    elemento.shadowRoot.querySelector("button.completar").click();
+    await flushPromises();
+
+    expect(avisos).toEqual([
+      expect.objectContaining({
+        title: "No se pudo completar la intervención.",
+        variant: "error"
+      })
+    ]);
+    expect(elemento.shadowRoot.querySelector("button.completar").disabled).toBe(
+      false
+    );
   });
 
   it("muestra las intervenciones abiertas y la línea de tiempo en orden", async () => {

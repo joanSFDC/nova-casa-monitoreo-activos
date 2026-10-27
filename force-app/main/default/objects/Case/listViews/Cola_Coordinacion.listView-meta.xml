@@ -16,6 +16,11 @@
         <operation>equals</operation>
         <value>0</value>
     </filters>
+    <filters>
+        <field>Condicion_Equipo__c</field>
+        <operation>equals</operation>
+        <value>En_falla</value>
+    </filters>
     <label>Cola de coordinación</label>
     <queue>Coordinacion</queue>
 </ListView>

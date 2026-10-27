@@ -42,7 +42,7 @@ Lo desplegado y verificado:
   `Senal__c`, `Control_de_Ingesta__c` y `Resumen_Bitacora__c`
 - Eventos: `Aviso_de_Senal__e` y `Panel_Actualizado__e`, el timbre sin campos
   del monitor (los dos `PublishAfterCommit`)
-- 22 campos en `Case`:
+- 23 campos en `Case`:
   - Identidad y ruta (6): `Clave_Abierta__c`, `Activo__c`, `Tipo_Medicion__c`,
     `Episodio_Id__c`, `Origen_Senal__c` y `Ciudad__c`.
   - Lecturas (9): `Severidad_Apertura__c`, `Lectura_Apertura__c`,
@@ -52,6 +52,7 @@ Lo desplegado y verificado:
   - Fórmulas del correo (7): `Edificio_Nombre__c`, `Equipo_Nombre__c`,
     `Como_Llego_A_Rojo__c`, `Que_Paso_Titulo__c`, `Que_Paso__c`,
     `Hora_Cambio_Texto__c` y `Responsable_Texto__c`.
+  - Cierre (1): `Resolucion__c`, «Cómo se resolvió».
 - Catálogos globales: `Tipo_Activo`, `Tipo_Medicion`, `Unidad`, `Severidad`
 
 Las claves External ID y Unique funcionan: dos estados con la misma
@@ -800,6 +801,16 @@ No estaban en la especificación y conviene no redescubrirlas.
     campos la guardan ([módulo 09](09-experiencia-del-operador.md)). Se descartó leer la
     llegada de las señales sin compartir: el operador y la gerencia no leen la bitácora, y
     sumaba cuatro avisos de seguridad.
+85. **El coordinador tiene un camino claro para cerrar y para terminar una intervención.**
+    MDSS no pide un flujo de cierre, pero cerrar con «Modificar» no lo veía nadie y una tarea
+    no se podía completar desde ninguna pantalla. «Cerrar incidente», con su permiso
+    `Nova_Casa_Cerrar_Incidente`, deja el caso Cerrado y pide «Cómo se resolvió»
+    (`Resolucion__c`); al cerrar, el flujo `Completar_Intervenciones_Al_Cerrar` completa sus
+    tareas abiertas; «Completar», en la historia, termina una. La cola se parte en «Cola de
+    coordinación», con lo que sigue en falla, y «Normalizados por cerrar», porque Salesforce
+    no deja fijar el orden de una vista en el metadato. El asunto de la intervención tiene
+    tipos de mantenimiento (`TaskSubject`) ([módulo 07](07-incidentes.md)). Se descartó
+    impedir el cierre con intervenciones abiertas.
 
 ## Historial breve
 
@@ -885,3 +896,5 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-25 | Revisión de la primera noche: la limpieza borró 153.876 señales en 25 minutos sin afectar la ingesta. La cadena de la ingesta llega a cinco páginas y sus trabajos se reprogramaron en hora de Bogotá. PR #162 fusionado. Cierra #161 |
 | 2026-10-25 | Prueba de carga: 100.000, 500.000 y un millón de señales a 200.000 por hora, sin fallidas ni atrasos; limpieza nocturna con el millón en 18 minutos; limpieza de la carga y retiro del generador. PR #164 fusionado. Cierra #163 |
 | 2026-10-27 | Datos de la demo: completadas las aperturas exactas de tres incidentes; cerrados los cuatro sin apertura recuperable y 24 cortes ya normalizados de la cámara. El resumen del incidente, la antigüedad, «Lecturas del periodo» y «Señales del caso» muestran la hora del sistema, no la del sensor. PR #166 fusionado. Cierra #167 |
+| 2026-10-27 | El README del modelo de datos apunta a `_trabajo/generadores`, donde quedaron los generadores al reorganizar la carpeta del sprint. PR #170 fusionado. Cierra #169 |
+| 2026-10-27 | La cola del coordinador en dos vistas (en falla y normalizados por cerrar), asuntos de mantenimiento en la intervención, «Cerrar incidente» con «Cómo se resolvió», «Completar» en la historia y las intervenciones completadas al cerrar. PR #172 fusionado. Cierra #171 |

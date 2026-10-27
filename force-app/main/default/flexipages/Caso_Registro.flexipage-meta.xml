@@ -85,13 +85,29 @@
                             </visibilityRule>
                         </valueListItems>
                         <valueListItems>
+                            <value>Case.Cerrar_Incidente</value>
+                            <visibilityRule>
+                                <booleanFilter>1 AND 2</booleanFilter>
+                                <criteria>
+                                    <leftValue>{!$Permission.CustomPermission.Nova_Casa_Cerrar_Incidente}</leftValue>
+                                    <operator>EQUAL</operator>
+                                    <rightValue>true</rightValue>
+                                </criteria>
+                                <criteria>
+                                    <leftValue>{!Record.IsClosed}</leftValue>
+                                    <operator>EQUAL</operator>
+                                    <rightValue>false</rightValue>
+                                </criteria>
+                            </visibilityRule>
+                        </valueListItems>
+                        <valueListItems>
                             <value>Edit</value>
                         </valueListItems>
                     </valueList>
                 </componentInstanceProperties>
                 <componentInstanceProperties>
                     <name>numVisibleActions</name>
-                    <value>2</value>
+                    <value>3</value>
                 </componentInstanceProperties>
                 <componentInstanceProperties>
                     <name>primaryField</name>
@@ -127,6 +143,16 @@
                 </fieldInstanceProperties>
                 <fieldItem>Record.Description</fieldItem>
                 <identifier>IncidenteDescripcion</identifier>
+            </fieldInstance>
+        </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>none</value>
+                </fieldInstanceProperties>
+                <fieldItem>Record.Resolucion__c</fieldItem>
+                <identifier>IncidenteResolucion</identifier>
             </fieldInstance>
         </itemInstances>
         <name>Facet-Incidente-Col1</name>
