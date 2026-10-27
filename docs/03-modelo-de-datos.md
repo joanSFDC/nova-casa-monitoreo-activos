@@ -382,6 +382,7 @@ Campos añadidos:
 | `Ultima_Senal__c` | Text(120) | La clave de la señal que hizo el último cambio |
 | `Condicion_Equipo__c` | Picklist: En falla, Normalizado | Normalizado cuando el equipo volvió a lo normal con el caso abierto |
 | `Normalizado_En__c` | DateTime | La fecha de origen de la lectura que normalizó; se vacía si reincide |
+| `Resolucion__c` | Long Text Area(2000) | «Cómo se resolvió»: lo escribe el coordinador al cerrar con «Cerrar incidente» |
 
 Siete fórmulas de texto solo para el correo de caso crítico ([módulo 07](07-incidentes.md)).
 No van en la página: la página ya muestra lo mismo con el resumen del incidente.

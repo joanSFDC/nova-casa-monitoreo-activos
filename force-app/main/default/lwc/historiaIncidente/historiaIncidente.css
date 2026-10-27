@@ -52,6 +52,10 @@
   color: var(--slds-g-color-neutral-base-30, #5c5c5c);
 }
 
+.completar {
+  margin-top: 0.5rem;
+}
+
 .estado {
   display: inline-block;
   padding: 0 0.5rem;

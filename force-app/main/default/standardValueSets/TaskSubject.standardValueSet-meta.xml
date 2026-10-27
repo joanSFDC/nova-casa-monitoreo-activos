@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StandardValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <sorted>false</sorted>
+    <standardValue>
+        <fullName>Revisar el equipo en sitio</fullName>
+        <default>false</default>
+        <label>Revisar el equipo en sitio</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Ajustar o reparar el equipo</fullName>
+        <default>false</default>
+        <label>Ajustar o reparar el equipo</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Cambiar una pieza</fullName>
+        <default>false</default>
+        <label>Cambiar una pieza</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Revisar el sensor</fullName>
+        <default>false</default>
+        <label>Revisar el sensor</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Coordinar con el proveedor</fullName>
+        <default>false</default>
+        <label>Coordinar con el proveedor</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Otra</fullName>
+        <default>false</default>
+        <label>Otra</label>
+    </standardValue>
+</StandardValueSet>

@@ -34,6 +34,18 @@
                   <dt>Estado</dt>
                   <dd><span class="estado">{intervencion.estado}</span></dd>
                 </dl>
+                <template lwc:if={puedeCompletar}>
+                  <button
+                    type="button"
+                    class="slds-button slds-button_neutral completar"
+                    data-id={intervencion.id}
+                    aria-label={intervencion.etiquetaCompletar}
+                    disabled={completando}
+                    onclick={handleCompletar}
+                  >
+                    Completar
+                  </button>
+                </template>
               </li>
             </template>
           </ul>

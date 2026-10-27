@@ -158,9 +158,13 @@ consultable, pero no entra en la cola de nadie ni exige acción hasta que escale
 ### La cola del coordinador
 
 La cola es una cola estándar de Case, **Coordinación**, sin correo a los miembros. El
-coordinador es su miembro y la revisa con la vista de lista «Cola de coordinación», que
-filtra los casos abiertos de la cola. Los miembros de usuario cambian en cada org, así que
-no van en el metadato de la cola: los añade `scripts/crear-usuarios-demo.sh`.
+coordinador es su miembro y la revisa con dos vistas de lista, las dos en su inicio:
+«Cola de coordinación», con los casos abiertos de la cola cuyo equipo sigue en falla, y
+«Normalizados por cerrar», con los abiertos de cualquier prioridad cuyo equipo ya volvió a
+lo normal y esperan que alguien los verifique y los cierre. Salesforce no deja fijar en el
+metadato el orden de una vista de lista, así que lo que se atiende primero va en su propia
+vista. Los miembros de usuario cambian en cada org, así que no van en el metadato de la
+cola: los añade `scripts/crear-usuarios-demo.sh`.
 
 `IncidentesServicio` deja a nombre de la cola el caso que nace en alta, y el que escala de
 baja a alta mientras sigue siendo de quien corre el procesamiento. Si una persona ya lo
@@ -192,6 +196,31 @@ La defensa es doble. Un **flujo sobre el cierre del caso** vacía el campo, en l
 confiar en que la persona lo haga. Y una **prueba dedicada** cierra un caso, vuelve a
 poner el activo en crítico y verifica que se abre uno nuevo. Esa prueba está en el
 [plan de pruebas](12-plan-de-pruebas.md) y no es negociable.
+
+### Cómo se cierra y cómo termina una intervención
+
+MDSS no pide un flujo de cierre: pide que el incidente tenga un estado de seguimiento, y lo
+tiene (Nuevo, Escalado, En espera, Cerrado). Pero cerrar con «Modificar» exigía saber que
+existía, y una tarea de «Registrar intervención» no se podía terminar desde ninguna
+pantalla. **Decisión: un camino claro para cada cosa.**
+
+- **«Cerrar incidente»** es una acción del caso, solo para el coordinador (el permiso
+  personalizado `Nova_Casa_Cerrar_Incidente`) y solo con el caso abierto. Deja el estado en
+  Cerrado y pide «Cómo se resolvió» (`Resolucion__c`): qué se hizo y cómo quedó el equipo.
+- **Al cerrar**, con la acción o con «Modificar», el flujo
+  `Completar_Intervenciones_Al_Cerrar` deja Completada cada tarea abierta del caso: si el
+  problema se resolvió, no queda trabajo pendiente sobre él. Los flujos y disparadores de
+  siempre liberan la clave y tocan el timbre del monitor.
+- **«Registrar intervención»** crea la tarea con su asunto, responsable, fecha límite y
+  prioridad. El asunto ofrece tipos propios (`TaskSubject`): Revisar el equipo en sitio,
+  Ajustar o reparar el equipo, Cambiar una pieza, Revisar el sensor, Coordinar con el
+  proveedor u Otra, y admite texto libre.
+- **«Completar»**, en la historia del incidente, termina una intervención abierta. Lo ve
+  quien puede registrarlas; después la intervención aparece en «Lo que pasó» como
+  completada ([módulo 09](09-experiencia-del-operador.md)).
+
+Se descartó impedir el cierre mientras haya intervenciones abiertas: obligaba a completarlas
+una por una antes de cerrar algo que ya está resuelto.
 
 ## Las garantías ante entregas concurrentes
 

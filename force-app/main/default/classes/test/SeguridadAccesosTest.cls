@@ -705,12 +705,17 @@ private class SeguridadAccesosTest {
     }
 
     Map<String, Boolean> tienen = new Map<String, Boolean>();
+    Map<String, Boolean> cierran = new Map<String, Boolean>();
     Test.startTest();
     for (String conjunto : personas.keySet()) {
       System.runAs(personas.get(conjunto)) {
         tienen.put(
           conjunto,
           FeatureManagement.checkPermission('Nova_Casa_Registrar_Intervencion')
+        );
+        cierran.put(
+          conjunto,
+          FeatureManagement.checkPermission('Nova_Casa_Cerrar_Incidente')
         );
       }
     }
@@ -723,6 +728,13 @@ private class SeguridadAccesosTest {
     Assert.isFalse(tienen.get('Nova_Casa_Operador'));
     Assert.isFalse(tienen.get('Nova_Casa_Gerencia'));
     Assert.isFalse(tienen.get('Nova_Casa_Administracion'));
+    Assert.isTrue(
+      cierran.get('Nova_Casa_Coordinador'),
+      'El coordinador ve Cerrar incidente en el caso'
+    );
+    Assert.isFalse(cierran.get('Nova_Casa_Operador'));
+    Assert.isFalse(cierran.get('Nova_Casa_Gerencia'));
+    Assert.isFalse(cierran.get('Nova_Casa_Administracion'));
   }
 
   @isTest

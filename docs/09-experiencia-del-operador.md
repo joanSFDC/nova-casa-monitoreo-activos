@@ -10,8 +10,10 @@ está razonado.
 
 El coordinador necesita revisar una cola de casos y asignar trabajo: eso es exactamente
 para lo que sirven las colas y las vistas de lista estándar, con filtros, ordenación
-masiva y asignación en bloque que ya funcionan. Su cola es **Coordinación** y la ve en la
-vista «Cola de coordinación» de Casos ([módulo 07](07-incidentes.md)). La gerencia
+masiva y asignación en bloque que ya funcionan. Su cola es **Coordinación** y la ve en dos
+vistas de Casos, las dos en su inicio: «Cola de coordinación», con lo que sigue en falla, y
+«Normalizados por cerrar», con lo que ya volvió y espera que alguien lo verifique y lo
+cierre ([módulo 07](07-incidentes.md)). La gerencia
 necesita ver qué edificios concentran situaciones graves: eso es un tablero, que el propio
 gerente filtra por ciudad y cuyos informes recibe por correo sin pedirnos nada
 ([más abajo](#el-tablero-de-la-gerencia)). El administrador necesita
@@ -217,9 +219,10 @@ abrirse, lo mantiene dentro mientras está abierto y lo devuelve al botón al ce
 Es la página de registro del caso, `Caso_Registro`, a la que lleva el monitor al abrir una
 intervención o al ir a la que ya existe. Arriba, el asunto, el estado, la prioridad, el
 número, la ciudad y la condición del equipo, con Editar solo para quien puede editar el
-caso y «Registrar intervención» solo para el coordinador. Debajo, el **resumen del
+caso y, solo para el coordinador, «Registrar intervención» y «Cerrar incidente», esta
+última mientras el caso siga abierto. Debajo, el **resumen del
 incidente**, «Lecturas del periodo» para quien lee la bitácora y tres secciones: Incidente,
-con la descripción y el propietario; Lecturas, con
+con la descripción, «Cómo se resolvió» y el propietario; Lecturas, con
 los campos que guarda el caso; y Equipo, con el activo, la medición, la ciudad y lo que ata
 el caso a su señal (clave, episodio y origen). Al lado, la **historia del incidente**, con
 las intervenciones abiertas y lo que pasó, y, para quien lee la bitácora, «Señales del
@@ -238,7 +241,9 @@ saber qué cambió, el historial. **Decisión: un componente propio, `historiaIn
 lugar del panel**, con dos partes:
 
 - **Intervenciones abiertas**, primero la que vence antes, con su responsable, fecha
-  límite, prioridad y estado.
+  límite, prioridad y estado. Quien puede registrarlas (el permiso
+  `Nova_Casa_Registrar_Intervencion`) ve en cada una «Completar», que la deja Completada con
+  `updateRecord` y los permisos de la persona; la historia se recarga y avisa si no se pudo.
 - **Lo que pasó**, una línea de tiempo del más reciente al más viejo: la apertura, los
   cambios de prioridad, estado, severidad de la última lectura y condición del equipo, y
   las intervenciones completadas. Cada punto tiene su color (rojo si el cambio sube a

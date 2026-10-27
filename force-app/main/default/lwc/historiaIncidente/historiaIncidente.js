@@ -1,11 +1,14 @@
 import { LightningElement, api, wire } from "lwc";
 import { refreshApex } from "@salesforce/apex";
+import { updateRecord } from "lightning/uiRecordApi";
+import { ShowToastEvent } from "lightning/platformShowToastEvent";
 import {
   registerRefreshHandler,
   unregisterRefreshHandler
 } from "lightning/refresh";
 import LOCALE from "@salesforce/i18n/locale";
 import TIME_ZONE from "@salesforce/i18n/timeZone";
+import PUEDE_COMPLETAR from "@salesforce/customPermission/Nova_Casa_Registrar_Intervencion";
 import historia from "@salesforce/apex/HistoriaIncidenteControlador.historia";
 
 export const TOPE_INICIAL = 10;
@@ -54,6 +57,7 @@ export default class HistoriaIncidente extends LightningElement {
   respuesta;
   ultimos;
   idRefresco;
+  completando = false;
 
   // Al pedir toda la historia se sigue viendo la anterior mientras llega.
   @wire(historia, { casoId: "$recordId", tope: "$tope" })
@@ -100,8 +104,14 @@ export default class HistoriaIncidente extends LightningElement {
       fechaLimite: intervencion.fechaLimite
         ? fechaSola(intervencion.fechaLimite)
         : "Sin fecha",
-      prioridad: intervencion.prioridad || "Sin prioridad"
+      prioridad: intervencion.prioridad || "Sin prioridad",
+      etiquetaCompletar: "Completar «" + intervencion.asunto + "»"
     }));
+  }
+
+  // Quien registra intervenciones es quien las da por terminadas.
+  get puedeCompletar() {
+    return Boolean(PUEDE_COMPLETAR);
   }
 
   get tituloAbiertas() {
@@ -158,5 +168,25 @@ export default class HistoriaIncidente extends LightningElement {
 
   handleVerTodo() {
     this.tope = TOPE_MAXIMO;
+  }
+
+  async handleCompletar(event) {
+    const id = event.currentTarget.dataset.id;
+    this.completando = true;
+    try {
+      await updateRecord({ fields: { Id: id, Status: "Completed" } });
+      this.avisar("success", "Intervención completada.");
+      await refreshApex(this.respuesta);
+    } catch {
+      this.avisar("error", "No se pudo completar la intervención.");
+    } finally {
+      this.completando = false;
+    }
+  }
+
+  avisar(variante, mensaje) {
+    this.dispatchEvent(
+      new ShowToastEvent({ title: mensaje, variant: variante })
+    );
   }
 }

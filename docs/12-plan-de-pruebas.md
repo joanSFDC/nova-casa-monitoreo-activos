@@ -151,6 +151,7 @@ inventados.
 | Conflicto | Misma clave con distinto contenido se marca conflicto y no abre caso |
 | Concurrencia | Un error de duplicado se trata como éxito y se reintenta la escalada |
 | **Cierre y reapertura** | Cerrar, volver a poner en crítico, y se abre uno nuevo |
+| Cierre con intervenciones | Cerrar el caso completa sus intervenciones abiertas, guarda «Cómo se resolvió» y no toca las de otro caso; un cambio que no es cierre no las toca (`CierreIncidenteTest`) |
 | Fallo al crear el caso | La señal queda fallida y el estado actual **sí** se actualizó |
 | Cola del coordinador | El crítico nace en la cola Coordinación; la advertencia no; la escalada y su reintento pasan el caso a la cola |
 | Caso ya tomado | Escala a alta y conserva a la persona que lo tomó |
@@ -207,7 +208,7 @@ más, y el fallo sería completamente invisible sin esta prueba.
 | Pastilla de severidad | Pinta cada severidad con su color y su nombre, y «Sin datos» cuando falta; pulsa en advertencia y en crítico salvo que el pulso esté detenido, y una pastilla abierta se entera al momento cuando se detiene o se reanuda |
 | Detener animación | El botón del monitor dice «Detener animación» o «Reanudar animación» con su `aria-pressed`, y la elección queda guardada en el navegador |
 | Resumen del incidente | Muestra lo que lo abrió, su último cambio y cómo está ahora; avisa de normalizado si el caso sigue abierto, no si está cerrado; dice «Sin registro» en un caso anterior a las lecturas; no muestra nada si el servidor no deja ver el caso |
-| Historia del incidente | Las intervenciones abiertas, primero la que vence antes; la línea de tiempo del más reciente al más viejo con la intervención completada, el cambio crítico, el cambio y la apertura; la integración se muestra como «Sistema»; diez eventos y «Ver toda la historia» hasta cien; un caso ajeno devuelve `null` (`HistoriaIncidenteControladorTest`); el texto «Prioridad: Baja a Alta» y un nombre para el lector de pantalla en cada punto (`historiaIncidente`) |
+| Historia del incidente | Las intervenciones abiertas, primero la que vence antes; la línea de tiempo del más reciente al más viejo con la intervención completada, el cambio crítico, el cambio y la apertura; la integración se muestra como «Sistema»; diez eventos y «Ver toda la historia» hasta cien; un caso ajeno devuelve `null` (`HistoriaIncidenteControladorTest`); el texto «Prioridad: Baja a Alta» y un nombre para el lector de pantalla en cada punto; «Completar», con el permiso de registrar intervenciones, deja la intervención Completada y lo avisa, avisa si no se pudo, y sin el permiso no aparece (`historiaIncidente`) |
 | Lecturas del periodo | Recorre 120 señales en páginas de 50, 50 y 20 sin repetir ni saltar ninguna, aunque cinco compartan el segundo del borde; solo el activo, su tipo de mensaje y el periodo del caso; empieza en la señal que lo abrió; avisa la ventana de siete días; el coordinador recibe la página; quien no lee la bitácora recibe `null`; una posición con demasiados identificadores se rechaza (`LecturasPeriodoControladorTest`) |
 | Tarjeta de lecturas | No aparece sin acceso a la bitácora; entra cerrada sin consultar; trae la primera página con su rango y la nota de la ventana; pide la siguiente con la posición y vuelve sin pedir otra vez; muestra la rechazada con su lectura, su color y su motivo; vacío, error y caso ajeno; tabla con encabezados y tarjeta con nombre (`lecturasPeriodo`) |
 | Aviso de caso crítico | El incidente queda guardado al nacer en rojo, al escalar desde advertencia, sin ciudad y en una ciudad sin operadores; las fórmulas del correo dicen «Nació en rojo», «Escaló desde advertencia», la hora de Bogotá de la última modificación, el corte de una cámara y «Está en la cola de Coordinación, sin responsable.» (`AvisoCasoCriticoTest`) |
@@ -240,9 +241,11 @@ El panel de gerencia es metadato y no tiene prueba de Apex. Se comprueba en la o
 | Gerente, informe | Ve «Suscribir» en el informe de casos |
 | Operador | La barra no muestra Paneles ni Informes |
 | Gerente, monitor | Ve «Ver incidente» y nunca «Abrir intervención» |
-| Coordinador, caso | La cabecera muestra «Registrar intervención» y crea la tarea; operador, gerente y administrador no la ven |
+| Coordinador, caso | La cabecera muestra «Registrar intervención», con los asuntos de mantenimiento, y «Cerrar incidente» mientras el caso está abierto; operador, gerente y administrador no las ven |
+| Coordinador, cierre | «Cerrar incidente» deja el caso Cerrado con «Cómo se resolvió» y su intervención abierta Completada |
+| Coordinador, inicio | «Cola de coordinación» trae solo lo que sigue en falla y «Normalizados por cerrar» lo que ya volvió, de cualquier prioridad |
 | Cada rol, inicio | El operador entra por Nova Casa Operación con el monitor y sus incidentes abiertos; el coordinador por Coordinación con la cola, el monitor y las rechazadas de hoy; el gerente por Gerencia con el panel y los críticos abiertos; el administrador por Administración con la salud de la ingesta, las atascadas y las rechazadas de hoy |
-| Operador, coordinador y gerente, caso | «Historia del incidente» muestra la intervención abierta de 00001149 en español y los cambios con «Sistema»; el operador de Bogotá no abre el caso de Barranquilla |
+| Operador, coordinador y gerente, caso | «Historia del incidente» muestra la intervención abierta de 00003498 en español y los cambios con «Sistema»; el operador de Bogotá no abre el caso de Barranquilla |
 | Coordinador, caso | «Lecturas del periodo» entra cerrada; al abrirla trae 50 lecturas en menos de un segundo, la siguiente página dice «Lecturas 51 a 100» y volver no consulta; el operador no ve la tarjeta |
 | Incidente crítico de prueba | El 00002442, en la bomba de Barranquilla, escala de advertencia a alta: llegan los dos correos de «Nova Casa · Monitoreo», el del operador de Barranquilla y el del coordinador; a las 2 horas, el gerente recibe «Caso crítico sin atender» en la campana. Después se cierra |
 | Primera limpieza en la org | Con la ingesta funcionando: 227 lotes en unos 41 minutos, sin errores; 452.402 señales borradas y contadas en el resumen; la ingesta siguió consultando cada minuto y no hubo caída avisada |
@@ -311,6 +314,11 @@ y ninguno de severidad 1. El único nuevo es una preparación repetida en
 `MonitorControladorTest`, porque la prueba de cerrar el incidente arma los mismos datos que
 la de normalizado. Es código de prueba, y se dejó así para no tocar el código antes de la
 exposición.
+
+El 27 de octubre, con la cola en dos vistas y el cierre del incidente, quedan 170. Los siete
+nuevos son de severidad 5, todos de duplicación en XML: bloques de permisos de campo,
+visibilidad de acciones y flujos que se repiten por naturaleza del metadato. No hay
+ninguno nuevo de Apex ni de seguridad.
 
 | Lo que queda | Por qué |
 | --- | --- |
