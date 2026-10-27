@@ -355,8 +355,9 @@ las usan con campos de combinación del caso, sin código.
 
 **La hora.** El correo muestra la hora en que Salesforce guardó el cambio, en hora de
 Bogotá, desde la fórmula `Hora_Cambio_Texto__c` sobre la última modificación. La hora del
-sensor viene del reloj del simulador («12/06/2030») y en un correo confunde; se ve dentro
-del incidente. La fórmula toma la fecha del texto en GMT y le resta cinco horas: `DATEVALUE`
+sensor viene del reloj del simulador («12/06/2030») y confunde: tampoco se muestra en el
+resumen del incidente ([módulo 09](09-experiencia-del-operador.md)). Se guarda en los
+campos del caso. La fórmula toma la fecha del texto en GMT y le resta cinco horas: `DATEVALUE`
 la pasaría a la zona de quien envía y cambiaría el día cerca de la medianoche.
 
 **El remitente** es la dirección de la organización «Nova Casa · Monitoreo», no el usuario

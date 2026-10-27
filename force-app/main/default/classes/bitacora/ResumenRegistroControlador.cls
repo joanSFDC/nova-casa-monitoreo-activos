@@ -5,6 +5,17 @@
  * delate que existe.
  */
 public with sharing class ResumenRegistroControlador {
+  private static final List<String> CAMPOS_DEL_CAMBIO = new List<String>{
+    'Severidad_Ultima_Lectura__c',
+    'Condicion_Equipo__c'
+  };
+
+  /**
+   * CaseHistory no se escribe en una prueba: el ultimo cambio entra por aqui.
+   */
+  @TestVisible
+  static List<Datetime> cambiosSimulados;
+
   public class EquipoDTO {
     @AuraEnabled
     public Id activoId;
@@ -171,14 +182,13 @@ public with sharing class ResumenRegistroControlador {
       SELECT
         Id,
         IsClosed,
+        CreatedDate,
         Activo__c,
         Tipo_Medicion__c,
         Lectura_Apertura__c,
         Severidad_Apertura__c,
-        Fecha_Lectura_Apertura__c,
         Ultima_Lectura__c,
         Severidad_Ultima_Lectura__c,
-        Fecha_Ultima_Lectura__c,
         Condicion_Equipo__c,
         Normalizado_En__c
       FROM Case
@@ -190,22 +200,23 @@ public with sharing class ResumenRegistroControlador {
       return null;
     }
     Case caso = casos[0];
+    Datetime ultimoCambio = ultimoCambio(caso);
     IncidenteDTO dto = new IncidenteDTO();
     dto.medicion = LecturaFormato.medicion(caso.Tipo_Medicion__c);
     dto.cerrado = caso.IsClosed;
     dto.apertura = lectura(
       caso.Lectura_Apertura__c,
       caso.Severidad_Apertura__c,
-      caso.Fecha_Lectura_Apertura__c
+      caso.CreatedDate
     );
     dto.ultima = lectura(
       caso.Ultima_Lectura__c,
       caso.Severidad_Ultima_Lectura__c,
-      caso.Fecha_Ultima_Lectura__c
+      ultimoCambio
     );
     dto.normalizado =
       caso.Condicion_Equipo__c == IncidentesServicio.CONDICION_NORMALIZADO;
-    dto.normalizadoEn = caso.Normalizado_En__c;
+    dto.normalizadoEn = caso.Normalizado_En__c == null ? null : ultimoCambio;
     if (caso.Activo__c == null) {
       return dto;
     }
@@ -223,7 +234,7 @@ public with sharing class ResumenRegistroControlador {
         Unidad__c,
         Severidad__c,
         Severidad_Nivel__c,
-        Fecha_Origen__c,
+        Fecha_Actualizacion__c,
         Estado_Comunicacion__c,
         Gap_Segundos__c,
         Activo__r.Name,
@@ -267,7 +278,7 @@ public with sharing class ResumenRegistroControlador {
           Unidad__c,
           Severidad__c,
           Severidad_Nivel__c,
-          Fecha_Origen__c,
+          Fecha_Actualizacion__c,
           Estado_Comunicacion__c,
           Gap_Segundos__c,
           Activo__r.Name,
@@ -335,7 +346,7 @@ public with sharing class ResumenRegistroControlador {
           Unidad__c,
           Severidad__c,
           Severidad_Nivel__c,
-          Fecha_Origen__c,
+          Fecha_Actualizacion__c,
           Estado_Comunicacion__c,
           Gap_Segundos__c,
           Activo__r.Name,
@@ -360,6 +371,32 @@ public with sharing class ResumenRegistroControlador {
       }
     }
     return dto;
+  }
+
+  /**
+   * Las fechas del incidente son las del sistema, no las del sensor, cuyo reloj
+   * puede ir adelantado: la apertura es la creacion del caso y el ultimo cambio
+   * es la ultima vez que cambiaron su severidad o su condicion, que guardan
+   * historial. Sin cambios, el ultimo es la apertura. Un caso normalizado no
+   * vuelve a cambiar hasta que falla otra vez: su ultimo cambio es el de
+   * normalizarse.
+   */
+  private static Datetime ultimoCambio(Case caso) {
+    List<Datetime> cambios = cambiosSimulados;
+    if (cambios == null) {
+      cambios = new List<Datetime>();
+      for (CaseHistory registro : [
+        SELECT CreatedDate
+        FROM CaseHistory
+        WHERE CaseId = :caso.Id AND Field IN :CAMPOS_DEL_CAMBIO
+        WITH USER_MODE
+        ORDER BY CreatedDate DESC
+        LIMIT 1
+      ]) {
+        cambios.add(registro.CreatedDate);
+      }
+    }
+    return cambios.isEmpty() ? caso.CreatedDate : cambios[0];
   }
 
   private static List<Activo__c> activos(Set<Id> ids) {
@@ -488,7 +525,7 @@ public with sharing class ResumenRegistroControlador {
       estado.Gap_Segundos__c
     );
     dto.antiguedad = LecturaFormato.antiguedad(
-      estado.Fecha_Origen__c,
+      estado.Fecha_Actualizacion__c,
       Datetime.now()
     );
     Case caso = porEquipo.get(estado.Activo__c + '|' + estado.Tipo_Medicion__c);

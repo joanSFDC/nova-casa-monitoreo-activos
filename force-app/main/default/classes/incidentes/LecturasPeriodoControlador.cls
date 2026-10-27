@@ -23,8 +23,6 @@ public with sharing class LecturasPeriodoControlador {
     @AuraEnabled
     public String nombre;
     @AuraEnabled
-    public Datetime origen;
-    @AuraEnabled
     public Datetime recibida;
     @AuraEnabled
     public String lectura;
@@ -107,14 +105,7 @@ public with sharing class LecturasPeriodoControlador {
     Integer conUnaMas = TAMANO_PAGINA + 1;
 
     List<Senal__c> senales = [
-      SELECT
-        Id,
-        Name,
-        Fecha_Origen__c,
-        CreatedDate,
-        Lectura__c,
-        Resultado__c,
-        toLabel(Motivo__c)
+      SELECT Id, Name, CreatedDate, Lectura__c, Resultado__c, toLabel(Motivo__c)
       FROM Senal__c
       WHERE
         Activo__c = :caso.Activo__c
@@ -175,7 +166,6 @@ public with sharing class LecturasPeriodoControlador {
     FilaDTO fila = new FilaDTO();
     fila.id = senal.Id;
     fila.nombre = senal.Name;
-    fila.origen = senal.Fecha_Origen__c;
     fila.recibida = senal.CreatedDate;
     fila.lectura = String.isBlank(senal.Lectura__c)
       ? LecturaFormato.SIN_VALOR

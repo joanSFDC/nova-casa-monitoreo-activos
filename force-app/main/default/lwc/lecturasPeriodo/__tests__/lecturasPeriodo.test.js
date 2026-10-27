@@ -13,7 +13,6 @@ function filas(desde, cuantas) {
   return Array.from({ length: cuantas }, (_, i) => ({
     id: "a07xx" + String(desde + i).padStart(10, "0"),
     nombre: "SEN-" + (2259900 - desde - i),
-    origen: "2030-06-12T19:14:00.000Z",
     recibida: "2026-10-22T20:41:00.000Z",
     lectura: "4,93 bar",
     resultado: i % 2 ? "Atrasado" : "Aplicado",
@@ -37,7 +36,6 @@ const SEGUNDA = {
     {
       id: "a07xx0000000052",
       nombre: "SEN-2259848",
-      origen: "2030-06-13T10:52:00.000Z",
       recibida: "2026-10-22T20:35:00.000Z",
       lectura: "72,5 PSI",
       resultado: "Rechazado",
@@ -221,7 +219,11 @@ describe("c-lecturas-periodo", () => {
     expect(raiz.querySelector("caption").textContent).toContain(
       "Lecturas del equipo"
     );
-    expect(raiz.querySelectorAll('thead th[scope="col"]')).toHaveLength(5);
+    expect(
+      Array.from(raiz.querySelectorAll('thead th[scope="col"]')).map(
+        (th) => th.textContent
+      )
+    ).toEqual(["Señal", "Recibida", "Lectura", "Resultado"]);
     expect(raiz.querySelectorAll('tbody th[scope="row"]')).toHaveLength(3);
     const id = raiz.querySelector("article").getAttribute("aria-labelledby");
     expect(raiz.querySelector('[id="' + id + '"]').textContent).toBe(

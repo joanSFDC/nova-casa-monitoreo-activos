@@ -267,15 +267,17 @@ incidente. Cómo se decide y a quién llega está en el [módulo 07](07-incident
 
 ### Las lecturas del periodo
 
-«Señales del caso» muestra solo las señales que cambiaron el incidente. Para ver todo lo
+«Señales del caso» muestra solo las señales que cambiaron el incidente, con su resultado y
+cuándo se recibieron, de la más reciente a la más vieja. Para ver todo lo
 que midió el equipo mientras estuvo abierto, el coordinador y el administrador tienen
 **«Lecturas del periodo»** (`lecturasPeriodo`), debajo del resumen:
 
 - **Bajo demanda.** Entra cerrada y no consulta nada hasta que se pulsa «Ver lecturas».
 - **Páginas de 50**, de la más nueva a la más vieja, con Primera, Anterior y Siguiente y el
   rango a la vista («Lecturas 51 a 100»). Una página ya vista no se vuelve a pedir.
-- **Columnas:** la señal, con enlace a su registro; la hora del sensor; cuándo se recibió;
-  la lectura; y el resultado en color, con el motivo debajo si lo hay.
+- **Columnas:** la señal, con enlace a su registro; cuándo se recibió; la lectura; y el
+  resultado en color, con el motivo debajo si lo hay. La hora del sensor no se muestra: el
+  reloj del simulador va años adelantado. Sigue en el registro de la señal.
 - **Todas las señales** del activo y de su tipo de mensaje entre la señal que abrió el
   incidente y su cierre (o ahora): aplicadas, atrasadas, rechazadas y las demás.
 - Si el incidente empezó hace más de siete días, una línea recuerda que la bitácora guarda
@@ -315,7 +317,25 @@ no puede.
 
 Los tres primeros leen con `ResumenRegistroControlador`, que es `with sharing` y consulta con
 `WITH USER_MODE`, igual que el monitor: si la persona no ve el registro, devuelve `null` y
-el componente no muestra nada. Los dos últimos leen con LDS (`getRecord`), que ya aplica
+el componente no muestra nada.
+
+**Las fechas de los resúmenes son las del sistema, no las del sensor.** El reloj del
+simulador avanza un minuto por mensaje y va años adelantado, y en un resumen esa fecha
+confunde. Qué lectura es más reciente se sigue decidiendo por la hora del sensor; solo cambia
+lo que se muestra:
+
+- **Lo abrió:** cuándo se creó el caso, segundos después de llegar la lectura que lo abrió.
+- **Último cambio** y el aviso de normalizado: la última vez que cambiaron la severidad o la
+  condición del caso, desde su historial (`CaseHistory`, en `USER_MODE`). Es la misma hora
+  de la última fila de «Historia del incidente». Sin cambios, es la apertura. Un caso
+  normalizado no vuelve a cambiar hasta que falla otra vez, así que su último cambio es el
+  de normalizarse.
+- **Ahora** y las mediciones del activo y del edificio: la antigüedad cuenta desde
+  `Fecha_Actualizacion__c`, cuando se escribió el estado.
+
+Los campos del caso (`Fecha_Lectura_Apertura__c`, `Fecha_Ultima_Lectura__c`,
+`Normalizado_En__c`) siguen guardando la hora del sensor, como evidencia, en la sección de
+campos. Los dos últimos leen con LDS (`getRecord`), que ya aplica
 los permisos de campo. Las secciones de campos de cada página siguen debajo, para quien
 necesite el dato exacto o editar.
 
