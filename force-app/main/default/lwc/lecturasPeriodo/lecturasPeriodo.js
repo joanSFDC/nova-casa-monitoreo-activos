@@ -82,7 +82,6 @@ export default class LecturasPeriodo extends NavigationMixin(LightningElement) {
     }
     return this.actual.filas.map((fila) => ({
       ...fila,
-      origen: fechaHora(fila.origen),
       recibida: fechaHora(fila.recibida),
       claseResultado:
         "resultado resultado_" + (CLASES[fila.resultado] || "pendiente")

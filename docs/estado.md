@@ -350,11 +350,16 @@ errores ([módulo 11](11-trazabilidad.md)). La prueba de carga de la fase 7 term
 octubre ([módulo 12](12-plan-de-pruebas.md)): un millón de señales a 200.000 por hora, sin
 fallidas ni atrasos, sin correos y sin afectar la ingesta en vivo. Después se borraron sus
 señales, incidentes y estados, y el generador salió de la org. El edificio de carga y sus
-cinco equipos, vacíos y visibles solo para el administrador, se borran el 26 de octubre,
-cuando Salesforce termine de purgar las señales. Mientras dure, nadie
-salvo el administrador ve el edificio «Carga» ni sus equipos, porque la compartición es
-por ciudad; el coordinador ve sus incidentes en la cola de Coordinación. Al terminar se
-borra todo y el generador sale de la org.
+cinco equipos, vacíos y visibles solo para el administrador, se borran cuando Salesforce
+termine de purgar las señales de la papelera; hasta entonces el borrado responde
+`DELETE_OPERATION_TOO_LARGE` y se reintenta con `python3 load-test/carga.py borrar-edificio`.
+Nadie salvo el administrador ve el edificio ni sus equipos, porque la compartición es por
+ciudad.
+
+El 27 de octubre se limpiaron los incidentes para la demo. Se completó «Lo abrió» de tres
+desde su señal de origen y se cerraron los cuatro cuya apertura no se podía recuperar y 24
+cortes ya normalizados de la cámara de Barranquilla. El sistema abrió los nuevos completos
+(00003496, 00003497 y 00003498).
 
 Los arreglos encontrados al cerrar US-208 están hechos: la fecha futura
 contra `publishedAt` (issue #28), la sesión dentro de la clave de la señal
@@ -787,6 +792,14 @@ No estaban en la especificación y conviene no redescubrirlas.
     de París y el 25 de octubre, con el fin del horario de verano europeo, se saltaron una
     hora; el vigía la detectó y avisó. Se reprogramaron con el administrador en hora de
     Bogotá, como el vigía y la limpieza ([módulo 02](02-ingesta.md)).
+84. **Las pantallas muestran la hora del sistema, no la del sensor.** El reloj del simulador
+    va años adelantado (2034 el 27 de octubre). El resumen del incidente fecha «Lo abrió»
+    con la creación del caso y «Último cambio» y el normalizado con el historial del caso; la
+    antigüedad cuenta desde que se escribió el estado; «Lecturas del periodo» y «Señales del
+    caso» muestran cuándo se recibió cada lectura. La vigencia sigue decidiéndose por la hora del sensor y los
+    campos la guardan ([módulo 09](09-experiencia-del-operador.md)). Se descartó leer la
+    llegada de las señales sin compartir: el operador y la gerencia no leen la bitácora, y
+    sumaba cuatro avisos de seguridad.
 
 ## Historial breve
 
@@ -871,3 +884,4 @@ No estaban en la especificación y conviene no redescubrirlas.
 | 2026-10-24 | Quién ve la prueba de carga, comprobado en la org: nadie salvo el administrador ve el edificio «Carga»; el coordinador ve sus incidentes en su cola. PR #160 fusionado. Cierra #159 |
 | 2026-10-25 | Revisión de la primera noche: la limpieza borró 153.876 señales en 25 minutos sin afectar la ingesta. La cadena de la ingesta llega a cinco páginas y sus trabajos se reprogramaron en hora de Bogotá. PR #162 fusionado. Cierra #161 |
 | 2026-10-25 | Prueba de carga: 100.000, 500.000 y un millón de señales a 200.000 por hora, sin fallidas ni atrasos; limpieza nocturna con el millón en 18 minutos; limpieza de la carga y retiro del generador. PR #164 fusionado. Cierra #163 |
+| 2026-10-27 | Datos de la demo: completadas las aperturas exactas de tres incidentes; cerrados los cuatro sin apertura recuperable y 24 cortes ya normalizados de la cámara. El resumen del incidente, la antigüedad, «Lecturas del periodo» y «Señales del caso» muestran la hora del sistema, no la del sensor. PR #166 fusionado. Cierra #165 |

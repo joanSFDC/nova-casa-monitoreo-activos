@@ -8,6 +8,22 @@ private class ResumenRegistroControladorTest {
     TestDataFactory.AST_PUMP + '|WATER_PRESSURE';
   private static final String CLAVE_SALA =
     TestDataFactory.AST_TEMP + '|TEMPERATURE';
+  private static final Datetime SENSOR_ADELANTADO = Datetime.newInstanceGmt(
+    2033,
+    5,
+    1,
+    8,
+    0,
+    0
+  );
+  private static final Datetime CAMBIO = Datetime.newInstanceGmt(
+    2026,
+    10,
+    16,
+    15,
+    31,
+    10
+  );
 
   @TestSetup
   static void setup() {
@@ -121,6 +137,68 @@ private class ResumenRegistroControladorTest {
   }
 
   @isTest
+  static void shouldFecharConElSistema_WhenElRelojDelSensorVaAdelantado() {
+    Case caso = caso(CLAVE_BOMBA);
+    update new Case(
+      Id = caso.Id,
+      Fecha_Lectura_Apertura__c = SENSOR_ADELANTADO,
+      Fecha_Ultima_Lectura__c = SENSOR_ADELANTADO,
+      Normalizado_En__c = SENSOR_ADELANTADO
+    );
+    update new Estado_Actual__c(
+      Id = estado(CLAVE_BOMBA).Id,
+      Fecha_Origen__c = SENSOR_ADELANTADO,
+      Fecha_Actualizacion__c = Datetime.now().addMinutes(-3)
+    );
+    ResumenRegistroControlador.cambiosSimulados = new List<Datetime>{ CAMBIO };
+
+    Test.startTest();
+    ResumenRegistroControlador.IncidenteDTO dto = ResumenRegistroControlador.incidente(
+      caso.Id
+    );
+    Test.stopTest();
+
+    Assert.areEqual(
+      creado(caso),
+      dto.apertura.fecha,
+      'El caso se crea con la lectura que lo abre'
+    );
+    Assert.areEqual(CAMBIO, dto.ultima.fecha, 'Cuando se registro el cambio');
+    Assert.areEqual(CAMBIO, dto.normalizadoEn, 'El cambio que lo normalizo');
+    Assert.areEqual(
+      'hace 3 min',
+      dto.ahora.antiguedad,
+      'Desde que se actualizo, no desde la hora del sensor'
+    );
+  }
+
+  @isTest
+  static void shouldFecharElUltimoCambioConLaApertura_WhenNoHaCambiado() {
+    User operador = operadorDeAlameda();
+    Case caso = caso(CLAVE_BOMBA);
+    insert new CaseShare(
+      CaseId = caso.Id,
+      UserOrGroupId = operador.Id,
+      CaseAccessLevel = 'Read',
+      RowCause = Schema.CaseShare.RowCause.Manual
+    );
+
+    ResumenRegistroControlador.IncidenteDTO dto;
+    Test.startTest();
+    System.runAs(operador) {
+      dto = ResumenRegistroControlador.incidente(caso.Id);
+    }
+    Test.stopTest();
+
+    Assert.areEqual(creado(caso), dto.apertura.fecha);
+    Assert.areEqual(
+      creado(caso),
+      dto.ultima.fecha,
+      'Sin historial, el ultimo cambio es la apertura'
+    );
+  }
+
+  @isTest
   static void shouldNoResumirIncidente_WhenOperadorDeOtraCiudad() {
     User operador = operadorDeAlameda();
     Case caribe = caso(CLAVE_SALA);
@@ -221,6 +299,14 @@ private class ResumenRegistroControladorTest {
       RowCause = Schema.Edificio__Share.RowCause.Manual
     );
     return operador;
+  }
+
+  private static Datetime creado(Case caso) {
+    return [SELECT CreatedDate FROM Case WHERE Id = :caso.Id].CreatedDate;
+  }
+
+  private static Estado_Actual__c estado(String clave) {
+    return [SELECT Id FROM Estado_Actual__c WHERE Clave__c = :clave];
   }
 
   private static Activo__c activo(String codigo) {
